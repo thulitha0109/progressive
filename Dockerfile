@@ -36,6 +36,10 @@ RUN \
   else echo "Lockfile not found." && exit 1; \
   fi
 
+RUN npx tsc scripts/seed-dummy.ts --outDir scripts/dist --module commonjs --esModuleInterop --skipLibCheck
+RUN npx tsc scripts/seed-admin.ts --outDir scripts/dist --module commonjs --esModuleInterop --skipLibCheck
+RUN npx tsc scripts/seed-genres.ts --outDir scripts/dist --module commonjs --esModuleInterop --skipLibCheck
+
 # Production image, copy all the files and run next
 FROM base AS runner
 WORKDIR /app
@@ -49,6 +53,9 @@ RUN apk add --no-cache openssl
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
+# Install bcryptjs for seed-admin script
+RUN npm install bcryptjs
+
 COPY --from=builder /app/public ./public
 
 # Set the correct permission for prerender cache
@@ -60,7 +67,9 @@ RUN chown nextjs:nodejs .next
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 COPY --from=builder --chown=nextjs:nodejs /app/prisma ./prisma
-COPY --from=builder --chown=nextjs:nodejs /app/scripts ./scripts
+COPY --from=builder --chown=nextjs:nodejs /app/scripts/dist/seed-dummy.js ./scripts/seed-dummy.js
+COPY --from=builder --chown=nextjs:nodejs /app/scripts/dist/seed-admin.js ./scripts/seed-admin.js
+COPY --from=builder --chown=nextjs:nodejs /app/scripts/dist/seed-genres.js ./scripts/seed-genres.js
 
 USER nextjs
 

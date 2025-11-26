@@ -1,5 +1,4 @@
-
-const { PrismaClient } = require('@prisma/client')
+import { PrismaClient } from "@prisma/client"
 
 const prisma = new PrismaClient()
 
@@ -73,7 +72,7 @@ const genres = [
     },
 ]
 
-function slugify(text) {
+function slugify(text: string): string {
     return text
         .toString()
         .toLowerCase()
@@ -102,23 +101,25 @@ async function main() {
         console.log(`Created/Updated parent genre: ${parent.name}`)
 
         // Create or update sub-genres
-        for (const subName of genre.subGenres) {
-            const subSlug = slugify(subName)
+        if (genre.subGenres) {
+            for (const subName of genre.subGenres) {
+                const subSlug = slugify(subName)
 
-            await prisma.genre.upsert({
-                where: { slug: subSlug },
-                update: {
-                    name: subName,
-                    parentId: parent.id
-                },
-                create: {
-                    name: subName,
-                    slug: subSlug,
-                    parentId: parent.id,
-                },
-            })
+                await prisma.genre.upsert({
+                    where: { slug: subSlug },
+                    update: {
+                        name: subName,
+                        parentId: parent.id
+                    },
+                    create: {
+                        name: subName,
+                        slug: subSlug,
+                        parentId: parent.id,
+                    },
+                })
 
-            console.log(`  - Created/Updated sub-genre: ${subName}`)
+                console.log(`  - Created/Updated sub-genre: ${subName}`)
+            }
         }
     }
 
