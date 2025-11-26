@@ -20,6 +20,6 @@ sleep 10
 # 4. Run migrations and seed
 echo "🔄 Running database migrations and seeding..."
 docker-compose exec -T app npx prisma migrate deploy
-docker-compose exec -T app npm run seed:dummy
+docker-compose exec -T app node scripts/seed-dummy.js
 
 echo "✅ Deployment complete! App is running on ${AUTH_URL:-http://localhost:3003}"
