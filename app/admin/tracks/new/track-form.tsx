@@ -33,16 +33,57 @@ export default function TrackForm({ artists, genres }: { artists: Artist[], genr
     const [error, setError] = useState("")
     const [isPending, startTransition] = useTransition()
     const router = useRouter()
+    const [uploadProgress, setUploadProgress] = useState(0)
+    const [uploadStatus, setUploadStatus] = useState("")
+
+    async function uploadFile(file: File, type: "audio" | "image", artistId: string): Promise<string> {
+        return new Promise((resolve, reject) => {
+            const formData = new FormData()
+            formData.append("file", file)
+            formData.append("artistId", artistId)
+            formData.append("type", type)
+
+            const xhr = new XMLHttpRequest()
+            xhr.open("POST", "/api/upload")
+
+            xhr.upload.onprogress = (event) => {
+                if (event.lengthComputable) {
+                    const percentComplete = (event.loaded / event.total) * 100
+                    if (type === "audio") {
+                        setUploadProgress(percentComplete)
+                    }
+                }
+            }
+
+            xhr.onload = () => {
+                if (xhr.status === 200) {
+                    const response = JSON.parse(xhr.responseText)
+                    resolve(response.url)
+                } else {
+                    reject(new Error("Upload failed"))
+                }
+            }
+
+            xhr.onerror = () => {
+                reject(new Error("Upload failed"))
+            }
+
+            xhr.send(formData)
+        })
+    }
 
     async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
         e.preventDefault()
         setError("")
+        setUploadProgress(0)
+        setUploadStatus("")
 
         const formData = new FormData(e.currentTarget)
 
         // Client-side validation
         const title = formData.get("title") as string
         const audioFile = formData.get("audioFile") as File
+        const imageFile = formData.get("imageFile") as File
         const scheduledFor = formData.get("scheduledFor") as string
 
         if (!title?.trim()) {
@@ -74,7 +115,22 @@ export default function TrackForm({ artists, genres }: { artists: Artist[], genr
 
         startTransition(async () => {
             try {
-                // Use the original formData - it now has all fields including artistId from hidden input
+                // 1. Upload Audio
+                setUploadStatus("Uploading audio...")
+                const audioUrl = await uploadFile(audioFile, "audio", selectedArtist)
+                formData.set("audioUrl", audioUrl)
+                formData.delete("audioFile") // Remove file from server action payload
+
+                // 2. Upload Image (if exists)
+                if (imageFile && imageFile.size > 0) {
+                    setUploadStatus("Uploading image...")
+                    const imageUrl = await uploadFile(imageFile, "image", selectedArtist)
+                    formData.set("imageUrl", imageUrl)
+                    formData.delete("imageFile")
+                }
+
+                // 3. Create Track
+                setUploadStatus("Saving track...")
                 await createTrack(formData)
             } catch (err: any) {
                 if (err.message === "NEXT_REDIRECT" || err.message.includes("NEXT_REDIRECT")) {
@@ -82,6 +138,7 @@ export default function TrackForm({ artists, genres }: { artists: Artist[], genr
                 }
                 console.error("Upload error:", err)
                 setError(err.message || "Failed to upload track. Please try again.")
+                setUploadStatus("")
             }
         })
     }
@@ -216,10 +273,25 @@ export default function TrackForm({ artists, genres }: { artists: Artist[], genr
                             </p>
                         </div>
 
+                        {isPending && (
+                            <div className="space-y-2">
+                                <div className="flex justify-between text-sm">
+                                    <span>{uploadStatus}</span>
+                                    <span>{Math.round(uploadProgress)}%</span>
+                                </div>
+                                <div className="h-2 bg-secondary rounded-full overflow-hidden">
+                                    <div
+                                        className="h-full bg-primary transition-all duration-300"
+                                        style={{ width: `${uploadProgress}%` }}
+                                    />
+                                </div>
+                            </div>
+                        )}
+
                         <div className="flex justify-end">
                             <Button type="submit" disabled={isPending}>
                                 {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                                {isPending ? "Uploading..." : "Upload Track"}
+                                {isPending ? "Processing..." : "Upload Track"}
                             </Button>
                         </div>
                     </form>

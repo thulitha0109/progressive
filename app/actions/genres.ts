@@ -40,7 +40,7 @@ export async function createGenre(formData: FormData) {
             data: {
                 name,
                 slug,
-                parentId: parentId || null
+                parentId: parentId === "none" ? null : parentId
             }
         })
         revalidatePath("/admin/genres")
@@ -71,7 +71,7 @@ export async function updateGenre(id: string, formData: FormData) {
             data: {
                 name,
                 slug,
-                parentId: parentId || null
+                parentId: parentId === "none" ? null : parentId
             }
         })
         revalidatePath("/admin/genres")

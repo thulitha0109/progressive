@@ -10,27 +10,36 @@ export async function getHomeData() {
 
     const [upcomingTracksRaw, publishedTracksRaw, featuredTrackRaw, artists] = await Promise.all([
         prisma.track.findMany({
-            where: { scheduledFor: { gt: now } },
+            where: {
+                scheduledFor: { gt: now },
+                deletedAt: null
+            },
             include: {
                 artist: true,
+                genreRel: true,
                 _count: { select: { likedBy: true } },
             },
             orderBy: { scheduledFor: "asc" },
             take: 5,
         }),
         prisma.track.findMany({
-            where: { scheduledFor: { lte: now } },
+            where: {
+                scheduledFor: { lte: now },
+                deletedAt: null
+            },
             include: {
                 artist: true,
+                genreRel: true,
                 _count: { select: { likedBy: true } },
             },
             orderBy: { scheduledFor: "desc" },
             take: 12,
         }),
         prisma.track.findFirst({
-            where: { isFeatured: true },
+            where: { isFeatured: true, deletedAt: null },
             include: {
                 artist: true,
+                genreRel: true,
                 _count: { select: { likedBy: true } },
             },
         }),
@@ -53,12 +62,14 @@ export async function getHomeData() {
 
     const upcomingTracks = upcomingTracksRaw.map((track: any) => ({
         ...track,
+        genre: track.genreRel?.name,
         likesCount: track._count.likedBy,
         isLiked: likedTrackIds.has(track.id),
     }))
 
     const publishedTracks = publishedTracksRaw.map((track: any) => ({
         ...track,
+        genre: track.genreRel?.name,
         likesCount: track._count.likedBy,
         isLiked: likedTrackIds.has(track.id),
     }))

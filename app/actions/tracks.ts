@@ -73,6 +73,7 @@ export async function getUpcomingTracks() {
             scheduledFor: {
                 gt: new Date(),
             },
+            deletedAt: null,
         },
         include: {
             artist: true,
@@ -117,16 +118,24 @@ export async function createTrack(formData: FormData) {
     const audioFile = formData.get("audioFile") as File
     const imageFile = formData.get("imageFile") as File
 
-    if (!title || !artistId || !scheduledForStr || !audioFile || audioFile.size === 0) {
-        console.error("Missing required fields:", { title, artistId, scheduledForStr, audioFile })
-        throw new Error("All fields are required and audio file must not be empty")
+    const audioUrlFromForm = formData.get("audioUrl") as string
+    const imageUrlFromForm = formData.get("imageUrl") as string
+
+    if (!title || !artistId || !scheduledForStr) {
+        console.error("Missing required fields:", { title, artistId, scheduledForStr })
+        throw new Error("All fields are required")
+    }
+
+    // If no pre-uploaded audio URL, check for file
+    if (!audioUrlFromForm && (!audioFile || audioFile.size === 0)) {
+        throw new Error("Audio file is required")
     }
 
     // Validate file sizes (50MB for audio, 10MB for images)
     const MAX_AUDIO_SIZE = 50 * 1024 * 1024 // 50MB
     const MAX_IMAGE_SIZE = 10 * 1024 * 1024 // 10MB
 
-    if (audioFile.size > MAX_AUDIO_SIZE) {
+    if (audioFile && audioFile.size > MAX_AUDIO_SIZE) {
         throw new Error(`Audio file is too large. Maximum size is 50MB. Your file is ${(audioFile.size / 1024 / 1024).toFixed(2)}MB`)
     }
 
@@ -145,13 +154,16 @@ export async function createTrack(formData: FormData) {
             throw new Error("Artist not found")
         }
 
-        // Handle Audio Upload using artist slug
-        const audioUrl = await saveUploadedFile(audioFile, UPLOAD_DIRS.ARTISTS, artist.slug)
-        console.log("Audio uploaded successfully:", audioUrl)
+        // Handle Audio Upload
+        let audioUrl = audioUrlFromForm
+        if (!audioUrl && audioFile) {
+            audioUrl = await saveUploadedFile(audioFile, UPLOAD_DIRS.ARTISTS, artist.slug)
+            console.log("Audio uploaded successfully:", audioUrl)
+        }
 
-        // Handle Image Upload (Optional)
-        let imageUrl = null
-        if (imageFile && imageFile.size > 0) {
+        // Handle Image Upload
+        let imageUrl = imageUrlFromForm || null
+        if (!imageUrl && imageFile && imageFile.size > 0) {
             imageUrl = await saveUploadedFile(imageFile, UPLOAD_DIRS.ARTISTS, artist.slug)
             console.log("Image uploaded successfully:", imageUrl)
         }
