@@ -18,7 +18,7 @@ export default async function ArtistsPage() {
 
                 <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                     {artists.map((artist) => (
-                        <Link key={artist.id} href={`/artists/${artist.id}`}>
+                        <Link key={artist.id} href={`/artists/${artist.slug}`}>
                             <Card className="overflow-hidden hover:bg-accent/50 transition-colors h-full">
                                 <div className="aspect-square relative bg-muted flex items-center justify-center">
                                     {artist.imageUrl ? (

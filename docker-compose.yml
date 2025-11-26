@@ -9,20 +9,22 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-password}
       POSTGRES_DB: ${POSTGRES_DB:-progressive}
     ports:
-      - "5432:5432"
+      - "5433:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
   app:
     container_name: progressive-app
-    image: progressive-app
+    build:
+      context: .
+      dockerfile: Dockerfile
     restart: always
     ports:
-      - "3000:3000"
+      - "3003:3000"
     environment:
       - DATABASE_URL=postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-password}@postgres:5432/${POSTGRES_DB:-progressive}
       - AUTH_SECRET=${AUTH_SECRET}
-      - AUTH_URL=${AUTH_URL}
+      - AUTH_URL=${AUTH_URL:-http://localhost:3003}
       - AUTH_TRUST_HOST=true
     depends_on:
       - postgres

@@ -18,12 +18,20 @@ export default async function TracksPage({ searchParams }: TracksPageProps) {
         <div>
             <div className="flex items-center justify-between mb-6">
                 <h1 className="text-3xl font-bold tracking-tight">Tracks</h1>
-                <Button asChild>
-                    <Link href="/admin/tracks/new">
-                        <Plus className="mr-2 h-4 w-4" />
-                        Add Track
-                    </Link>
-                </Button>
+                <div className="flex gap-2">
+                    <Button variant="outline" asChild>
+                        <Link href="/admin/tracks/trash">
+                            <Trash className="mr-2 h-4 w-4" />
+                            Trash
+                        </Link>
+                    </Button>
+                    <Button asChild>
+                        <Link href="/admin/tracks/new">
+                            <Plus className="mr-2 h-4 w-4" />
+                            Add Track
+                        </Link>
+                    </Button>
+                </div>
             </div>
 
             <div className="rounded-md border">

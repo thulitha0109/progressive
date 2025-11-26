@@ -68,12 +68,17 @@ async function main() {
             ? new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7 days from now
             : new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) // 7 days ago
 
+        // Find genre by name
+        const genre = await prisma.genre.findFirst({
+            where: { name: trackData.genre }
+        })
+
         await prisma.track.create({
             data: {
                 title: trackData.title,
                 audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3", // Placeholder audio
                 imageUrl: artist.imageUrl, // Use artist image for track cover for now
-                genre: trackData.genre,
+                genreId: genre ? genre.id : null,
                 scheduledFor,
                 artistId: artist.id,
             },

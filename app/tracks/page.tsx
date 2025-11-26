@@ -1,4 +1,5 @@
 import { getTracks } from "@/app/actions/tracks"
+import { getGenres } from "@/app/actions/genres"
 import { PlayButton } from "@/components/play-button"
 import { LikeButton } from "@/components/like-button"
 import { User, Calendar } from "lucide-react"
@@ -10,25 +11,24 @@ import {
     SelectValue,
 } from "@/components/ui/select"
 
-// Define available genres (should match your schema)
-const GENRES = [
-    "Progressive House",
-    "Techno",
-    "Trance",
-    "Progressive Trance",
-    "Melodic Techno",
-    "Deep House",
-    "Tech House",
-]
-
 export default async function TracksPage({
     searchParams,
 }: {
     searchParams: Promise<{ genre?: string }>
 }) {
     const params = await searchParams
-    const selectedGenre = params.genre || "all"
-    const { tracks } = await getTracks(1, 100, selectedGenre === "all" ? undefined : selectedGenre)
+    const selectedGenreId = params.genre || "all"
+
+    // Fetch tracks and genres in parallel
+    const [tracksData, genres] = await Promise.all([
+        getTracks(1, 100, selectedGenreId === "all" ? undefined : selectedGenreId),
+        getGenres()
+    ])
+
+    const { tracks } = tracksData
+
+    // Create a map for easy genre lookup if needed, though tracks might have genre relation loaded if we update getTracks
+    // For now, we rely on what getTracks returns. We should update getTracks to include genre relation.
 
     return (
         <div className="container py-10 px-4 md:px-8">
@@ -43,16 +43,26 @@ export default async function TracksPage({
 
                     {/* Genre Filter */}
                     <div className="w-full sm:w-[200px]">
-                        <Select value={selectedGenre}>
+                        <Select value={selectedGenreId}>
                             <SelectTrigger>
                                 <SelectValue placeholder="Filter by genre" />
                             </SelectTrigger>
                             <SelectContent>
                                 <SelectItem value="all">All Genres</SelectItem>
-                                {GENRES.map((genre) => (
-                                    <SelectItem key={genre} value={genre}>
-                                        {genre}
-                                    </SelectItem>
+                                {genres.filter((g: any) => !g.parentId).map((parent: any) => (
+                                    <div key={parent.id}>
+                                        <SelectItem value={parent.id} className="font-semibold">
+                                            {parent.name}
+                                        </SelectItem>
+                                        {genres
+                                            .filter((g: any) => g.parentId === parent.id)
+                                            .map((sub: any) => (
+                                                <SelectItem key={sub.id} value={sub.id} className="pl-6 text-muted-foreground">
+                                                    {sub.name}
+                                                </SelectItem>
+                                            ))
+                                        }
+                                    </div>
                                 ))}
                             </SelectContent>
                         </Select>
@@ -60,7 +70,7 @@ export default async function TracksPage({
                 </div>
 
                 <div className="grid gap-4">
-                    {tracks.map((track) => (
+                    {tracks.map((track: any) => (
                         <div
                             key={track.id}
                             className="group flex items-center gap-4 rounded-lg border p-3 hover:bg-accent transition-colors"
@@ -86,11 +96,12 @@ export default async function TracksPage({
                                     <h3 className="font-semibold truncate text-lg">{track.title}</h3>
                                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
                                         <span className="truncate">{track.artist.name}</span>
-                                        {track.genre && (
+                                        {/* Display Genre Name if available. We need to fetch it in getTracks or find it here */}
+                                        {track.genreRel?.name && (
                                             <>
                                                 <span className="text-muted-foreground/50">•</span>
                                                 <span className="px-2 py-0.5 bg-primary/10 text-primary rounded-full text-xs">
-                                                    {track.genre}
+                                                    {track.genreRel.name}
                                                 </span>
                                             </>
                                         )}
@@ -110,7 +121,7 @@ export default async function TracksPage({
                     ))}
                     {tracks.length === 0 && (
                         <div className="text-center py-20 text-muted-foreground">
-                            No tracks found{selectedGenre !== "all" && ` for ${selectedGenre}`}.
+                            No tracks found.
                         </div>
                     )}
                 </div>

@@ -22,7 +22,13 @@ interface Artist {
     name: string
 }
 
-export default function TrackForm({ artists }: { artists: Artist[] }) {
+interface Genre {
+    id: string
+    name: string
+    parentId?: string | null
+}
+
+export default function TrackForm({ artists, genres }: { artists: Artist[], genres: Genre[] }) {
     const [selectedArtist, setSelectedArtist] = useState("")
     const [error, setError] = useState("")
     const [isPending, startTransition] = useTransition()
@@ -38,7 +44,6 @@ export default function TrackForm({ artists }: { artists: Artist[] }) {
         const title = formData.get("title") as string
         const audioFile = formData.get("audioFile") as File
         const scheduledFor = formData.get("scheduledFor") as string
-        const genre = formData.get("genre") as string
 
         if (!title?.trim()) {
             setError("Please enter a track title")
@@ -67,36 +72,10 @@ export default function TrackForm({ artists }: { artists: Artist[] }) {
             return
         }
 
-        // Create a fresh FormData object to ensure clean state
-        const submitData = new FormData()
-
-        // 1. Title
-        if (title) submitData.append("title", title)
-
-        // 2. Artist ID
-        if (selectedArtist) submitData.append("artistId", selectedArtist)
-
-        // 3. Scheduled For
-        if (scheduledFor) submitData.append("scheduledFor", scheduledFor)
-
-        // 4. Audio File
-        if (audioFile && audioFile instanceof File) {
-            submitData.append("audioFile", audioFile)
-        }
-
-        // 5. Genre (Optional)
-        if (genre) submitData.append("genre", genre)
-
-        // 6. Image File (Optional)
-        const imageFile = formData.get("imageFile") as File
-        if (imageFile && imageFile.size > 0) {
-            submitData.append("imageFile", imageFile)
-        }
-
         startTransition(async () => {
             try {
-                await createTrack(submitData)
-                // No need to push/refresh here as the server action redirects
+                // Use the original formData - it now has all fields including artistId from hidden input
+                await createTrack(formData)
             } catch (err: any) {
                 if (err.message === "NEXT_REDIRECT" || err.message.includes("NEXT_REDIRECT")) {
                     return // Redirecting, so no error
@@ -160,25 +139,36 @@ export default function TrackForm({ artists }: { artists: Artist[] }) {
                                     ))}
                                 </SelectContent>
                             </Select>
+                            {/* Hidden input to include artistId in FormData */}
+                            <input type="hidden" name="artistId" value={selectedArtist} />
                         </div>
 
                         <div className="space-y-2">
-                            <Label htmlFor="genre">Genre</Label>
+                            <Label htmlFor="genreId">Genre</Label>
                             <Select
-                                name="genre"
+                                name="genreId"
                                 disabled={isPending}
                             >
-                                <SelectTrigger id="genre">
+                                <SelectTrigger id="genreId">
                                     <SelectValue placeholder="Select a genre (optional)" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="Progressive House">Progressive House</SelectItem>
-                                    <SelectItem value="Techno">Techno</SelectItem>
-                                    <SelectItem value="Trance">Trance</SelectItem>
-                                    <SelectItem value="Progressive Trance">Progressive Trance</SelectItem>
-                                    <SelectItem value="Melodic Techno">Melodic Techno</SelectItem>
-                                    <SelectItem value="Deep House">Deep House</SelectItem>
-                                    <SelectItem value="Tech House">Tech House</SelectItem>
+                                    <SelectItem value="none">None</SelectItem>
+                                    {genres.filter(g => !g.parentId).map((parent) => (
+                                        <div key={parent.id}>
+                                            <SelectItem value={parent.id} className="font-semibold">
+                                                {parent.name}
+                                            </SelectItem>
+                                            {genres
+                                                .filter(g => g.parentId === parent.id)
+                                                .map(sub => (
+                                                    <SelectItem key={sub.id} value={sub.id} className="pl-6 text-muted-foreground">
+                                                        {sub.name}
+                                                    </SelectItem>
+                                                ))
+                                            }
+                                        </div>
+                                    ))}
                                 </SelectContent>
                             </Select>
                         </div>

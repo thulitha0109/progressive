@@ -27,10 +27,16 @@ interface Track {
     title: string
     artistId: string
     scheduledFor: Date
-    genre?: string | null
+    genreId?: string | null
 }
 
-export default function EditTrackForm({ track, artists }: { track: Track, artists: Artist[] }) {
+interface Genre {
+    id: string
+    name: string
+    parentId?: string | null
+}
+
+export default function EditTrackForm({ track, artists, genres }: { track: Track, artists: Artist[], genres: Genre[] }) {
     const [selectedArtist, setSelectedArtist] = useState(track.artistId)
     const [error, setError] = useState("")
     const [isPending, startTransition] = useTransition()
@@ -62,9 +68,6 @@ export default function EditTrackForm({ track, artists }: { track: Track, artist
             setError("Please select a scheduled date and time")
             return
         }
-
-        // Add artistId to form data
-        formData.set("artistId", selectedArtist)
 
         startTransition(async () => {
             try {
@@ -134,23 +137,32 @@ export default function EditTrackForm({ track, artists }: { track: Track, artist
                         </div>
 
                         <div className="space-y-2">
-                            <Label htmlFor="genre">Genre</Label>
+                            <Label htmlFor="genreId">Genre</Label>
                             <Select
-                                name="genre"
-                                defaultValue={track.genre || undefined}
+                                name="genreId"
+                                defaultValue={track.genreId || undefined}
                                 disabled={isPending}
                             >
-                                <SelectTrigger id="genre">
+                                <SelectTrigger id="genreId">
                                     <SelectValue placeholder="Select a genre (optional)" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="Progressive House">Progressive House</SelectItem>
-                                    <SelectItem value="Techno">Techno</SelectItem>
-                                    <SelectItem value="Trance">Trance</SelectItem>
-                                    <SelectItem value="Progressive Trance">Progressive Trance</SelectItem>
-                                    <SelectItem value="Melodic Techno">Melodic Techno</SelectItem>
-                                    <SelectItem value="Deep House">Deep House</SelectItem>
-                                    <SelectItem value="Tech House">Tech House</SelectItem>
+                                    <SelectItem value="none">None</SelectItem>
+                                    {genres.filter(g => !g.parentId).map((parent) => (
+                                        <div key={parent.id}>
+                                            <SelectItem value={parent.id} className="font-semibold">
+                                                {parent.name}
+                                            </SelectItem>
+                                            {genres
+                                                .filter(g => g.parentId === parent.id)
+                                                .map(sub => (
+                                                    <SelectItem key={sub.id} value={sub.id} className="pl-6 text-muted-foreground">
+                                                        {sub.name}
+                                                    </SelectItem>
+                                                ))
+                                            }
+                                        </div>
+                                    ))}
                                 </SelectContent>
                             </Select>
                         </div>

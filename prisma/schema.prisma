@@ -60,6 +60,7 @@ model VerificationToken {
 model Artist {
   id             String   @id @default(cuid())
   name           String
+  slug           String   @unique
   bio            String
   imageUrl       String?
   socialProfiles String?  // Stored as JSON string
@@ -68,17 +69,33 @@ model Artist {
   updatedAt      DateTime @updatedAt
 }
 
+
+model Genre {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  slug      String   @unique
+  parentId  String?
+  parent    Genre?   @relation("SubGenres", fields: [parentId], references: [id])
+  subGenres Genre[]  @relation("SubGenres")
+  tracks    Track[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
 model Track {
   id           String   @id @default(cuid())
   title        String
   audioUrl     String
   imageUrl     String?
-  genre        String?  // Progressive House, Techno, Trance, etc.
+  genre        String?  // Deprecated: use genreId
+  genreId      String?
+  genreRel     Genre?   @relation(fields: [genreId], references: [id])
   scheduledFor DateTime
   artistId     String
   artist       Artist   @relation(fields: [artistId], references: [id], onDelete: Cascade)
   likedBy      User[]   @relation("UserLikes")
   isFeatured   Boolean  @default(false)
+  deletedAt    DateTime?
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 }

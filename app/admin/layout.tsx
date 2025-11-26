@@ -42,6 +42,13 @@ export default function AdminLayout({
                         <Podcast className="h-4 w-4" />
                         Podcasts
                     </Link>
+                    <Link
+                        href="/admin/genres"
+                        className="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground"
+                    >
+                        <Music className="h-4 w-4" />
+                        Genres
+                    </Link>
                 </nav>
             </aside>
             <main className="flex-1 p-6 md:p-10">{children}</main>

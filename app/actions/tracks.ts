@@ -14,11 +14,12 @@ export async function getTracks(page: number = 1, pageSize: number = 10, genre?:
 
     // Build where clause
     const where: any = {
-        scheduledFor: { lte: now } // Only show published tracks
+        scheduledFor: { lte: now }, // Only show published tracks
+        deletedAt: null // Only show non-deleted tracks
     }
 
     if (genre && genre !== "all") {
-        where.genre = genre
+        where.genreId = genre
     }
 
     const [tracksRaw, totalCount] = await Promise.all([
@@ -26,6 +27,7 @@ export async function getTracks(page: number = 1, pageSize: number = 10, genre?:
             where,
             include: {
                 artist: true,
+                genreRel: true,
                 _count: { select: { likedBy: true } },
             },
             orderBy: { scheduledFor: "desc" },
@@ -74,6 +76,7 @@ export async function getUpcomingTracks() {
         },
         include: {
             artist: true,
+            genreRel: true,
         },
         orderBy: { scheduledFor: "asc" },
     })
@@ -84,6 +87,7 @@ export async function getTrack(id: string) {
         where: { id },
         include: {
             artist: true,
+            genreRel: true,
         },
     })
 }
@@ -99,6 +103,7 @@ export async function getLikedTracks(userId: string) {
         },
         include: {
             artist: true,
+            genreRel: true,
         },
         orderBy: { createdAt: "desc" },
     })
@@ -107,7 +112,7 @@ export async function getLikedTracks(userId: string) {
 export async function createTrack(formData: FormData) {
     const title = formData.get("title") as string
     const artistId = formData.get("artistId") as string
-    const genre = (formData.get("genre") as string) || null
+    const genreId = (formData.get("genreId") as string) || null
     const scheduledForStr = formData.get("scheduledFor") as string
     const audioFile = formData.get("audioFile") as File
     const imageFile = formData.get("imageFile") as File
@@ -130,14 +135,24 @@ export async function createTrack(formData: FormData) {
     }
 
     try {
-        // Handle Audio Upload using centralized utility
-        const audioUrl = await saveUploadedFile(audioFile, UPLOAD_DIRS.ARTISTS, artistId)
+        // Get artist slug for file path
+        const artist = await prisma.artist.findUnique({
+            where: { id: artistId },
+            select: { slug: true }
+        })
+
+        if (!artist) {
+            throw new Error("Artist not found")
+        }
+
+        // Handle Audio Upload using artist slug
+        const audioUrl = await saveUploadedFile(audioFile, UPLOAD_DIRS.ARTISTS, artist.slug)
         console.log("Audio uploaded successfully:", audioUrl)
 
         // Handle Image Upload (Optional)
         let imageUrl = null
         if (imageFile && imageFile.size > 0) {
-            imageUrl = await saveUploadedFile(imageFile, UPLOAD_DIRS.ARTISTS, artistId)
+            imageUrl = await saveUploadedFile(imageFile, UPLOAD_DIRS.ARTISTS, artist.slug)
             console.log("Image uploaded successfully:", imageUrl)
         }
 
@@ -148,7 +163,7 @@ export async function createTrack(formData: FormData) {
                 title,
                 audioUrl,
                 imageUrl,
-                genre,
+                genreId: genreId === "none" ? null : genreId,
                 scheduledFor,
                 artistId,
             },
@@ -166,20 +181,61 @@ export async function createTrack(formData: FormData) {
 
 export async function deleteTrack(id: string) {
     try {
-        await prisma.track.delete({
+        await prisma.track.update({
             where: { id },
+            data: { deletedAt: new Date() }
         })
         revalidatePath("/admin/tracks")
+        revalidatePath("/admin/tracks/trash")
     } catch (error) {
         console.error("Failed to delete track:", error)
         throw new Error("Failed to delete track")
     }
 }
 
+export async function restoreTrack(id: string) {
+    try {
+        await prisma.track.update({
+            where: { id },
+            data: { deletedAt: null }
+        })
+        revalidatePath("/admin/tracks")
+        revalidatePath("/admin/tracks/trash")
+    } catch (error) {
+        console.error("Failed to restore track:", error)
+        throw new Error("Failed to restore track")
+    }
+}
+
+export async function permanentDeleteTrack(id: string) {
+    try {
+        await prisma.track.delete({
+            where: { id },
+        })
+        revalidatePath("/admin/tracks/trash")
+    } catch (error) {
+        console.error("Failed to permanently delete track:", error)
+        throw new Error("Failed to permanently delete track")
+    }
+}
+
+export async function getTrashedTracks() {
+    return await prisma.track.findMany({
+        where: {
+            deletedAt: { not: null }
+        },
+        include: {
+            artist: true,
+            genreRel: true,
+        },
+        orderBy: { deletedAt: "desc" },
+    })
+}
+
 export async function updateTrack(id: string, formData: FormData) {
     const title = formData.get("title") as string
     const artistId = formData.get("artistId") as string
-    const genre = (formData.get("genre") as string) || null
+    const genreId = (formData.get("genreId") as string) || null
     const scheduledForStr = formData.get("scheduledFor") as string
     const audioFile = formData.get("audioFile") as File
     const imageFile = formData.get("imageFile") as File
@@ -205,20 +261,30 @@ export async function updateTrack(id: string, formData: FormData) {
     const data: any = {
         title,
         artistId,
-        genre,
+        genreId: genreId === "none" ? null : genreId,
         scheduledFor,
     }
 
     try {
-        // Handle Audio Upload
+        // Get artist slug for file path
+        const artist = await prisma.artist.findUnique({
+            where: { id: artistId },
+            select: { slug: true }
+        })
+
+        if (!artist) {
+            throw new Error("Artist not found")
+        }
+
+        // Handle Audio Upload with artist slug
         if (audioFile && audioFile.size > 0) {
-            data.audioUrl = await saveUploadedFile(audioFile, UPLOAD_DIRS.ARTISTS, artistId)
+            data.audioUrl = await saveUploadedFile(audioFile, UPLOAD_DIRS.ARTISTS, artist.slug)
             console.log("Audio updated successfully:", data.audioUrl)
         }
 
-        // Handle Image Upload
+        // Handle Image Upload with artist slug
         if (imageFile && imageFile.size > 0) {
-            data.imageUrl = await saveUploadedFile(imageFile, UPLOAD_DIRS.ARTISTS, artistId)
+            data.imageUrl = await saveUploadedFile(imageFile, UPLOAD_DIRS.ARTISTS, artist.slug)
             console.log("Image updated successfully:", data.imageUrl)
         }
 
