@@ -13,7 +13,13 @@ echo "🚀 Starting deployment..."
 if [ -z "$AUTH_SECRET" ]; then
   echo "⚠️ AUTH_SECRET not set. Generating a temporary one..."
   export AUTH_SECRET=$(openssl rand -base64 32)
+  export AUTH_SECRET=$(openssl rand -base64 32)
 fi
+
+# Ensure uploads directory exists and is writable
+echo "📂 Setting up upload directory..."
+mkdir -p public/uploads
+chmod 777 public/uploads
 
 # 2. Build and start containers
 echo "📦 Building and starting containers..."
