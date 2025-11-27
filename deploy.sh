@@ -13,7 +13,6 @@ echo "🚀 Starting deployment..."
 if [ -z "$AUTH_SECRET" ]; then
   echo "⚠️ AUTH_SECRET not set. Generating a temporary one..."
   export AUTH_SECRET=$(openssl rand -base64 32)
-  export AUTH_SECRET=$(openssl rand -base64 32)
 fi
 
 # Ensure uploads directory exists and is writable
@@ -31,8 +30,8 @@ sleep 10
 
 # 4. Run migrations and seed
 echo "🔄 Running database migrations and seeding..."
-# Force use of prisma@5.22.0 to match project version and avoid v7 breaking changes
-docker-compose exec -T app npx prisma@5.22.0 migrate deploy
+# Use db push to sync schema (accepting data loss for dev/prototype speed)
+docker-compose exec -T app npx prisma@5.22.0 db push --accept-data-loss
 docker-compose exec -T app node scripts/dist/seed-genres.js
 docker-compose exec -T app node scripts/dist/seed-admin.js
 docker-compose exec -T app node scripts/dist/seed-dummy.js
