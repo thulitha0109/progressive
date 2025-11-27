@@ -101,13 +101,16 @@ model Track {
 }
 
 model Podcast {
-  id          String   @id @default(cuid())
+  id          String    @id @default(cuid())
   title       String
+  slug        String    @unique
   description String
   audioUrl    String
   imageUrl    String?
   host        String?
   duration    String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  scheduledFor DateTime @default(now())
+  deletedAt    DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 }
