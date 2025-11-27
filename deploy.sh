@@ -27,8 +27,8 @@ sleep 10
 echo "🔄 Running database migrations and seeding..."
 # Force use of prisma@5.22.0 to match project version and avoid v7 breaking changes
 docker-compose exec -T app npx prisma@5.22.0 migrate deploy
-docker-compose exec -T app node scripts/seed-genres.js
-docker-compose exec -T app node scripts/seed-admin.js
-docker-compose exec -T app node scripts/seed-dummy.js
+docker-compose exec -T app node scripts/dist/seed-genres.js
+docker-compose exec -T app node scripts/dist/seed-admin.js
+docker-compose exec -T app node scripts/dist/seed-dummy.js
 
 echo "✅ Deployment complete! App is running on ${AUTH_URL:-http://localhost:3003}"
