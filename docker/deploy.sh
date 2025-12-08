@@ -30,7 +30,7 @@ sleep 10
 
 # 4. Run migrations and seed
 echo "🔄 Running database migrations and seeding..."
-# Use db push to sync schema (accepting data loss for dev/prototype speed)
+# Use the Prisma version installed in node_modules
 docker-compose exec -T app npx prisma migrate deploy --schema=src/prisma/schema.prisma
 docker-compose exec -T app node scripts/dist/seed-genres.js
 docker-compose exec -T app node scripts/dist/seed-admin.js
