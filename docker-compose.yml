@@ -12,6 +12,11 @@ services:
       - "5433:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   app:
     container_name: progressive-app
@@ -27,7 +32,8 @@ services:
       - AUTH_URL=${AUTH_URL:-http://localhost:3003}
       - AUTH_TRUST_HOST=true
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
     volumes:
       - ./public/uploads:/app/public/uploads
 

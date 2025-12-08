@@ -26,7 +26,7 @@ docker-compose up -d --build
 
 # 3. Wait for database to be ready
 echo "⏳ Waiting for database..."
-sleep 10
+sleep 20
 
 # 4. Run migrations only (no full seeding for existing data)
 echo "🔄 Running database migrations..."
