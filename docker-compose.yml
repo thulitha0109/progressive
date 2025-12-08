@@ -17,7 +17,7 @@ services:
     container_name: progressive-app
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: docker/Dockerfile.prod
     restart: always
     ports:
       - "3003:3000"
