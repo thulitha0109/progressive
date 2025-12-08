@@ -56,8 +56,9 @@ RUN apk add --no-cache openssl
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
-# Install bcryptjs for seed-admin script
-RUN npm install bcryptjs
+# Install dependencies needed for runtime (bcryptjs for seeding, prisma for migrations)
+RUN npm install bcryptjs prisma@5.22.0 @prisma/client@5.22.0
+
 
 COPY --from=builder /app/public ./public
 
