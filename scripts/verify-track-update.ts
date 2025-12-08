@@ -1,6 +1,6 @@
 
 import { PrismaClient } from '@prisma/client'
-import { updateTrack } from '../app/actions/tracks'
+import { updateTrack } from '../src/server/actions/tracks'
 
 const prisma = new PrismaClient()
 

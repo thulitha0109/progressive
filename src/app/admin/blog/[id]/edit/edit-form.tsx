@@ -1,0 +1,247 @@
+"use client"
+
+import { useState, useTransition } from "react"
+import Link from "next/link"
+import { updateBlogPost } from "@/server/actions/blog"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Textarea } from "@/components/ui/textarea"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { ArrowLeft, Loader2 } from "lucide-react"
+import { Switch } from "@/components/ui/switch"
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select"
+
+interface Category {
+    id: string
+    name: string
+}
+
+interface BlogPost {
+    id: string
+    title: string
+    content: string
+    excerpt: string | null
+    coverImage: string | null
+    publishedAt: Date | null
+    categoryId: string | null
+}
+
+export default function EditBlogPostForm({
+    post,
+    categories
+}: {
+    post: BlogPost
+    categories: Category[]
+}) {
+    const [isPending, startTransition] = useTransition()
+    const [error, setError] = useState("")
+    const [uploadStatus, setUploadStatus] = useState("")
+
+    async function uploadImage(file: File): Promise<string> {
+        return new Promise((resolve, reject) => {
+            const formData = new FormData()
+            formData.append("file", file)
+            formData.append("type", "blog")
+
+            const xhr = new XMLHttpRequest()
+            xhr.open("POST", "/api/upload")
+
+            xhr.onload = () => {
+                if (xhr.status === 200) {
+                    const response = JSON.parse(xhr.responseText)
+                    resolve(response.url)
+                } else {
+                    reject(new Error("Image upload failed"))
+                }
+            }
+
+            xhr.onerror = () => {
+                reject(new Error("Image upload failed"))
+            }
+
+            xhr.send(formData)
+        })
+    }
+
+    async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+        e.preventDefault()
+        setError("")
+        setUploadStatus("")
+
+        const formData = new FormData(e.currentTarget)
+        const coverImageFile = formData.get("coverImageFile") as File
+
+        startTransition(async () => {
+            try {
+                // Upload new cover image if provided
+                if (coverImageFile && coverImageFile.size > 0) {
+                    setUploadStatus("Uploading cover image...")
+                    const imageUrl = await uploadImage(coverImageFile)
+                    formData.set("coverImage", imageUrl)
+                } else if (post.coverImage) {
+                    // Keep existing image
+                    formData.set("coverImage", post.coverImage)
+                }
+                formData.delete("coverImageFile")
+
+                setUploadStatus("Updating post...")
+                await updateBlogPost(post.id, formData)
+            } catch (err: any) {
+                if (err.message === "NEXT_REDIRECT" || err.message.includes("NEXT_REDIRECT")) {
+                    return // Redirecting
+                }
+                console.error("Error:", err)
+                setError(err.message || "Failed to update post. Please try again.")
+                setUploadStatus("")
+            }
+        })
+    }
+
+    return (
+        <div className="max-w-4xl mx-auto">
+            <div className="mb-6">
+                <Button variant="ghost" asChild className="mb-4 pl-0 hover:bg-transparent hover:text-primary">
+                    <Link href="/admin/blog" className="flex items-center gap-2">
+                        <ArrowLeft className="h-4 w-4" />
+                        Back to Blog
+                    </Link>
+                </Button>
+                <h1 className="text-3xl font-bold tracking-tight">Edit Blog Post</h1>
+            </div>
+
+            <Card>
+                <CardHeader>
+                    <CardTitle>Post Details</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    {error && (
+                        <div className="mb-6 p-4 bg-destructive/10 border border-destructive/20 rounded-lg">
+                            <p className="text-sm text-destructive font-medium">{error}</p>
+                        </div>
+                    )}
+
+                    <form onSubmit={handleSubmit} className="space-y-6">
+                        <div className="grid gap-6 md:grid-cols-[2fr_1fr]">
+                            <div className="space-y-6">
+                                <div className="space-y-2">
+                                    <Label htmlFor="title">Title</Label>
+                                    <Input
+                                        id="title"
+                                        name="title"
+                                        placeholder="Post Title"
+                                        required
+                                        defaultValue={post.title}
+                                        disabled={isPending}
+                                    />
+                                </div>
+
+                                <div className="space-y-2">
+                                    <Label htmlFor="content">Content</Label>
+                                    <Textarea
+                                        id="content"
+                                        name="content"
+                                        placeholder="Write your post content here..."
+                                        className="min-h-[400px] font-mono"
+                                        required
+                                        defaultValue={post.content}
+                                        disabled={isPending}
+                                    />
+                                </div>
+
+                                <div className="space-y-2">
+                                    <Label htmlFor="excerpt">Excerpt</Label>
+                                    <Textarea
+                                        id="excerpt"
+                                        name="excerpt"
+                                        placeholder="Short summary for listings..."
+                                        className="min-h-[100px]"
+                                        defaultValue={post.excerpt || ""}
+                                        disabled={isPending}
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="space-y-6">
+                                <div className="space-y-4 rounded-lg border p-4">
+                                    <h3 className="font-medium">Publishing</h3>
+                                    <div className="flex items-center justify-between">
+                                        <Label htmlFor="isPublished">Published</Label>
+                                        <Switch
+                                            id="isPublished"
+                                            name="isPublished"
+                                            defaultChecked={!!post.publishedAt}
+                                            disabled={isPending}
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="space-y-2">
+                                    <Label htmlFor="categoryId">Category</Label>
+                                    <Select
+                                        name="categoryId"
+                                        defaultValue={post.categoryId || undefined}
+                                        disabled={isPending}
+                                    >
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Select category" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {categories.map((category) => (
+                                                <SelectItem key={category.id} value={category.id}>
+                                                    {category.name}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+
+                                <div className="space-y-2">
+                                    <Label htmlFor="coverImageFile">Cover Image</Label>
+                                    {post.coverImage && (
+                                        <div className="mb-2">
+                                            <img
+                                                src={post.coverImage}
+                                                alt="Current cover"
+                                                className="w-full h-32 object-cover rounded-md"
+                                            />
+                                            <p className="text-xs text-muted-foreground mt-1">Current image</p>
+                                        </div>
+                                    )}
+                                    <Input
+                                        id="coverImageFile"
+                                        name="coverImageFile"
+                                        type="file"
+                                        accept="image/*"
+                                        disabled={isPending}
+                                    />
+                                    <p className="text-xs text-muted-foreground">
+                                        Upload new cover image (optional, Max 10MB)
+                                    </p>
+                                </div>
+
+                                {isPending && uploadStatus && (
+                                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                        <Loader2 className="h-4 w-4 animate-spin" />
+                                        {uploadStatus}
+                                    </div>
+                                )}
+
+                                <Button type="submit" className="w-full" disabled={isPending}>
+                                    {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                    {isPending ? "Updating..." : "Update Post"}
+                                </Button>
+                            </div>
+                        </div>
+                    </form>
+                </CardContent>
+            </Card>
+        </div>
+    )
+}
