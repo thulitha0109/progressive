@@ -28,12 +28,12 @@ docker-compose up -d --build
 echo "⏳ Waiting for database..."
 sleep 10
 
-# 4. Run migrations and seed
-echo "🔄 Running database migrations and seeding..."
-# Use the Prisma version installed in node_modules
+# 4. Run migrations only (no full seeding for existing data)
+echo "🔄 Running database migrations..."
 docker-compose exec -T app npx prisma migrate deploy --schema=src/prisma/schema.prisma
-docker-compose exec -T app node scripts/dist/seed-genres.js
-docker-compose exec -T app node scripts/dist/seed-admin.js
-docker-compose exec -T app node scripts/dist/seed-dummy.js
+
+# 5. Seed blog data only (preserves existing artists/tracks)
+echo "🌱 Seeding blog data..."
+docker-compose exec -T app node scripts/dist/seed-blog.js
 
 echo "✅ Deployment complete! App is running on ${AUTH_URL:-http://localhost:3003}"
