@@ -30,7 +30,7 @@ sleep 10
 
 # 4. Run migrations only (no full seeding for existing data)
 echo "🔄 Running database migrations..."
-docker-compose exec -T app npx prisma migrate deploy --schema=src/prisma/schema.prisma
+docker-compose exec -T app node node_modules/.bin/prisma migrate deploy --schema=src/prisma/schema.prisma
 
 # 5. Seed blog data only (preserves existing artists/tracks)
 echo "🌱 Seeding blog data..."
