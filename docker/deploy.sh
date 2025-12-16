@@ -11,7 +11,9 @@ echo "🚀 Starting deployment..."
 # Load .env file if it exists
 if [ -f .env ]; then
   echo "📄 Loading environment variables from .env..."
-  export $(cat .env | xargs)
+  set -a  # automatically export all variables
+  source .env
+  set +a
 fi
 
 # 2. Build and start containers
