@@ -21,7 +21,7 @@ export default function NewArtistForm() {
         return new Promise((resolve, reject) => {
             const formData = new FormData()
             formData.append("file", file)
-            formData.append("type", "artist")
+            formData.append("type", "images")
 
             const xhr = new XMLHttpRequest()
             xhr.open("POST", "/api/upload")
