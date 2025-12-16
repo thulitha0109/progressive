@@ -12,6 +12,7 @@ export const UPLOAD_DIRS = {
     EVENTS: "events",
     SHOPS: "shops",
     PRODUCTS: "products",
+    IMAGES: "images",
 } as const
 
 /**
