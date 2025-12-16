@@ -30,10 +30,10 @@ sleep 20
 
 # 4. Run migrations only (no full seeding for existing data)
 echo "🔄 Running database migrations..."
-docker-compose exec -T app npx prisma migrate deploy --schema=src/prisma/schema.prisma
+docker compose exec -T app npx prisma migrate deploy --schema=src/prisma/schema.prisma
 
 # 5. Seed essential production data (Admin, Genres)
 echo "🌱 Seeding production data..."
-docker-compose exec -T app node scripts/dist/seed-prod.js
+docker compose exec -T app node scripts/dist/seed-prod.js
 
 echo "✅ Deployment complete! App is running on ${AUTH_URL:-http://localhost:3003}"
