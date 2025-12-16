@@ -26,7 +26,7 @@ fi
 # Ensure uploads directory exists and is writable
 echo "📂 Setting up upload directory..."
 mkdir -p public/uploads
-chmod 777 public/uploads
+chmod -R 777 public/uploads
 
 # 2. Build and start containers
 echo "📦 Building and starting containers..."
