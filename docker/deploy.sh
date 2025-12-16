@@ -8,6 +8,12 @@ echo "🚀 Starting deployment..."
 # 1. Pull latest changes (uncomment if using git on server)
 # git pull origin main
 
+# Load .env file if it exists
+if [ -f .env ]; then
+  echo "📄 Loading environment variables from .env..."
+  export $(cat .env | xargs)
+fi
+
 # 2. Build and start containers
 # Generate AUTH_SECRET if not set
 if [ -z "$AUTH_SECRET" ]; then
