@@ -5,6 +5,8 @@ import { revalidatePath } from "next/cache"
 import { auth } from "@/auth"
 import { redirect } from "next/navigation"
 import { saveUploadedFile, UPLOAD_DIRS } from "@/lib/file-upload"
+import { generateWaveformPeaks } from "@/lib/waveform-peaks"
+import path from "path"
 
 export async function getTracks(page: number = 1, pageSize: number = 10, genre?: string, status: 'published' | 'upcoming' | 'all' = 'published') {
     const skip = (page - 1) * pageSize
@@ -176,7 +178,7 @@ export async function createTrack(formData: FormData) {
         // Parse scheduledFor with Colombo timezone (+05:30) if not present
         const scheduledFor = new Date(scheduledForStr.includes('+') ? scheduledForStr : `${scheduledForStr}+05:30`)
 
-        await prisma.track.create({
+        const track = await prisma.track.create({
             data: {
                 title,
                 audioUrl,
@@ -186,6 +188,34 @@ export async function createTrack(formData: FormData) {
                 artistId,
             },
         })
+
+        // Generate waveform peaks asynchronously (don't block the response)
+        if (audioUrl) {
+            // Remove '/api/' prefix from audioUrl if present (e.g., '/api/uploads/...' -> '/uploads/...')
+            const cleanAudioUrl = audioUrl.startsWith('/api/') ? audioUrl.replace('/api/', '/') : audioUrl
+            const audioFilePath = path.join(process.cwd(), 'public', cleanAudioUrl)
+
+            console.log(`[WAVEFORM] Starting peak generation for track ${track.id}`)
+            console.log(`[WAVEFORM] Audio URL: ${audioUrl}`)
+            console.log(`[WAVEFORM] File path: ${audioFilePath}`)
+
+            generateWaveformPeaks(audioFilePath, 1000)
+                .then(async (peaks) => {
+                    if (peaks) {
+                        console.log(`[WAVEFORM] Successfully generated ${peaks.length} peaks for track ${track.id}`)
+                        await prisma.track.update({
+                            where: { id: track.id },
+                            data: { waveformPeaks: peaks },
+                        })
+                        console.log(`[WAVEFORM] ✅ Peaks saved to database for track: ${track.id}`)
+                    } else {
+                        console.log(`[WAVEFORM] ⚠️  Peak generation returned null for track ${track.id}`)
+                    }
+                })
+                .catch(err => {
+                    console.error(`[WAVEFORM] ❌ Failed to generate peaks for track ${track.id}:`, err)
+                })
+        }
 
         revalidatePath("/admin/tracks")
     } catch (error) {
@@ -311,6 +341,24 @@ export async function updateTrack(id: string, formData: FormData) {
             where: { id },
             data,
         })
+
+        // Generate waveform peaks if audio was updated
+        if (data.audioUrl) {
+            // Remove '/api/' prefix from audioUrl if present
+            const cleanAudioUrl = data.audioUrl.startsWith('/api/') ? data.audioUrl.replace('/api/', '/') : data.audioUrl
+            const audioFilePath = path.join(process.cwd(), 'public', cleanAudioUrl)
+            generateWaveformPeaks(audioFilePath, 1000)
+                .then(async (peaks) => {
+                    if (peaks) {
+                        await prisma.track.update({
+                            where: { id },
+                            data: { waveformPeaks: peaks },
+                        })
+                        console.log(`Waveform peaks updated for track: ${id}`)
+                    }
+                })
+                .catch(err => console.error('Failed to generate peaks:', err))
+        }
 
         revalidatePath("/admin/tracks")
     } catch (error) {

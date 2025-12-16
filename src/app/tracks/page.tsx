@@ -1,130 +1,111 @@
 import { getTracks } from "@/server/actions/tracks"
 import { getGenres } from "@/server/actions/genres"
-import { PlayButton } from "@/components/shared/play-button"
-import { LikeButton } from "@/components/shared/like-button"
-import { User, Calendar } from "lucide-react"
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select"
+import { NewReleaseCard } from "@/components/shared/new-release-card"
+import { GenreFilter } from "@/components/tracks/genre-filter"
+import { Pagination } from "@/components/ui/pagination"
+import Link from "next/link"
+import { cn } from "@/lib/utils"
+// import { Track } from "@prisma/client"
+
+export const dynamic = 'force-dynamic'
 
 export default async function TracksPage({
     searchParams,
 }: {
-    searchParams: Promise<{ genre?: string }>
+    searchParams: Promise<{ page?: string; genre?: string; status?: string }>
 }) {
     const params = await searchParams
+    const currentPage = Number(params.page) || 1
     const selectedGenreId = params.genre || "all"
+    const statusParam = params.status || "published"
+    const ITEMS_PER_PAGE = 12
 
-    // Fetch tracks and genres in parallel
+    const validStatus = (statusParam === 'published' || statusParam === 'upcoming' || statusParam === 'all')
+        ? statusParam
+        : 'published';
+
     const [tracksData, genres] = await Promise.all([
-        getTracks(1, 100, selectedGenreId === "all" ? undefined : selectedGenreId),
+        getTracks(currentPage, ITEMS_PER_PAGE, selectedGenreId === "all" ? undefined : selectedGenreId, validStatus),
         getGenres()
     ])
 
-    const { tracks } = tracksData
+    const { tracks, totalPages } = tracksData
 
-    // Create a map for easy genre lookup if needed, though tracks might have genre relation loaded if we update getTracks
-    // For now, we rely on what getTracks returns. We should update getTracks to include genre relation.
+    const statusFilters = [
+        { label: "New Releases", value: "published" },
+        { label: "Upcoming", value: "upcoming" },
+        { label: "All Tracks", value: "all" },
+    ]
 
     return (
-        <div className="container py-10 px-4 md:px-8">
-            <div className="flex flex-col gap-4 md:gap-8">
-                <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
-                    <div className="flex flex-col gap-2">
-                        <h1 className="text-3xl font-bold tracking-tight">All Tracks</h1>
-                        <p className="text-muted-foreground">
-                            Explore our complete collection of progressive sounds.
-                        </p>
-                    </div>
+        <div className="container py-10 px-4 md:px-8 min-h-screen animate-enter-fade-in relative max-w-[1400px]">
+            <div className="flex flex-col gap-8">
+                <div className="flex flex-col gap-6 z-10 relative">
+                    <div className="flex flex-col xl:flex-row xl:items-end xl:justify-between gap-6">
+                        <div className="flex flex-col gap-2 max-w-2xl">
+                            <h1 className="text-4xl sm:text-5xl font-bold tracking-tight bg-gradient-to-br from-foreground to-foreground/60 bg-clip-text text-transparent">
+                                Tracks
+                            </h1>
+                            <p className="text-lg text-muted-foreground leading-relaxed">
+                                Explore our collection of progressive sounds.
+                            </p>
+                        </div>
 
-                    {/* Genre Filter */}
-                    <div className="w-full sm:w-[200px]">
-                        <Select value={selectedGenreId}>
-                            <SelectTrigger>
-                                <SelectValue placeholder="Filter by genre" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="all">All Genres</SelectItem>
-                                {genres.filter((g: any) => !g.parentId).map((parent: any) => (
-                                    <div key={parent.id}>
-                                        <SelectItem value={parent.id} className="font-semibold">
-                                            {parent.name}
-                                        </SelectItem>
-                                        {genres
-                                            .filter((g: any) => g.parentId === parent.id)
-                                            .map((sub: any) => (
-                                                <SelectItem key={sub.id} value={sub.id} className="pl-6 text-muted-foreground">
-                                                    {sub.name}
-                                                </SelectItem>
-                                            ))
-                                        }
-                                    </div>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                    </div>
-                </div>
-
-                <div className="grid gap-4">
-                    {tracks.map((track: any) => (
-                        <div
-                            key={track.id}
-                            className="group flex items-center gap-4 rounded-lg border p-3 hover:bg-accent transition-colors"
-                        >
-                            <div className="relative h-16 w-16 flex-shrink-0 overflow-hidden rounded bg-muted">
-                                {track.imageUrl ? (
-                                    <img
-                                        src={track.imageUrl}
-                                        alt={track.title}
-                                        className="h-full w-full object-cover"
-                                    />
-                                ) : (
-                                    <div className="flex h-full items-center justify-center text-muted-foreground">
-                                        <User className="h-6 w-6" />
-                                    </div>
-                                )}
-                                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/40">
-                                    <PlayButton track={track} />
-                                </div>
-                            </div>
-                            <div className="flex-1 min-w-0 flex items-center justify-between gap-4">
-                                <div className="min-w-0 flex-1">
-                                    <h3 className="font-semibold truncate text-lg">{track.title}</h3>
-                                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                        <span className="truncate">{track.artist.name}</span>
-                                        {/* Display Genre Name if available. We need to fetch it in getTracks or find it here */}
-                                        {track.genreRel?.name && (
-                                            <>
-                                                <span className="text-muted-foreground/50">•</span>
-                                                <span className="px-2 py-0.5 bg-primary/10 text-primary rounded-full text-xs">
-                                                    {track.genreRel.name}
-                                                </span>
-                                            </>
+                        <div className="flex flex-col sm:flex-row gap-4 w-full xl:w-auto">
+                            <div className="flex items-center p-1 bg-muted/40 rounded-lg border border-border/50 self-start sm:self-auto w-full sm:w-auto overflow-x-auto">
+                                {statusFilters.map((filter) => (
+                                    <Link
+                                        key={filter.value}
+                                        href={`/tracks?status=${filter.value}&genre=${selectedGenreId}`}
+                                        className={cn(
+                                            "px-4 py-2 text-sm font-medium rounded-md whitespace-nowrap transition-all",
+                                            validStatus === filter.value
+                                                ? "bg-background text-foreground shadow-sm"
+                                                : "text-muted-foreground hover:text-foreground hover:bg-muted/60"
                                         )}
-                                    </div>
-                                </div>
-                                <div className="hidden md:flex items-center gap-2 text-sm text-muted-foreground mr-4">
-                                    <Calendar className="h-4 w-4" />
-                                    {new Date(track.scheduledFor).toLocaleDateString()}
-                                </div>
-                                <LikeButton
-                                    trackId={track.id}
-                                    initialLikes={track.likesCount}
-                                    initialIsLiked={track.isLiked}
+                                    >
+                                        {filter.label}
+                                    </Link>
+                                ))}
+                            </div>
+
+                            <div className="w-full sm:w-[240px]">
+                                <GenreFilter
+                                    genres={genres}
+                                    selectedGenreId={selectedGenreId}
+                                    status={validStatus}
                                 />
                             </div>
                         </div>
-                    ))}
-                    {tracks.length === 0 && (
-                        <div className="text-center py-20 text-muted-foreground">
-                            No tracks found.
+                    </div>
+                </div>
+
+                <div className="w-full mt-4">
+                    {tracks.length > 0 ? (
+                        <div className="grid grid-cols-1 gap-6">
+                            {tracks.map((track) => (
+                                <NewReleaseCard
+                                    key={track.id}
+                                    track={track}
+                                />
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="flex flex-col items-center justify-center py-32 text-center border-2 border-dashed rounded-3xl border-muted">
+                            <p className="text-xl font-medium text-muted-foreground">No tracks found matching your criteria.</p>
+                            <p className="text-sm text-muted-foreground/60 mt-2">Try selecting a different genre or status.</p>
                         </div>
                     )}
                 </div>
+
+                {totalPages > 1 && (
+                    <Pagination
+                        currentPage={currentPage}
+                        totalPages={totalPages}
+                        basePath="/tracks"
+                        searchParams={{ genre: selectedGenreId, status: validStatus }}
+                    />
+                )}
             </div>
         </div>
     )

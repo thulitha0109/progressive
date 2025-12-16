@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from "next/server"
-import { readFile } from "fs/promises"
+import { stat } from "fs/promises"
+import { createReadStream, existsSync } from "fs"
 import { join } from "path"
-import { existsSync } from "fs"
 
 /**
- * API Route to serve uploaded files dynamically in both dev and production modes
+ * API Route to serve uploaded files dynamically with Range support
  * Handles: /api/uploads/artists/{artistId}/{filename}
  *          /api/uploads/podcasts/{filename}
  */
@@ -40,61 +40,101 @@ export async function GET(
     { params }: { params: Promise<{ path: string[] }> }
 ) {
     try {
-        // Await the params since they're a Promise in Next.js 16
         const { path } = await params
 
         if (!path || path.length === 0) {
-            return NextResponse.json(
-                { error: "File path is required" },
-                { status: 400 }
-            )
+            return NextResponse.json({ error: "File path is required" }, { status: 400 })
         }
 
-        // Construct the file path
-        // path will be like: ['artists', 'artistId', 'filename.mp3'] or ['podcasts', 'filename.mp3']
         const filePath = join(process.cwd(), "public", "uploads", ...path)
-
-        // Security check: ensure the path is within the uploads directory
         const uploadsDir = join(process.cwd(), "public", "uploads")
+
         if (!filePath.startsWith(uploadsDir)) {
-            console.error("Invalid file path - outside uploads directory:", filePath)
-            return NextResponse.json(
-                { error: "Invalid file path" },
-                { status: 403 }
-            )
+            return NextResponse.json({ error: "Invalid file path" }, { status: 403 })
         }
 
-        // Check if file exists
         if (!existsSync(filePath)) {
-            console.error("File not found:", filePath)
-            return NextResponse.json(
-                { error: "File not found" },
-                { status: 404 }
-            )
+            return NextResponse.json({ error: "File not found" }, { status: 404 })
         }
 
-        // Read the file
-        const fileBuffer = await readFile(filePath)
-
-        // Get the filename from the path
+        const stats = await stat(filePath)
+        const fileSize = stats.size
         const filename = path[path.length - 1]
         const mimeType = getMimeType(filename)
+        const range = request.headers.get("range")
 
-        // Return the file with appropriate headers
-        return new NextResponse(fileBuffer, {
-            status: 200,
-            headers: {
-                "Content-Type": mimeType,
-                "Content-Length": fileBuffer.length.toString(),
-                "Cache-Control": "public, max-age=31536000, immutable",
-                "Content-Disposition": `inline; filename="${filename}"`,
-            },
-        })
+        if (range) {
+            const parts = range.replace(/bytes=/, "").split("-")
+            const start = parseInt(parts[0], 10)
+            const end = parts[1] ? parseInt(parts[1], 10) : fileSize - 1
+            const chunksize = (end - start) + 1
+
+            const stream = createReadStream(filePath, { start, end })
+
+            // Convert Node.js stream to Web ReadableStream
+            const readableStream = new ReadableStream({
+                start(controller) {
+                    stream.on("data", (chunk) => {
+                        if (controller.desiredSize === null) return
+                        controller.enqueue(chunk)
+                    })
+                    stream.on("end", () => {
+                        if (controller.desiredSize !== null) controller.close()
+                    })
+                    stream.on("error", (err) => {
+                        if (controller.desiredSize !== null) controller.error(err)
+                    })
+                },
+                cancel() {
+                    stream.destroy()
+                }
+            })
+
+            return new NextResponse(readableStream as any, {
+                status: 206,
+                headers: {
+                    "Content-Range": `bytes ${start}-${end}/${fileSize}`,
+                    "Accept-Ranges": "bytes",
+                    "Content-Length": chunksize.toString(),
+                    "Content-Type": mimeType,
+                    "Cache-Control": "public, max-age=31536000, immutable",
+                },
+            })
+        } else {
+            const stream = createReadStream(filePath)
+
+            // Convert Node.js stream to Web ReadableStream
+            const readableStream = new ReadableStream({
+                start(controller) {
+                    stream.on("data", (chunk) => {
+                        if (controller.desiredSize === null) return
+                        controller.enqueue(chunk)
+                    })
+                    stream.on("end", () => {
+                        if (controller.desiredSize !== null) controller.close()
+                    })
+                    stream.on("error", (err) => {
+                        if (controller.desiredSize !== null) controller.error(err)
+                    })
+                },
+                cancel() {
+                    stream.destroy()
+                }
+            })
+
+            return new NextResponse(readableStream as any, {
+                status: 200,
+                headers: {
+                    "Content-Length": fileSize.toString(),
+                    "Content-Type": mimeType,
+                    "Accept-Ranges": "bytes", // Advertise support for ranges
+                    "Cache-Control": "public, max-age=31536000, immutable",
+                    "Content-Disposition": `inline; filename="${filename}"`,
+                },
+            })
+        }
     } catch (error) {
         console.error("Error serving uploaded file:", error)
-        return NextResponse.json(
-            { error: "Internal server error" },
-            { status: 500 }
-        )
+        return NextResponse.json({ error: "Internal server error" }, { status: 500 })
     }
 }

@@ -11,14 +11,14 @@ export default async function BlogPage({
 }) {
     const params = await searchParams
     const currentPage = Number(params.page) || 1
-    // We might want to filter by category in getBlogPosts, but for now let's just show all or implement filtering later if needed.
-    // The current getBlogPosts doesn't support category filtering yet, but we can add it easily.
-    // For now, let's just list them.
-    const { posts, totalPages } = await getBlogPosts(currentPage, 12, 'published')
+    const currentCategory = params.category || undefined
+
+    // Fetch posts with category filter
+    const { posts, totalPages } = await getBlogPosts(currentPage, 12, 'published', currentCategory)
     const categories = await getCategories()
 
     return (
-        <div className="min-h-screen bg-background pb-24">
+        <div className="min-h-screen bg-background pb-24 animate-enter-fade-in">
             <div className="container px-4 md:px-6 py-12">
                 <div className="flex flex-col gap-4 mb-12">
                     <h1 className="text-4xl font-bold tracking-tight">Blog</h1>
@@ -27,15 +27,25 @@ export default async function BlogPage({
                     </p>
                 </div>
 
-                {/* Categories (Visual only for now unless we update action) */}
+                {/* Categories Filter */}
                 <div className="flex flex-wrap gap-2 mb-8">
-                    <Badge variant="secondary" className="cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors">
-                        All
-                    </Badge>
-                    {categories.map(cat => (
-                        <Badge key={cat.id} variant="outline" className="cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors">
-                            {cat.name}
+                    <Link href="/blog">
+                        <Badge
+                            variant={!currentCategory ? "default" : "secondary"}
+                            className="cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors"
+                        >
+                            All
                         </Badge>
+                    </Link>
+                    {categories.map(cat => (
+                        <Link key={cat.id} href={`/blog?category=${cat.slug}`}>
+                            <Badge
+                                variant={currentCategory === cat.slug ? "default" : "outline"}
+                                className="cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors"
+                            >
+                                {cat.name}
+                            </Badge>
+                        </Link>
                     ))}
                 </div>
 
@@ -85,7 +95,7 @@ export default async function BlogPage({
 
                 {posts.length === 0 && (
                     <div className="text-center py-20 text-muted-foreground">
-                        No blog posts found.
+                        No blog posts found{currentCategory ? ` in this category` : ''}.
                     </div>
                 )}
             </div>

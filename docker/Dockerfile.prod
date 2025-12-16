@@ -37,10 +37,7 @@ RUN \
   fi
 
 
-RUN npx tsc scripts/seed-dummy.ts --outDir scripts/dist --module commonjs --esModuleInterop --skipLibCheck
-RUN npx tsc scripts/seed-admin.ts --outDir scripts/dist --module commonjs --esModuleInterop --skipLibCheck
-RUN npx tsc scripts/seed-genres.ts --outDir scripts/dist --module commonjs --esModuleInterop --skipLibCheck
-RUN npx tsc scripts/seed-blog.ts --outDir scripts/dist --module commonjs --esModuleInterop --skipLibCheck
+RUN npx tsc scripts/seed-prod.ts --outDir scripts/dist --module commonjs --esModuleInterop --skipLibCheck
 
 
 # Production image, copy all the files and run next

@@ -9,6 +9,8 @@ interface WaveformProps {
     height?: number
     waveColor?: string
     progressColor?: string
+    peaks?: number[] | null // Pre-computed waveform peaks
+    duration?: number // Explicit duration for interaction
 }
 
 export function Waveform({
@@ -16,7 +18,9 @@ export function Waveform({
     media,
     height = 64,
     waveColor = "#9ca3af", // text-muted-foreground
-    progressColor = "#2563eb" // primary (blue-600 approx)
+    progressColor = "#2563eb", // primary (blue-600 approx)
+    peaks = null,
+    duration
 }: WaveformProps) {
     const containerRef = useRef<HTMLDivElement>(null)
     const wavesurfer = useRef<WaveSurfer | null>(null)
@@ -24,38 +28,76 @@ export function Waveform({
     useEffect(() => {
         if (!containerRef.current || !media) return
 
+        // If no peaks available, show simple progress bar instead
+        if (!peaks || peaks.length === 0) {
+            console.warn('No waveform peaks available for this track')
+            return
+        }
+
         const options = {
             container: containerRef.current,
             waveColor: waveColor,
             progressColor: progressColor,
-            url: audioUrl,
-            media: media,
-            height: height,
-            barWidth: 2,
-            barGap: 2,
             barRadius: 2,
-            cursorWidth: 0,
+            cursorWidth: 1, // Show cursor for visual feedback
+            cursorColor: progressColor,
             normalize: true,
-            backend: 'MediaElement', // Use MediaElement backend for better performance with large files
-            fetchParams: {
-                cache: 'force-cache', // Try to use browser cache
-            },
+            interact: true, // Ensure interaction is enabled
+            // Use pre-computed peaks - no URL needed!
+            peaks: [peaks], // WaveSurfer expects array of channels
+            duration: duration || media.duration || 1, // Fallback duration to prevent div/0
         }
 
         try {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             wavesurfer.current = WaveSurfer.create(options as any)
 
             wavesurfer.current.on('error', (err) => {
                 console.error("WaveSurfer error:", err)
             })
+
+            // Handle seeking manually
+            wavesurfer.current.on('interaction', (newTime) => {
+                if (media && Number.isFinite(newTime)) {
+                    media.currentTime = newTime
+                }
+            })
+
+            // Sync WaveSurfer with audio playback
+            const onTimeUpdate = () => {
+                if (wavesurfer.current && media.currentTime) {
+                    wavesurfer.current.setTime(media.currentTime)
+                }
+            }
+
+            // If duration changes (e.g. metadata loaded), update wavesurfer
+            const onDurationChange = () => {
+                if (wavesurfer.current && media.duration) {
+                    wavesurfer.current.setOptions({ duration: media.duration })
+                }
+            }
+
+            media.addEventListener('timeupdate', onTimeUpdate)
+            media.addEventListener('durationchange', onDurationChange)
+
+            return () => {
+                media.removeEventListener('timeupdate', onTimeUpdate)
+                media.removeEventListener('durationchange', onDurationChange)
+                wavesurfer.current?.destroy()
+            }
         } catch (err) {
             console.error("Failed to initialize WaveSurfer:", err)
         }
+    }, [audioUrl, media, height, waveColor, progressColor, peaks, duration])
 
-        return () => {
-            wavesurfer.current?.destroy()
-        }
-    }, [audioUrl, media, height, waveColor, progressColor])
+    // Show simple progress bar if no peaks
+    if (!peaks || peaks.length === 0) {
+        return (
+            <div ref={containerRef} className="w-full h-16 flex items-center">
+                <div className="w-full h-1 bg-muted rounded-full" />
+            </div>
+        )
+    }
 
-    return <div ref={containerRef} className="w-full" />
+    return <div ref={containerRef} className="w-full h-full relative z-10" />
 }

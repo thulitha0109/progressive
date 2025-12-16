@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { LayoutDashboard, Mic2, Music, Podcast, Users, FileText } from "lucide-react"
+import { LayoutDashboard, Mic2, Music, Podcast, Users, FileText, Calendar, ShoppingBag, Package } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 export default function AdminLayout({
@@ -91,6 +91,42 @@ export default function AdminLayout({
                     >
                         <FileText className="h-4 w-4" />
                         Blog
+                    </Link>
+                    <Link
+                        href="/admin/events"
+                        className={cn(
+                            "flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-primary",
+                            pathname.startsWith("/admin/events")
+                                ? "bg-secondary text-primary"
+                                : "text-muted-foreground"
+                        )}
+                    >
+                        <Calendar className="h-4 w-4" />
+                        Events
+                    </Link>
+                    <Link
+                        href="/admin/shops"
+                        className={cn(
+                            "flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-primary",
+                            pathname.startsWith("/admin/shops")
+                                ? "bg-secondary text-primary"
+                                : "text-muted-foreground"
+                        )}
+                    >
+                        <ShoppingBag className="h-4 w-4" />
+                        Shops
+                    </Link>
+                    <Link
+                        href="/admin/products"
+                        className={cn(
+                            "flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-primary",
+                            pathname.startsWith("/admin/products")
+                                ? "bg-secondary text-primary"
+                                : "text-muted-foreground"
+                        )}
+                    >
+                        <Package className="h-4 w-4" />
+                        Products
                     </Link>
                 </nav>
             </aside>

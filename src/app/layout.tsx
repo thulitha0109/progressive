@@ -68,7 +68,7 @@ export default async function RootLayout({
           disableTransitionOnChange
         >
           <PlayerProvider>
-            <div className="relative flex min-h-screen flex-col mx-auto max-w-[1400px] border-x shadow-2xl">
+            <div className="relative flex min-h-screen flex-col mx-auto max-w-[1400px] shadow-2xl">
               <SiteHeader user={session?.user} />
               <main className="flex-1">{children}</main>
               <SiteFooter />

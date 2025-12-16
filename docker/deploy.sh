@@ -22,7 +22,7 @@ chmod 777 public/uploads
 
 # 2. Build and start containers
 echo "📦 Building and starting containers..."
-docker-compose up -d --build
+docker compose up -d --build
 
 # 3. Wait for database to be ready
 echo "⏳ Waiting for database..."
@@ -32,8 +32,8 @@ sleep 20
 echo "🔄 Running database migrations..."
 docker-compose exec -T app npx prisma migrate deploy --schema=src/prisma/schema.prisma
 
-# 5. Seed blog data only (preserves existing artists/tracks)
-echo "🌱 Seeding blog data..."
-docker-compose exec -T app node scripts/dist/seed-blog.js
+# 5. Seed essential production data (Admin, Genres)
+echo "🌱 Seeding production data..."
+docker-compose exec -T app node scripts/dist/seed-prod.js
 
 echo "✅ Deployment complete! App is running on ${AUTH_URL:-http://localhost:3003}"

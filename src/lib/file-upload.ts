@@ -9,6 +9,9 @@ export const UPLOAD_DIRS = {
     ARTISTS: "artists",
     PODCASTS: "podcasts",
     BLOG: "blog",
+    EVENTS: "events",
+    SHOPS: "shops",
+    PRODUCTS: "products",
 } as const
 
 /**
@@ -76,10 +79,10 @@ export async function saveUploadedFile(
         const filePath = join(uploadDir, uniqueFilename)
         await writeFile(filePath, buffer)
 
-        console.log(`File saved successfully: ${filePath}`)
+
 
         // Return URL path using API route
-        const urlParts = [subDir, ...additionalPaths, uniqueFilename]
+        const urlParts = [subDir, ...additionalPaths, uniqueFilename].filter(Boolean)
         return `/api/uploads/${urlParts.join("/")}`
     } catch (error) {
         console.error("Failed to save file:", error)

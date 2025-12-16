@@ -73,7 +73,7 @@ export async function getPodcast(id: string) {
 }
 
 export async function createPodcast(formData: FormData) {
-    console.log("createPodcast called")
+
     const title = formData.get("title") as string
     const description = formData.get("description") as string
     const host = formData.get("host") as string

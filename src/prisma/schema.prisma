@@ -21,6 +21,7 @@ model User {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
   posts         BlogPost[]
+  reviews       Review[]
 }
 
 model Account {
@@ -85,21 +86,22 @@ model Genre {
 }
 
 model Track {
-  id           String   @id @default(cuid())
-  title        String
-  audioUrl     String
-  imageUrl     String?
-  genre        String?  // Deprecated: use genreId
-  genreId      String?
-  genreRel     Genre?   @relation(fields: [genreId], references: [id])
-  scheduledFor DateTime
-  artistId     String
-  artist       Artist   @relation(fields: [artistId], references: [id], onDelete: Cascade)
-  likedBy      User[]   @relation("UserLikes")
-  isFeatured   Boolean  @default(false)
-  deletedAt    DateTime?
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id             String    @id @default(cuid())
+  title          String
+  audioUrl       String
+  imageUrl       String?
+  genre          String?   // Deprecated: use genreId
+  genreId        String?
+  genreRel       Genre?    @relation(fields: [genreId], references: [id])
+  scheduledFor   DateTime
+  artistId       String
+  artist         Artist    @relation(fields: [artistId], references: [id], onDelete: Cascade)
+  likedBy        User[]    @relation("UserLikes")
+  isFeatured     Boolean   @default(false)
+  waveformPeaks  Json?     // Pre-computed waveform peak data for instant rendering
+  deletedAt      DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
 }
 
 model Podcast {
@@ -153,18 +155,6 @@ model Tag {
   updatedAt DateTime   @updatedAt
 }
 
-model Event {
-  id          String   @id @default(cuid())
-  title       String
-  slug        String   @unique
-  description String
-  date        DateTime
-  location    String
-  coverImage  String?
-  ticketUrl   String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-}
 
 model Product {
   id          String   @id @default(cuid())
@@ -174,6 +164,76 @@ model Product {
   price       Decimal
   images      String[]
   stock       Int      @default(0)
+  
+  shopId      String?
+  shop        Shop?    @relation(fields: [shopId], references: [id])
+  
+  reviews     Review[]
+  
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+}
+
+model Shop {
+  id          String    @id @default(cuid())
+  name        String
+  slug        String    @unique
+  description String?
+  location    String?
+  imageUrl    String?
+  contactInfo Json?     // { email: string, phone: string, website: string }
+  isVerified  Boolean   @default(false)
+  
+  products    Product[]
+  reviews     Review[]
+  
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model Review {
+  id        String   @id @default(cuid())
+  rating    Int      // 1-5
+  comment   String?
+  
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  
+  productId String?
+  product   Product? @relation(fields: [productId], references: [id])
+  
+  shopId    String?
+  shop      Shop?    @relation(fields: [shopId], references: [id])
+  
+  createdAt DateTime @default(now())
+}
+
+model Event {
+  id          String   @id @default(cuid())
+  title       String
+  slug        String   @unique
+  description String
+  date        DateTime
+  location    String
+  venue       String?
+  coverImage  String?
+  
+  isFeatured  Boolean  @default(false)
+  
+  ticketUrl   String?  // External link fallback
+  tickets     EventTicket[]
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model EventTicket {
+  id          String   @id @default(cuid())
+  name        String   // e.g. "Early Bird", "VIP"
+  price       Decimal
+  currency    String   @default("LKR")
+  quantity    Int?     // Available quantity
+  
+  eventId     String
+  event       Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
 }

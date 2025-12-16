@@ -7,6 +7,8 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import Link from "next/link"
 import { useState, useTransition } from "react"
+import { LiquidBackground } from "@/components/shared/liquid-background"
+import { Music2 } from "lucide-react"
 
 export default function LoginPage() {
     const [error, setError] = useState<string | null>(null)
@@ -23,15 +25,22 @@ export default function LoginPage() {
     }
 
     return (
-        <div className="flex h-screen w-full items-center justify-center px-4">
-            <Card className="mx-auto max-w-sm">
-                <CardHeader>
-                    <CardTitle className="text-2xl">Login</CardTitle>
-                    <CardDescription>
-                        Enter your email below to login to your account
-                    </CardDescription>
-                </CardHeader>
-                <CardContent>
+        <div className="w-full min-h-screen grid lg:grid-cols-2 animate-enter-fade-in">
+            {/* Left: Form */}
+            <div className="flex flex-col justify-center px-6 md:px-12 lg:px-24 py-12 bg-background">
+                <div className="w-full max-w-sm mx-auto flex flex-col gap-8">
+                    <Link href="/" className="flex items-center gap-2 mb-2 w-fit hover:opacity-80 transition-opacity">
+                        <Music2 className="h-6 w-6" />
+                        <span className="text-xl font-bold">Progressive.lk</span>
+                    </Link>
+
+                    <div className="flex flex-col gap-2">
+                        <h1 className="text-3xl font-bold tracking-tight">Welcome back</h1>
+                        <p className="text-muted-foreground">
+                            Enter your email below to login to your account
+                        </p>
+                    </div>
+
                     <form action={handleSubmit} className="grid gap-4">
                         <div className="grid gap-2">
                             <Label htmlFor="email">Email</Label>
@@ -46,30 +55,43 @@ export default function LoginPage() {
                         <div className="grid gap-2">
                             <div className="flex items-center">
                                 <Label htmlFor="password">Password</Label>
-                                <Link href="#" className="ml-auto inline-block text-sm underline">
+                                <Link href="#" className="ml-auto inline-block text-sm underline text-muted-foreground hover:text-primary">
                                     Forgot your password?
                                 </Link>
                             </div>
-                            <Input id="password" name="password" type="password" required />
+                            <Input
+                                id="password"
+                                name="password"
+                                type="password"
+                                required
+                            />
                         </div>
                         {error && (
-                            <p className="text-sm text-red-500">{error}</p>
+                            <p className="text-sm text-destructive bg-destructive/10 p-2 rounded text-center font-medium">{error}</p>
                         )}
                         <Button type="submit" className="w-full" disabled={isPending}>
                             {isPending ? "Logging in..." : "Login"}
                         </Button>
-                        <Button variant="outline" className="w-full">
-                            Login with Google
-                        </Button>
                     </form>
-                    <div className="mt-4 text-center text-sm">
+
+                    <div className="text-center text-sm text-muted-foreground">
                         Don&apos;t have an account?{" "}
-                        <Link href="/auth/signup" className="underline">
+                        <Link href="/auth/signup" className="underline hover:text-primary font-medium">
                             Sign up
                         </Link>
                     </div>
-                </CardContent>
-            </Card>
+                </div>
+            </div>
+
+            {/* Right: Visual */}
+            <div className="relative hidden lg:flex items-center justify-center bg-background overflow-hidden">
+                <LiquidBackground
+                    imageUrl="/SVG-02.svg"
+                    className="absolute inset-0 w-full h-full z-10"
+                    objectFit="contain"
+                />
+
+            </div>
         </div>
     )
 }

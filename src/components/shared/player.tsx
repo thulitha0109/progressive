@@ -66,16 +66,9 @@ export function Player() {
 
     return (
         <>
-            <div className="fixed bottom-0 left-0 right-0 mx-auto max-w-[1400px] border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 p-4 z-50">
-                {/* Visualizer Border */}
-                <div className="absolute top-0 left-0 right-0 h-[2px] overflow-hidden pointer-events-none">
-                    <Visualizer
-                        isPlaying={isPlaying}
-                        barCount={100}
-                        className="h-full w-full items-end justify-between gap-[1px] opacity-100"
-                        color="bg-primary"
-                    />
-                </div>
+            <div className="fixed bottom-0 left-0 right-0 mx-auto max-w-[1400px] bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 p-4 z-50 shadow-2xl border-t-0">
+                {/* Visualizer Removed/Updated per request */}
+                <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-primary to-transparent opacity-50" />
 
                 <div className="flex items-center justify-between gap-4">
                     {/* Track Info */}

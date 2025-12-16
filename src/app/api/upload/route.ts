@@ -6,7 +6,7 @@ export async function POST(req: NextRequest) {
     try {
         const formData = await req.formData()
         const file = formData.get("file") as File
-        const type = formData.get("type") as "audio" | "image" | "blog"
+        const type = formData.get("type") as "audio" | "image" | "blog" | "events" | "shops" | "products"
         const entityType = formData.get("entityType") as "artist" | "podcast" | undefined
 
         // Artist specific
@@ -49,6 +49,13 @@ export async function POST(req: NextRequest) {
                 file,
                 UPLOAD_DIRS.BLOG,
                 "" // No subdirectory needed for blog
+            )
+        } else if (type === "events" || type === "shops" || type === "products") {
+            // General admin uploads
+            uploadPath = await saveUploadedFile(
+                file,
+                type,
+                ""
             )
         } else {
             // Default to artist (backward compatibility)

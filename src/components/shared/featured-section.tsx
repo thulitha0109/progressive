@@ -9,6 +9,8 @@ import { usePlayer } from "@/components/shared/player-context"
 import { Slider } from "@/components/ui/slider"
 import { useEffect, useState } from "react"
 import { cn } from "@/lib/utils"
+import { WaveformBar } from "@/components/shared/waveform-bar"
+import { LiquidBackground } from "@/components/shared/liquid-background"
 
 interface Track {
     id: string
@@ -31,141 +33,137 @@ export function FeaturedSection({ track }: { track: Track }) {
 
     const isCurrentTrack = currentTrack?.id === track.id
     const [mousePosition, setMousePosition] = useState<{ x: number; y: number } | null>(null)
+    // Remove complex glitch state, replace with simple mouse tracking for liquid effect
 
     const handleMouseMove = (e: React.MouseEvent<HTMLElement>) => {
         const { left, top, width, height } = e.currentTarget.getBoundingClientRect()
-        const x = (e.clientX - left) / width
-        const y = (e.clientY - top) / height
+        const x = (e.clientX - left)
+        const y = (e.clientY - top)
         setMousePosition({ x, y })
     }
 
-    // This is a visual approximation since we don't have direct access to the audio element's time here
-    // In a real app, we'd want to expose currentTime/duration from the context or use a more complex setup
-    // For now, we'll just show a static slider or a simple visual if it's playing
+    const handleImageClick = () => {
+        if (isCurrentTrack) {
+            togglePlay()
+        } else {
+            playTrack(track)
+        }
+    }
+
+    // We no longer need to hold back the content, as the LiquidBackground now has a static fallback
+    // that renders immediately. This fixes the "double load" / invisible content issue.
 
     return (
         <section
-            className="w-full py-12 md:py-24 lg:py-32 relative overflow-hidden group"
-            onMouseMove={handleMouseMove}
+            className="relative w-full overflow-hidden min-h-[700px] lg:min-h-screen flex items-end animate-enter-fade-in"
         >
-            {/* Multi-layered colorful gradient background with blur (smoking effect) */}
-            <div
-                className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none"
-                style={{
-                    background: mousePosition ? `
-                        radial-gradient(
-                            600px circle at ${mousePosition.x * 100}% ${mousePosition.y * 100}%,
-                            rgba(139, 92, 246, 0.4),
-                            transparent 50%
-                        ),
-                        radial-gradient(
-                            450px circle at ${mousePosition.x * 100}% ${mousePosition.y * 100}%,
-                            rgba(236, 72, 153, 0.3),
-                            transparent 40%
-                        ),
-                        radial-gradient(
-                            350px circle at ${mousePosition.x * 100}% ${mousePosition.y * 100}%,
-                            rgba(59, 130, 246, 0.25),
-                            transparent 30%
-                        )
-                    ` : '',
-                    filter: 'blur(60px)',
-                    transition: 'background 0.5s ease'
-                }}
-            />
-            {/* Secondary glow layer for extra depth */}
-            <div
-                className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none mix-blend-screen"
-                style={{
-                    background: mousePosition ? `
-                        radial-gradient(
-                            400px circle at ${mousePosition.x * 100}% ${mousePosition.y * 100}%,
-                            rgba(251, 191, 36, 0.15),
-                            transparent 50%
-                        )
-                    ` : '',
-                    filter: 'blur(40px)',
-                }}
-            />
-            <div className="absolute inset-0 bg-gradient-to-r from-primary/10 via-background to-background -z-10" />
-            <div className="container px-4 md:px-6 relative z-10">
-                <div className="flex flex-col-reverse lg:grid lg:grid-cols-2 gap-6 lg:gap-12 items-center">
-                    {/* Left Side: Artist & Track Info */}
-                    <div className="flex flex-col justify-center space-y-4">
-                        <div className="space-y-2">
-                            <Badge variant="secondary" className="w-fit">Featured Track</Badge>
-                            <h1 className="text-3xl font-bold tracking-tighter sm:text-5xl xl:text-6xl/none">
-                                {track.title}
-                            </h1>
-                            <p className="max-w-[600px] text-muted-foreground md:text-xl">
-                                by <span className="font-semibold text-foreground">{track.artist.name}</span>
-                            </p>
-                        </div>
+            {/* Background Image - LEFT sided liquid */}
+            <div className="absolute inset-y-0 left-0 w-full lg:w-3/4 z-0 overflow-hidden">
+                <LiquidBackground
+                    imageUrl="/images/PNG-06.png"
+                    className="absolute inset-0 w-full h-full"
+                />
 
-                        <div className="flex items-center gap-4">
-                            <div className="relative h-20 w-20 md:h-24 md:w-24 overflow-hidden rounded-full border-2 border-primary">
-                                {track.artist.imageUrl ? (
-                                    <img
-                                        src={track.artist.imageUrl}
-                                        alt={track.artist.name}
-                                        className="h-full w-full object-cover"
-                                    />
-                                ) : (
-                                    <div className="h-full w-full bg-muted" />
-                                )}
-                            </div>
-                            <div className="flex flex-col gap-2">
-                                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                    <Calendar className="h-4 w-4" />
-                                    {new Date(track.scheduledFor).toLocaleDateString()}
+                {/* Overlays for depth - Pointer events none to allow BG interaction */}
+                <div className="absolute inset-0 bg-gradient-to-r from-background/0 to-background dark:from-black/0 dark:to-black pointer-events-none" />
+                <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-background/0 dark:from-black dark:via-black/50 dark:to-black/0 pointer-events-none" />
+            </div>
+
+            <div className="container px-4 md:px-6 relative z-10 py-12 pointer-events-none">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-6 items-end">
+                    {/* Left Side: Content - Text Data (Order 2 on Mobile, 1 on Desktop) */}
+                    <div className="flex flex-col space-y-6 md:space-y-8 lg:items-end lg:text-right pointer-events-none lg:mb-12 order-2 lg:order-1">
+                        {/* Wrapper div for content to allow pointer events on text if needed, but mainly visual */}
+                        <div className="pointer-events-auto w-full flex flex-col items-end space-y-8">
+
+                            {/* Artist Info (NOW ON TOP) */}
+                            <div className="flex items-center space-x-6 lg:flex-row-reverse lg:space-x-reverse">
+                                <div className="relative h-16 w-16 md:h-20 md:w-20 overflow-hidden rounded-full border-2 border-white/20 shadow-lg">
+                                    {track.artist.imageUrl ? (
+                                        <img
+                                            src={track.artist.imageUrl}
+                                            alt={track.artist.name}
+                                            className="h-full w-full object-cover"
+                                            loading="lazy"
+                                        />
+                                    ) : (
+                                        <div className="h-full w-full bg-muted flex items-center justify-center">
+                                            <span className="text-xl font-bold text-muted-foreground">
+                                                {track.artist.name[0]}
+                                            </span>
+                                        </div>
+                                    )}
                                 </div>
-                                <LikeButton
-                                    trackId={track.id}
-                                    initialLikes={track.likesCount}
-                                    initialIsLiked={track.isLiked}
-                                />
+                                <h3 className="text-2xl md:text-3xl font-light text-foreground/80 tracking-wide">
+                                    {track.artist.name}
+                                </h3>
+                            </div>
+
+                            {/* Track Info (NOW ON BOTTOM) */}
+                            <div className="space-y-4 flex flex-col lg:items-end w-full">
+                                <div className="flex items-center gap-4 justify-end w-full">
+                                    <span className="text-primary font-medium tracking-widest uppercase text-sm md:text-base bg-primary/10 px-3 py-1 rounded-full backdrop-blur-sm border border-primary/20">
+                                        Featured Track
+                                    </span>
+                                </div>
+
+                                <div className="relative inline-block text-right">
+                                    <h1
+                                        className="text-6xl md:text-8xl lg:text-9xl font-bold tracking-tighter text-foreground drop-shadow-2xl relative z-10 leading-[0.9]"
+                                    >
+                                        {track.title}
+                                    </h1>
+                                </div>
                             </div>
                         </div>
                     </div>
 
-                    {/* Right Side: Player UI */}
-                    <Card className="w-full max-w-md mx-auto lg:ml-auto p-6 bg-card/50 backdrop-blur-sm border-primary/20 shadow-xl">
-                        <div className="flex flex-col gap-6">
-                            <div className="aspect-square w-full relative rounded-md overflow-hidden bg-muted shadow-inner">
-                                {track.imageUrl || track.artist.imageUrl ? (
-                                    <img
-                                        src={track.imageUrl || track.artist.imageUrl || ""}
-                                        alt={track.title}
-                                        className="h-full w-full object-cover"
-                                    />
-                                ) : (
-                                    <div className="h-full w-full bg-secondary flex items-center justify-center text-muted-foreground">
-                                        No Image
-                                    </div>
-                                )}
+                    {/* Right Side: Player Card - (Order 1 on Mobile, 2 on Desktop) */}
+                    <div className="relative w-full max-w-md mx-auto lg:ml-auto lg:mb-12 cursor-pointer pointer-events-auto order-1 lg:order-2" onClick={handleImageClick}>
+                        <div className="relative aspect-square rounded-2xl overflow-hidden shadow-2xl group border border-white/10 bg-black/50 backdrop-blur-md">
+                            {track.imageUrl || track.artist.imageUrl ? (
+                                <img
+                                    src={track.imageUrl || track.artist.imageUrl || ""}
+                                    alt={track.title}
+                                    className={cn(
+                                        "w-full h-full object-cover transition-all duration-700 group-hover:scale-105 opacity-80 group-hover:opacity-100",
+                                        isCurrentTrack && isPlaying && "scale-105 opacity-100"
+                                    )}
+                                    loading="lazy"
+                                />
+                            ) : (
+                                <div className="w-full h-full bg-secondary flex items-center justify-center">
+                                    No Image
+                                </div>
+                            )}
 
-                                {/* Overlay Play Button */}
-                                <div className="absolute inset-0 flex items-center justify-center bg-black/20 hover:bg-black/30 transition-colors group">
-                                    <div className="transform transition-transform group-hover:scale-110">
-                                        <PlayButton track={track} variant="icon" />
-                                    </div>
+                            {/* Play Overlay */}
+                            <div className={cn(
+                                "absolute inset-0 flex items-center justify-center transition-all duration-300",
+                                isCurrentTrack && isPlaying ? "opacity-0" : "opacity-100"
+                            )}>
+                                <div className="rounded-full bg-black/30 backdrop-blur-xl p-6 border border-white/20 hover:scale-110 transition-transform group-hover:bg-black/50">
+                                    <PlayButton track={track} variant="icon" />
                                 </div>
                             </div>
 
-                            <div className="space-y-2">
-                                <div className="flex justify-between text-sm font-medium">
-                                    <span>{track.title}</span>
-                                    <span className="text-muted-foreground">{track.artist.name}</span>
-                                </div>
-                                {/* Decorative Progress Bar */}
-                                <div className="h-1 w-full bg-secondary rounded-full overflow-hidden">
-                                    <div
-                                        className={cn("h-full bg-primary transition-all duration-500", isCurrentTrack && isPlaying ? "w-full animate-pulse" : "w-0")}
-                                    />
+                            {/* Glassmorphism Overlay Detail */}
+                            <div className="absolute top-6 left-6 right-6 flex justify-between items-start text-white/90 z-20 pointer-events-none">
+                                <span className="font-bold text-lg tracking-tighter uppercase mix-blend-overlay opacity-70">Progressive.lk</span>
+                            </div>
+
+                            {/* Bottom Waveform & Info */}
+                            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent p-6 flex flex-col justify-end h-1/2 pointer-events-none">
+                                <div className="flex items-end justify-between">
+                                    <div>
+                                        <p className="text-xs uppercase tracking-wider text-white/60 mb-1">Now Featured</p>
+                                        <p className="text-lg font-bold text-white tracking-wide">{track.artist.name}</p>
+                                    </div>
+                                    <WaveformBar isPlaying={isCurrentTrack && isPlaying} count={12} height="h-10" color="bg-primary" />
                                 </div>
                             </div>
                         </div>
-                    </Card>
+                    </div>
                 </div>
             </div>
         </section>

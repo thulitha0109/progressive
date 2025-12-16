@@ -7,7 +7,7 @@ export default async function ArtistsPage() {
     const { artists } = await getArtists()
 
     return (
-        <div className="container py-10 px-4 md:px-8">
+        <div className="container py-10 px-4 md:px-8 animate-enter-fade-in">
             <div className="flex flex-col gap-4 md:gap-8">
                 <div className="flex flex-col gap-2">
                     <h1 className="text-3xl font-bold tracking-tight">Artists</h1>

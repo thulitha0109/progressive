@@ -1,5 +1,6 @@
 import Link from "next/link"
-import { getBlogPosts, deleteBlogPost } from "@/server/actions/blog"
+import { getBlogPosts } from "@/server/actions/blog"
+import { deleteBlogPost } from "@/server/actions/admin/blog"
 import { Button } from "@/components/ui/button"
 import {
     Table,
@@ -25,12 +26,19 @@ export default async function AdminBlogPage({
         <div>
             <div className="flex items-center justify-between mb-6">
                 <h1 className="text-3xl font-bold tracking-tight">Blog Posts</h1>
-                <Button asChild>
-                    <Link href="/admin/blog/new">
-                        <Plus className="mr-2 h-4 w-4" />
-                        New Post
-                    </Link>
-                </Button>
+                <div className="flex gap-2">
+                    <Button variant="outline" asChild>
+                        <Link href="/admin/blog/categories">
+                            Manage Categories
+                        </Link>
+                    </Button>
+                    <Button asChild>
+                        <Link href="/admin/blog/new">
+                            <Plus className="mr-2 h-4 w-4" />
+                            New Post
+                        </Link>
+                    </Button>
+                </div>
             </div>
 
             <div className="rounded-md border">

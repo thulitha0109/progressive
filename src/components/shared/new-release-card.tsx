@@ -5,6 +5,7 @@ import { LikeButton } from "@/components/shared/like-button"
 import { PlayButton } from "@/components/shared/play-button"
 import { User, Calendar } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { WaveformBar } from "@/components/shared/waveform-bar"
 
 interface Track {
     id: string
@@ -13,6 +14,12 @@ interface Track {
     imageUrl?: string | null
     scheduledFor: Date
     genre?: string | null
+    genreRel?: {
+        name: string
+        parent?: {
+            name: string
+        }
+    } | null
     likesCount: number
     isLiked: boolean
     artist: {
@@ -20,6 +27,27 @@ interface Track {
         name: string
         imageUrl?: string | null
     }
+}
+
+const GENRE_BORDERS: Record<string, string> = {
+    "Progressive": "border-blue-500/50 hover:border-blue-500",
+    "Melodic": "border-cyan-500/50 hover:border-cyan-500",
+    "Techno": "border-purple-500/50 hover:border-purple-500",
+    "Peak Time": "border-fuchsia-500/50 hover:border-fuchsia-500",
+    "House": "border-orange-500/50 hover:border-orange-500",
+    "Deep House": "border-amber-500/50 hover:border-amber-500",
+    "Trance": "border-pink-500/50 hover:border-pink-500",
+    "Electronica": "border-emerald-500/50 hover:border-emerald-500",
+    "Organic": "border-green-500/50 hover:border-green-500",
+    "Drum & Bass": "border-yellow-500/50 hover:border-yellow-500",
+    "Liquid": "border-lime-500/50 hover:border-lime-500",
+    "Ambient": "border-teal-500/50 hover:border-teal-500",
+    "Chillout": "border-indigo-500/50 hover:border-indigo-500",
+}
+
+function getGenreBorderColor(genre: string) {
+    const key = Object.keys(GENRE_BORDERS).find(k => genre.includes(k))
+    return key ? GENRE_BORDERS[key] : "border-white/10 hover:border-white/30"
 }
 
 export function NewReleaseCard({ track }: { track: Track }) {
@@ -34,63 +62,56 @@ export function NewReleaseCard({ track }: { track: Track }) {
         }
     }
 
+    // Determine Genre Data
+    const genreName = track.genreRel?.name || track.genre
+    const parentGenreName = track.genreRel?.parent?.name
+
     return (
         <div
             onClick={handleCardClick}
             className={cn(
-                "group relative flex items-center gap-3 rounded-lg border p-3 transition-colors cursor-pointer",
-                isCurrentTrack && isPlaying ? "bg-accent/50 border-primary/50" : "hover:bg-accent/50"
+                "group relative grid grid-cols-[auto_1fr] gap-4 sm:gap-6 p-2 sm:p-3 rounded-2xl border border-white/5 bg-white/[0.02] hover:bg-white/[0.05] backdrop-blur-sm transition-colors duration-500 cursor-pointer overflow-hidden hover:shadow-2xl min-h-[110px] sm:min-h-[140px]",
+                isCurrentTrack && isPlaying ? "bg-white/[0.08] border-primary/30" : ""
             )}
         >
-            {/* Image Section - Left */}
-            <div className="relative h-16 w-16 flex-shrink-0 overflow-hidden rounded bg-muted">
+            {/* Absolute Glow Background */}
+            <div className="absolute inset-0 bg-gradient-to-r from-primary/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+
+            {/* Image Section */}
+            <div className="relative w-28 sm:w-40 self-stretch shrink-0 overflow-hidden rounded-xl shadow-lg isolate ring-1 ring-white/10 ring-inset">
+                <div className="absolute inset-0 bg-gradient-to-br from-black/20 to-transparent z-10 pointer-events-none" />
                 {track.imageUrl || track.artist.imageUrl ? (
                     <img
                         src={track.imageUrl || track.artist.imageUrl || ""}
                         alt={track.title}
-                        className="h-full w-full object-cover"
+                        className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-110"
+                        loading="lazy"
                     />
                 ) : (
-                    <User className="h-6 w-6 m-auto text-muted-foreground" />
+                    <div className="h-full w-full bg-secondary flex items-center justify-center">
+                        <User className="h-8 w-8 text-muted-foreground" />
+                    </div>
                 )}
 
-                {/* Overlay Play Button (Visible on hover or when playing) */}
+                {/* Overlay Play Button */}
                 <div className={cn(
-                    "absolute inset-0 flex items-center justify-center bg-black/40 transition-opacity",
-                    isCurrentTrack && isPlaying ? "opacity-100" : "opacity-0 group-hover:opacity-100"
+                    "absolute inset-0 flex items-center justify-center bg-black/40 z-20 transition-all duration-300 backdrop-blur-[2px]",
+                    isCurrentTrack && isPlaying ? "opacity-100 bg-black/60" : "opacity-0 group-hover:opacity-100"
                 )}>
                     <PlayButton track={track} variant="icon" />
                 </div>
             </div>
 
-            {/* Genre Tag - Absolute Top Right */}
-            {track.genre && (
-                <span className="absolute top-3 right-3 text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20 whitespace-nowrap">
-                    {track.genre}
-                </span>
-            )}
-
             {/* Info Section - Right */}
-            <div className="flex flex-1 flex-col justify-between min-h-[4rem]">
-                {/* Top: Title & Artist */}
-                <div className="mb-1 pr-16 relative">
-                    <h3 className={cn("font-medium leading-none truncate", isCurrentTrack && "text-primary")}>
-                        {track.title}
-                    </h3>
-                    <p className="text-sm text-muted-foreground truncate mt-1">
-                        {track.artist.name}
-                    </p>
-                </div>
-
-                {/* Bottom: Date & Like */}
-                <div className="flex items-center justify-between mt-auto">
-                    <div className="flex items-center text-xs text-muted-foreground">
-                        <Calendar className="mr-1 h-3 w-3" />
-                        {new Date(track.scheduledFor).toLocaleDateString()}
+            <div className="flex flex-col justify-between h-full min-w-0 z-10 relative py-0.5 sm:py-1">
+                {/* Top Row: Date (Left) and Like (Right) */}
+                <div className="flex justify-between items-start w-full">
+                    <div className="flex items-center gap-1 text-[10px] sm:text-xs text-muted-foreground font-medium bg-white/5 px-2 py-0.5 rounded-md">
+                        <Calendar className="h-3 w-3" />
+                        {new Date(track.scheduledFor).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
                     </div>
 
-                    {/* Like Button - Stop Propagation handled inside component */}
-                    <div onClick={(e) => e.stopPropagation()}>
+                    <div onClick={(e) => e.stopPropagation()} className="transform transition-transform active:scale-95 text-muted-foreground hover:text-red-500">
                         <LikeButton
                             trackId={track.id}
                             initialLikes={track.likesCount}
@@ -98,6 +119,56 @@ export function NewReleaseCard({ track }: { track: Track }) {
                         />
                     </div>
                 </div>
+
+                {/* Track Title */}
+                <h3 className={cn(
+                    "font-bold text-lg sm:text-2xl md:text-3xl truncate leading-tight transition-colors tracking-tight pr-4 py-1",
+                    isCurrentTrack ? "text-primary" : "text-foreground group-hover:text-primary"
+                )}>
+                    {track.title}
+                </h3>
+
+                {/* Artist & Genres */}
+                <div className="flex flex-col gap-1.5">
+                    <p className="text-sm sm:text-base text-muted-foreground font-medium truncate flex items-center gap-2">
+                        {track.artist.name}
+                        {isCurrentTrack && isPlaying && (
+                            <span className="flex h-2 w-2 relative">
+                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                                <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                            </span>
+                        )}
+                    </p>
+
+                    {/* Separate Genre Tags */}
+                    {(genreName || parentGenreName) && (
+                        <div className="flex flex-wrap gap-1.5">
+                            {parentGenreName && (
+                                <span className={cn(
+                                    "inline-block px-2 py-0.5 bg-background/50 dark:bg-black/40 backdrop-blur-md rounded-md text-[10px] sm:text-xs font-bold uppercase tracking-wider border text-muted-foreground hover:text-foreground transition-colors",
+                                    getGenreBorderColor(parentGenreName)
+                                )}>
+                                    {parentGenreName}
+                                </span>
+                            )}
+                            {genreName && (
+                                <span className={cn(
+                                    "inline-block px-2 py-0.5 bg-background/50 dark:bg-black/40 backdrop-blur-md rounded-md text-[10px] sm:text-xs font-bold uppercase tracking-wider border text-muted-foreground hover:text-foreground transition-colors",
+                                    getGenreBorderColor(genreName)
+                                )}>
+                                    {genreName}
+                                </span>
+                            )}
+                        </div>
+                    )}
+                </div>
+
+                {/* Waveform */}
+                {isCurrentTrack && isPlaying && (
+                    <div className="absolute bottom-0 right-0 opacity-50">
+                        <WaveformBar isPlaying={true} count={12} height="h-5 sm:h-8" color="bg-primary" />
+                    </div>
+                )}
             </div>
         </div>
     )

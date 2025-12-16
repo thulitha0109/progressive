@@ -22,8 +22,9 @@ export function Visualizer({ isPlaying, className, barCount = 20, color = "bg-pr
                     )}
                     style={{
                         height: isPlaying ? undefined : "4px",
-                        animationDelay: `${Math.random() * 0.5}s`,
-                        animationDuration: `${0.5 + Math.random() * 0.5}s`
+                        // Deterministic pseudo-random values to prevent hydration mismatch
+                        animationDelay: `${((i * 0.3) % 0.5)}s`,
+                        animationDuration: `${0.5 + ((i * 0.7) % 0.5)}s`
                     }}
                 />
             ))}

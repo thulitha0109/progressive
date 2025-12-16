@@ -23,6 +23,7 @@ import {
 import { logout } from "@/server/actions/auth"
 import { useState } from "react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { InlineSearch } from "@/components/shared/inline-search"
 
 interface SiteHeaderProps {
     user?: {
@@ -38,11 +39,11 @@ export function SiteHeader({ user }: SiteHeaderProps) {
     const [isOpen, setIsOpen] = useState(false)
 
     const routes = [
-        {
-            href: "/",
-            label: "Home",
-            active: pathname === "/",
-        },
+        // {
+        //     href: "/",
+        //     label: "Home",
+        //     active: pathname === "/",
+        // },
         {
             href: "/tracks",
             label: "Tracks",
@@ -58,6 +59,16 @@ export function SiteHeader({ user }: SiteHeaderProps) {
             label: "Blog",
             active: pathname === "/blog" || pathname.startsWith("/blog/"),
         },
+        // {
+        //     href: "/events",
+        //     label: "Events",
+        //     active: pathname === "/events" || pathname.startsWith("/events/"),
+        // },
+        // {
+        //     href: "/shops",
+        //     label: "Shops",
+        //     active: pathname === "/shops" || pathname.startsWith("/shops/"),
+        // },
         {
             href: "/podcasts",
             label: "Podcasts",
@@ -65,16 +76,12 @@ export function SiteHeader({ user }: SiteHeaderProps) {
         },
     ]
 
-    const accountHref = user
-        ? (user.role === "ADMIN" ? "/admin/artists" : "/profile")
-        : "/auth/login"
-
     return (
-        <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-            <div className="flex h-16 items-center px-4">
-                <div className="mr-4 hidden lg:flex">
+        <header className="sticky top-0 z-50 w-full bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60 animate-enter-slide-down border-b border-border/40">
+            <div className="flex h-16 items-center px-4 md:px-8 max-w-[1400px] mx-auto">
+                <div className="mr-8 hidden lg:flex">
                     <Link href="/" className="mr-6 flex items-center space-x-2">
-                        <Music2 className="h-6 w-6" />
+                        <Music2 className="h-6 w-6 text-primary" />
                         <span className="hidden font-bold sm:inline-block">
                             Progressive.lk
                         </span>
@@ -111,7 +118,7 @@ export function SiteHeader({ user }: SiteHeaderProps) {
                             className="flex items-center"
                             onClick={() => setIsOpen(false)}
                         >
-                            <Music2 className="mr-2 h-6 w-6" />
+                            <Music2 className="mr-2 h-6 w-6 text-primary" />
                             <span className="font-bold">Progressive.lk</span>
                         </Link>
                         <div className="my-4 pb-10 pl-6">
@@ -133,13 +140,17 @@ export function SiteHeader({ user }: SiteHeaderProps) {
                         </div>
                     </SheetContent>
                 </Sheet>
-                <div className="ml-auto flex items-center space-x-2">
+                <div className="ml-auto flex items-center space-x-4">
+                    <div className="w-full max-w-[200px] lg:max-w-xs md:max-w-[240px]">
+                        <InlineSearch />
+                    </div>
+
                     <nav className="flex items-center gap-2">
                         {user ? (
                             <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
                                     <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-                                        <Avatar className="h-8 w-8">
+                                        <Avatar className="h-8 w-8 border border-border">
                                             <AvatarImage src={user.image || ""} alt={user.name || ""} />
                                             <AvatarFallback>{user.name?.[0]?.toUpperCase() || "U"}</AvatarFallback>
                                         </Avatar>
@@ -171,13 +182,18 @@ export function SiteHeader({ user }: SiteHeaderProps) {
                             <Link href="/auth/login">
                                 <Button
                                     variant="ghost"
-                                    size="icon"
-                                    className="w-10 h-10 rounded-full lg:w-auto lg:px-4 lg:rounded-md border border-input bg-background hover:bg-accent hover:text-accent-foreground"
+                                    size="sm"
+                                    className="hidden md:flex gap-2"
                                 >
-                                    <User className="h-[1.2rem] w-[1.2rem]" />
-                                    <span className="sr-only lg:not-sr-only lg:ml-2">
-                                        Login
-                                    </span>
+                                    <User className="h-4 w-4" />
+                                    Login
+                                </Button>
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="flex md:hidden"
+                                >
+                                    <User className="h-5 w-5" />
                                 </Button>
                             </Link>
                         )}

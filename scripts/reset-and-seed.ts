@@ -8,6 +8,10 @@ async function main() {
     console.log('🗑️  Cleaning database...')
 
     // Delete in order of dependencies
+    await prisma.blogPost.deleteMany()
+    await prisma.tag.deleteMany()
+    await prisma.category.deleteMany()
+
     await prisma.track.deleteMany()
     await prisma.artist.deleteMany()
     await prisma.genre.deleteMany()
@@ -19,16 +23,16 @@ async function main() {
     console.log('🌱 Running seeders...')
 
     try {
-        console.log('Running seed-genres.js...')
-        execSync('node scripts/seed-genres.js', { stdio: 'inherit' })
+        console.log('Running seed-genres.ts...')
+        execSync('npx tsx scripts/seed-genres.ts', { stdio: 'inherit' })
 
-        console.log('Running seed-dummy.js...')
+        console.log('Running seed-dummy.ts...')
         // Check if seed-dummy exists, otherwise run seed-admin or whatever is appropriate
         // The user asked to "clean the db and seed again", assuming they mean the dummy data too
-        execSync('node scripts/seed-dummy.js', { stdio: 'inherit' })
+        execSync('npx tsx scripts/seed-dummy.ts', { stdio: 'inherit' })
 
-        console.log('Running seed-admin.js...')
-        execSync('node scripts/seed-admin.js', { stdio: 'inherit' })
+        console.log('Running seed-admin.ts...')
+        execSync('npx tsx scripts/seed-admin.ts', { stdio: 'inherit' })
 
         console.log('✅ Seeding completed')
     } catch (error) {

@@ -15,7 +15,11 @@ export async function getHomeData() {
         },
         include: {
             artist: true,
-            genreRel: true,
+            genreRel: {
+                include: {
+                    parent: true
+                }
+            },
             _count: { select: { likedBy: true } },
         },
         orderBy: { scheduledFor: "asc" },
@@ -29,7 +33,11 @@ export async function getHomeData() {
         },
         include: {
             artist: true,
-            genreRel: true,
+            genreRel: {
+                include: {
+                    parent: true
+                }
+            },
             _count: { select: { likedBy: true } },
         },
         orderBy: { scheduledFor: "desc" },
@@ -40,7 +48,11 @@ export async function getHomeData() {
         where: { isFeatured: true, deletedAt: null },
         include: {
             artist: true,
-            genreRel: true,
+            genreRel: {
+                include: {
+                    parent: true
+                }
+            },
             _count: { select: { likedBy: true } },
         },
     })
@@ -92,14 +104,14 @@ export async function getHomeData() {
 
     const upcomingTracks = upcomingTracksRaw.map((track: any) => ({
         ...track,
-        genre: track.genreRel?.name,
+        genre: track.genreRel?.name, // Keep for backward compat
         likesCount: track._count.likedBy,
         isLiked: likedTrackIds.has(track.id),
     }))
 
     const publishedTracks = publishedTracksRaw.map((track: any) => ({
         ...track,
-        genre: track.genreRel?.name,
+        genre: track.genreRel?.name, // Keep for backward compat
         likesCount: track._count.likedBy,
         isLiked: likedTrackIds.has(track.id),
     }))

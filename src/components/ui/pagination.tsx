@@ -8,6 +8,7 @@ interface PaginationProps {
     basePath: string
     totalItems?: number
     itemsPerPage?: number
+    searchParams?: Record<string, string | number | undefined>
 }
 
 export function Pagination({
@@ -16,12 +17,28 @@ export function Pagination({
     basePath,
     totalItems,
     itemsPerPage = 10,
+    searchParams = {},
 }: PaginationProps) {
     // Don't render if there's only one page or no pages
     if (totalPages <= 1) return null
 
     const getPageUrl = (page: number) => {
-        return page === 1 ? basePath : `${basePath}?page=${page}`
+        const params = new URLSearchParams()
+
+        // Add existing search params
+        Object.entries(searchParams).forEach(([key, value]) => {
+            if (value !== undefined && value !== null && value !== '') {
+                params.set(key, String(value))
+            }
+        })
+
+        // Set page param
+        if (page > 1) {
+            params.set("page", page.toString())
+        }
+
+        const queryString = params.toString()
+        return queryString ? `${basePath}?${queryString}` : basePath
     }
 
     // Calculate which page numbers to show
@@ -40,20 +57,23 @@ export function Pagination({
 
             // Calculate start and end of middle pages
             let start = Math.max(2, currentPage - 1)
-            let end = Math.min(totalPages - 1, currentPage + 1)
+            const end = Math.min(totalPages - 1, currentPage + 1)
 
             // Add ellipsis and adjust start if needed
             if (start > 2) {
                 pages.push("...")
-                start = Math.max(start, currentPage - 1)
             }
+
+            // Ensure start isn't too small (redundant with initial max(2, ...))
+            // Logic check: if currentPage is large, start is large.
+            // If currentPage is small, start is 2.
 
             // Add middle pages
             for (let i = start; i <= end; i++) {
                 pages.push(i)
             }
 
-            // Add ellipsis and adjust end if needed
+            // Add ellipsis if needed
             if (end < totalPages - 1) {
                 pages.push("...")
             }

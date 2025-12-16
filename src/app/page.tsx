@@ -9,6 +9,7 @@ import { FeaturedSection } from "@/components/shared/featured-section"
 import { NewReleaseCard } from "@/components/shared/new-release-card"
 import { ArtistCarousel } from "@/components/shared/artist-carousel"
 import { UpcomingCarousel } from "@/components/shared/upcoming-carousel"
+import { NewReleasesCarousel } from "@/components/home/new-releases-carousel"
 
 export default async function HomePage() {
   const { upcomingTracks, publishedTracks, featuredTrack, artists, blogPosts } = await getHomeData()
@@ -34,7 +35,7 @@ export default async function HomePage() {
         </section>
       )}
 
-      <div className="px-4 md:px-6 py-12 space-y-16">
+      <div className="px-4 md:px-6 py-16 md:py-24 space-y-24 md:space-y-32">
         {/* Upcoming Tracks */}
         <section>
           <div className="flex items-center justify-between mb-8">
@@ -59,14 +60,12 @@ export default async function HomePage() {
               View All
             </Link>
           </div>
-          <div className="grid gap-4 md:gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {publishedTracks.map((track) => (
-              <NewReleaseCard key={track.id} track={track} />
-            ))}
-            {publishedTracks.length === 0 && (
-              <p className="text-muted-foreground">No tracks published yet.</p>
-            )}
-          </div>
+
+          {publishedTracks.length > 0 ? (
+            <NewReleasesCarousel tracks={publishedTracks} />
+          ) : (
+            <p className="text-muted-foreground">No tracks published yet.</p>
+          )}
         </section>
 
         {/* Artists */}

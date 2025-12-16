@@ -11,6 +11,7 @@ interface Track {
     id: string
     title: string
     audioUrl: string
+    waveformPeaks?: number[] | null
     artist: {
         name: string
         imageUrl?: string | null
@@ -69,7 +70,7 @@ export function FullScreenPlayer({
     return (
         <div
             className={cn(
-                "fixed inset-0 z-[60] flex flex-col bg-background transition-transform duration-300 ease-in-out",
+                "fixed inset-0 z-[60] flex flex-col bg-background/95 backdrop-blur-xl supports-[backdrop-filter]:bg-background/80 transition-transform duration-300 ease-in-out",
                 isOpen ? "translate-y-0" : "translate-y-full"
             )}
         >
@@ -106,13 +107,15 @@ export function FullScreenPlayer({
                 {/* Waveform */}
                 <div className="w-full max-w-2xl space-y-4">
                     <div className="h-32 w-full flex items-center justify-center rounded-md bg-muted/20 p-4">
-                        {track.audioUrl && audioElement && (
+                        {track.audioUrl && audioElement && duration > 0 && (
                             <Waveform
                                 audioUrl={track.audioUrl}
                                 media={audioElement}
                                 height={100}
                                 waveColor="#52525b" // zinc-600
                                 progressColor="#fafafa" // zinc-50
+                                peaks={track.waveformPeaks as number[] | undefined}
+                                duration={duration}
                             />
                         )}
                     </div>
