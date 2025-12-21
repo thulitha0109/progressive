@@ -71,7 +71,7 @@ export function UpcomingCarousel({ tracks }: { tracks: Track[] }) {
             {tracks.map((track) => (
                 <SwiperSlide key={track.id}>
                     <Link href={`/artists/${track.artist.slug}`}>
-                        <div className="group relative aspect-square overflow-hidden rounded-lg bg-muted shadow-lg transition-all hover:shadow-xl isolate ring-1 ring-white/10 ring-inset">
+                        <div className="group relative aspect-square overflow-hidden rounded-md bg-muted shadow-lg transition-all hover:shadow-xl isolate ring-1 ring-white/10 ring-inset">
                             {/* Full Image Background */}
                             {track.artist.imageUrl ? (
                                 <img

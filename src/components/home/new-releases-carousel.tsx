@@ -7,7 +7,8 @@ import "swiper/css"
 import "swiper/css/free-mode"
 import { NewReleaseCard } from "@/components/shared/new-release-card"
 import { cn } from "@/lib/utils"
-// import { ChevronLeft, ChevronRight } from "lucide-react" 
+import { ChevronLeft, ChevronRight } from "lucide-react"
+import type { Swiper as SwiperType } from "swiper"
 
 interface Track {
     id: string
@@ -68,9 +69,9 @@ function AnalogWheelIndicator({ total, current }: { total: number, current: numb
     if (!total) return null
 
     return (
-        <div className="relative h-8 w-full overflow-hidden bg-transparent dark:bg-black/60 rounded-full mb-8 select-none">
+        <div className="relative h-8 w-full overflow-hidden bg-transparent rounded-full mb-8 select-none">
             {/* Static Needle / Highlight - Always center */}
-            <div className="absolute left-1/2 top-0 bottom-0 w-0.5 bg-red-500 z-20 -translate-x-1/2 shadow-[0_0_10px_2px_rgba(255,0,0,0.5)]" />
+            <div className="absolute left-1/2 top-1/2 -translate-y-1/2 h-[3px] w-0.5 bg-red-500 z-20 -translate-x-1/2 shadow-[0_0_6px_1px_rgba(255,0,0,0.6)]" />
 
             {/* Moving Strip */}
             <div
@@ -86,14 +87,15 @@ function AnalogWheelIndicator({ total, current }: { total: number, current: numb
                     const isCurrent = realIndex === current
                     // Calculate distance from visual center for opacity
                     const dist = Math.abs(i - visualIndex)
-                    const opacity = Math.max(0.1, 1 - dist * 0.15)
+                    const opacity = Math.max(0.05, 1 - dist * 0.25)
 
                     if (dist > 3.5) return null // Show only 3 on each side + center
 
                     // Dynamic height based on distance from center
-                    // dist is 0 at center, ~1 at first neighbor, etc.
-                    // We want: Center=High, Farther=Lower
-                    const heightValue = Math.max(4, 24 - (Math.round(dist) * 6))
+                    // We want: Center=High, Farther=Lower. Max height 3px to match needle.
+                    // Center (dist=0) -> 3px.
+                    // Neighbors -> reduce.
+                    const heightValue = Math.max(1, 3 - Math.round(dist))
                     const heightClass = `h-[${heightValue}px]`
 
                     return (
@@ -108,7 +110,8 @@ function AnalogWheelIndicator({ total, current }: { total: number, current: numb
                             <div
                                 className={cn(
                                     "w-0.5 rounded-full transition-all duration-300",
-                                    isCurrent ? "bg-black dark:bg-white shadow-[0_0_8px_rgba(0,0,0,0.5)] dark:shadow-[0_0_8px_rgba(255,255,255,0.8)]" : "bg-black/20 dark:bg-white/40"
+                                    isCurrent ? "bg-foreground shadow-[0_0_8px_rgba(0,0,0,0.2)] dark:shadow-[0_0_8px_rgba(255,255,255,0.5)]" : "bg-neutral-400/80 dark:bg-white/80",
+                                    isCurrent ? "w-[2px]" : "w-[1px]" // Make current slightly thicker for visibility at small size
                                 )}
                                 style={{
                                     opacity,
@@ -129,40 +132,73 @@ function AnalogWheelIndicator({ total, current }: { total: number, current: numb
 
 export function NewReleasesCarousel({ tracks }: { tracks: Track[] }) {
     const [currentIndex, setCurrentIndex] = useState(0)
+    const [isBeginning, setIsBeginning] = useState(true)
+    const [isEnd, setIsEnd] = useState(false)
+    const swiperRef = useRef<SwiperType | null>(null)
 
     return (
-        <div className="space-y-6 w-full overflow-hidden">
+        <div className="space-y-6 w-full">
             <AnalogWheelIndicator key={tracks.length} total={tracks.length} current={currentIndex} />
 
-            {/* Negative margin to breakout on mobile, but keeping padding for shadows */}
-            <div className="-mx-4 px-4 overflow-visible py-4 -my-4 sm:mx-0 sm:px-0 sm:overflow-hidden">
-                <Swiper
-                    slidesPerView={1.1} // Slightly show next slide to encourage swipe
-                    spaceBetween={16}
-                    centeredSlides={false}
-                    loop={tracks.length > 4}
-                    // FreeMode removed to ensure snapping and correct index updates for the indicator
-                    className="w-full py-4 !overflow-visible sm:!overflow-hidden"
-                    onRealIndexChange={(swiper) => setCurrentIndex(swiper.realIndex)}
-                    breakpoints={{
-                        640: {
-                            slidesPerView: 1.5,
-                            spaceBetween: 24,
-                        },
-                        1024: {
-                            slidesPerView: 2.2,
-                            spaceBetween: 32,
-                        }
-                    }}
-                >
-                    {tracks.map((track) => (
-                        <SwiperSlide key={track.id} className="h-full !h-auto">
-                            <div className="p-1 h-full"> {/* Padding for potential hover scale/shadow clipping */}
-                                <NewReleaseCard track={track} />
-                            </div>
-                        </SwiperSlide>
-                    ))}
-                </Swiper>
+            <div className="relative">
+                {/* Navigation Arrows */}
+                <div className="absolute top-1/2 -translate-y-1/2 -left-12 z-20 hidden md:block">
+                    <button
+                        onClick={() => swiperRef.current?.slidePrev()}
+                        className="p-2 text-foreground hover:text-foreground/80 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        disabled={isBeginning}
+                    >
+                        <ChevronLeft className="h-8 w-8" />
+                    </button>
+                </div>
+                <div className="absolute top-1/2 -translate-y-1/2 -right-12 z-20 hidden md:block">
+                    <button
+                        onClick={() => swiperRef.current?.slideNext()}
+                        className="p-2 text-foreground hover:text-foreground/80 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        disabled={isEnd}
+                    >
+                        <ChevronRight className="h-8 w-8" />
+                    </button>
+                </div>
+
+                {/* Negative margin to breakout on mobile, but keeping padding for shadows */}
+                <div className="-mx-4 px-4 overflow-visible py-4 -my-4 sm:mx-0 sm:px-0 sm:overflow-hidden relative">
+                    <Swiper
+                        onSwiper={(swiper) => {
+                            swiperRef.current = swiper
+                            setIsBeginning(swiper.isBeginning)
+                            setIsEnd(swiper.isEnd)
+                        }}
+                        slidesPerView={1.1} // Slightly show next slide to encourage swipe
+                        spaceBetween={16}
+                        centeredSlides={false}
+                        loop={false}
+                        className="w-full py-4 !overflow-visible sm:!overflow-hidden"
+                        onSlideChange={(swiper) => {
+                            setCurrentIndex(swiper.realIndex)
+                            setIsBeginning(swiper.isBeginning)
+                            setIsEnd(swiper.isEnd)
+                        }}
+                        breakpoints={{
+                            640: {
+                                slidesPerView: 1.5,
+                                spaceBetween: 24,
+                            },
+                            1024: {
+                                slidesPerView: 2.2,
+                                spaceBetween: 32,
+                            }
+                        }}
+                    >
+                        {tracks.map((track) => (
+                            <SwiperSlide key={track.id} className="h-full !h-auto">
+                                <div className="p-1 h-full"> {/* Padding for potential hover scale/shadow clipping */}
+                                    <NewReleaseCard track={track} />
+                                </div>
+                            </SwiperSlide>
+                        ))}
+                    </Swiper>
+                </div>
             </div>
         </div>
     )

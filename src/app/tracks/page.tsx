@@ -91,7 +91,7 @@ export default async function TracksPage({
                             ))}
                         </div>
                     ) : (
-                        <div className="flex flex-col items-center justify-center py-32 text-center border-2 border-dashed rounded-3xl border-muted">
+                        <div className="flex flex-col items-center justify-center py-32 text-center border-2 border-dashed rounded-md border-muted">
                             <p className="text-xl font-medium text-muted-foreground">No tracks found matching your criteria.</p>
                             <p className="text-sm text-muted-foreground/60 mt-2">Try selecting a different genre or status.</p>
                         </div>

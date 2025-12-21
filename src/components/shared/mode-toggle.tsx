@@ -22,23 +22,15 @@ export function ModeToggle() {
     const isDark = theme === "dark"
 
     return (
-        <div
-            className="relative flex h-8 w-16 cursor-pointer items-center rounded-full border bg-muted p-1 transition-colors hover:bg-muted/80"
+        <Button
+            variant="ghost"
+            size="icon"
             onClick={() => setTheme(isDark ? "light" : "dark")}
+            className="h-9 w-9 rounded-full"
         >
-            <div
-                className={cn(
-                    "flex h-6 w-6 items-center justify-center rounded-full bg-background shadow-sm transition-transform duration-300 ease-in-out",
-                    isDark ? "translate-x-8" : "translate-x-0"
-                )}
-            >
-                {isDark ? (
-                    <Moon className="h-4 w-4 text-foreground" />
-                ) : (
-                    <Sun className="h-4 w-4 text-foreground" />
-                )}
-            </div>
+            <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+            <Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
             <span className="sr-only">Toggle theme</span>
-        </div>
+        </Button>
     )
 }

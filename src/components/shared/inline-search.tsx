@@ -59,7 +59,7 @@ export function InlineSearch() {
             <div className="relative">
                 <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
                 <Input
-                    placeholder="Search..."
+                    placeholder=""
                     value={query}
                     onChange={(e) => {
                         setQuery(e.target.value)
@@ -68,7 +68,7 @@ export function InlineSearch() {
                     onFocus={() => {
                         if (query.length > 0) setOpen(true)
                     }}
-                    className="pl-8 bg-muted/40 border-none focus-visible:ring-1 focus-visible:ring-primary h-9 w-[200px] lg:w-[300px] transition-all"
+                    className="pl-8 bg-transparent border-0 border-b border-transparent focus:border-primary rounded-none focus-visible:ring-0 focus-visible:ring-offset-0 shadow-none h-9 w-[200px] lg:w-[300px] transition-all"
                 />
                 {isPending && (
                     <div className="absolute right-2 top-2.5">

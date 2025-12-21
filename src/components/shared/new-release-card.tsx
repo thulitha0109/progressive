@@ -70,7 +70,7 @@ export function NewReleaseCard({ track }: { track: Track }) {
         <div
             onClick={handleCardClick}
             className={cn(
-                "group relative grid grid-cols-[auto_1fr] gap-4 sm:gap-6 p-2 sm:p-3 rounded-2xl border border-white/5 bg-white/[0.02] hover:bg-white/[0.05] backdrop-blur-sm transition-colors duration-500 cursor-pointer overflow-hidden hover:shadow-2xl min-h-[110px] sm:min-h-[140px]",
+                "group relative grid grid-cols-[auto_1fr] gap-4 sm:gap-6 rounded-md border border-white/5 bg-white/[0.01] hover:bg-white/[0.05] backdrop-blur-sm transition-colors duration-500 cursor-pointer overflow-hidden hover:shadow-2xl min-h-[110px] sm:min-h-[140px]",
                 isCurrentTrack && isPlaying ? "bg-white/[0.08] border-primary/30" : ""
             )}
         >
@@ -78,7 +78,7 @@ export function NewReleaseCard({ track }: { track: Track }) {
             <div className="absolute inset-0 bg-gradient-to-r from-primary/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
 
             {/* Image Section */}
-            <div className="relative w-28 sm:w-40 self-stretch shrink-0 overflow-hidden rounded-xl shadow-lg isolate ring-1 ring-white/10 ring-inset">
+            <div className="relative w-28 sm:w-40 self-stretch shrink-0 overflow-hidden rounded-md shadow-lg isolate ring-1 ring-white/10 ring-inset">
                 <div className="absolute inset-0 bg-gradient-to-br from-black/20 to-transparent z-10 pointer-events-none" />
                 {track.imageUrl || track.artist.imageUrl ? (
                     <img
@@ -103,7 +103,7 @@ export function NewReleaseCard({ track }: { track: Track }) {
             </div>
 
             {/* Info Section - Right */}
-            <div className="flex flex-col justify-between h-full min-w-0 z-10 relative py-0.5 sm:py-1">
+            <div className="flex flex-col justify-between h-full min-w-0 z-10 relative py-3 pr-3 sm:py-4 sm:pr-4">
                 {/* Top Row: Date (Left) and Like (Right) */}
                 <div className="flex justify-between items-start w-full">
                     <div className="flex items-center gap-1 text-[10px] sm:text-xs text-muted-foreground font-medium bg-white/5 px-2 py-0.5 rounded-md">

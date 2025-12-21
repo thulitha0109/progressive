@@ -5,6 +5,7 @@ import { Canvas, useFrame, useThree, extend } from '@react-three/fiber'
 import { useTexture, shaderMaterial } from '@react-three/drei'
 import * as THREE from 'three'
 import { cn } from "@/lib/utils"
+import { useTheme } from "next-themes"
 
 // --- 1. Custom Shader Material ---
 const LiquidDistortionMaterial = shaderMaterial(
@@ -16,6 +17,7 @@ const LiquidDistortionMaterial = shaderMaterial(
         uTime: 0,
         uHover: 0,
         uFit: 0, // 0 = cover, 1 = contain
+        uIsDark: 0, // 0 = light, 1 = dark
     },
     // Vertex Shader
     `
@@ -34,6 +36,7 @@ const LiquidDistortionMaterial = shaderMaterial(
     uniform float uTime;
     uniform float uHover;
     uniform float uFit;
+    uniform float uIsDark;
     varying vec2 vUv;
 
     // Simplex 2D noise function
@@ -137,6 +140,7 @@ function Scene({ imageUrl, fit }: { imageUrl: string, fit: 'cover' | 'contain' }
 
     const mouseRef = useRef(new THREE.Vector2(0.5, 0.5))
     const hoverStrength = useRef(0)
+    const { theme } = useTheme()
 
     useFrame((state) => {
         if (!ref.current) return
@@ -155,6 +159,7 @@ function Scene({ imageUrl, fit }: { imageUrl: string, fit: 'cover' | 'contain' }
         ref.current.uMouse = mouseRef.current
         ref.current.uHover = hoverStrength.current
         ref.current.uFit = fit === 'contain' ? 1.0 : 0.0
+        ref.current.uIsDark = theme === 'dark' ? 1.0 : 0.0
         ref.current.uResolution = new THREE.Vector2(size.width, size.height)
 
         const tex = texture as THREE.Texture

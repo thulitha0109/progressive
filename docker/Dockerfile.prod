@@ -40,6 +40,27 @@ RUN \
 RUN npx tsc scripts/seed-prod.ts --outDir scripts/dist --module commonjs --esModuleInterop --skipLibCheck
 
 
+# Builder for audiowaveform
+FROM alpine:3.20 AS audiowaveform-builder
+RUN apk add --no-cache \
+  git make cmake gcc g++ \
+  libmad-dev \
+  libid3tag-dev \
+  libsndfile-dev \
+  gd-dev \
+  boost-dev \
+  libvips-dev \
+  zlib-dev
+
+WORKDIR /tmp
+RUN git clone https://github.com/bbc/audiowaveform.git
+WORKDIR /tmp/audiowaveform
+RUN mkdir build
+WORKDIR /tmp/audiowaveform/build
+RUN cmake -D ENABLE_TESTS=0 -D BUILD_STATIC=1 ..
+RUN make
+RUN strip audiowaveform
+
 # Production image, copy all the files and run next
 FROM base AS runner
 WORKDIR /app
@@ -48,7 +69,7 @@ ENV NODE_ENV production
 # Uncomment the following line in case you want to disable telemetry during runtime.
 # ENV NEXT_TELEMETRY_DISABLED 1
 
-RUN apk add --no-cache openssl ffmpeg
+RUN apk add --no-cache openssl ffmpeg libmad libid3tag libsndfile gd
 
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
@@ -58,6 +79,7 @@ RUN npm install bcryptjs prisma@5.22.0 @prisma/client@5.22.0
 
 
 COPY --from=builder /app/public ./public
+COPY --from=audiowaveform-builder /tmp/audiowaveform/build/audiowaveform /usr/local/bin/
 
 # Set the correct permission for prerender cache
 RUN mkdir .next

@@ -65,8 +65,8 @@ export function FeaturedSection({ track }: { track: Track }) {
                 />
 
                 {/* Overlays for depth - Pointer events none to allow BG interaction */}
-                <div className="absolute inset-0 bg-gradient-to-r from-background/0 to-background dark:from-black/0 dark:to-black pointer-events-none" />
-                <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-background/0 dark:from-black dark:via-black/50 dark:to-black/0 pointer-events-none" />
+                <div className="absolute inset-0 bg-gradient-to-r from-background/0 to-background dark:from-background/0 dark:to-background pointer-events-none" />
+                <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-background/0 dark:from-background dark:via-background/20 dark:to-background/0 pointer-events-none" />
             </div>
 
             <div className="container px-4 md:px-6 relative z-10 py-12 pointer-events-none">
@@ -76,9 +76,9 @@ export function FeaturedSection({ track }: { track: Track }) {
                         {/* Wrapper div for content to allow pointer events on text if needed, but mainly visual */}
                         <div className="pointer-events-auto w-full flex flex-col items-end space-y-8">
 
-                            {/* Artist Info (NOW ON TOP) */}
-                            <div className="flex items-center space-x-6 lg:flex-row-reverse lg:space-x-reverse">
-                                <div className="relative h-16 w-16 md:h-20 md:w-20 overflow-hidden rounded-full border-2 border-white/20 shadow-lg">
+                            {/* Artist Info (Vertical Layout: Image -> Name) */}
+                            <div className="flex flex-col items-end space-y-6">
+                                <div className="relative h-24 w-24 md:h-32 md:w-32 overflow-hidden rounded-full border-2 border-white/20 shadow-lg">
                                     {track.artist.imageUrl ? (
                                         <img
                                             src={track.artist.imageUrl}
@@ -94,6 +94,7 @@ export function FeaturedSection({ track }: { track: Track }) {
                                         </div>
                                     )}
                                 </div>
+
                                 <h3 className="text-2xl md:text-3xl font-light text-foreground/80 tracking-wide">
                                     {track.artist.name}
                                 </h3>
@@ -101,12 +102,6 @@ export function FeaturedSection({ track }: { track: Track }) {
 
                             {/* Track Info (NOW ON BOTTOM) */}
                             <div className="space-y-4 flex flex-col lg:items-end w-full">
-                                <div className="flex items-center gap-4 justify-end w-full">
-                                    <span className="text-primary font-medium tracking-widest uppercase text-sm md:text-base bg-primary/10 px-3 py-1 rounded-full backdrop-blur-sm border border-primary/20">
-                                        Featured Track
-                                    </span>
-                                </div>
-
                                 <div className="relative inline-block text-right">
                                     <h1
                                         className="text-6xl md:text-8xl lg:text-9xl font-bold tracking-tighter text-foreground drop-shadow-2xl relative z-10 leading-[0.9]"
@@ -114,13 +109,19 @@ export function FeaturedSection({ track }: { track: Track }) {
                                         {track.title}
                                     </h1>
                                 </div>
+
+                                <div className="flex items-center gap-4 justify-end w-full mt-4">
+                                    <span className="text-primary font-medium tracking-widest uppercase text-sm md:text-base bg-primary/10 px-3 py-1 rounded-full backdrop-blur-sm border border-primary/20">
+                                        Featured Track
+                                    </span>
+                                </div>
                             </div>
                         </div>
                     </div>
 
                     {/* Right Side: Player Card - (Order 1 on Mobile, 2 on Desktop) */}
                     <div className="relative w-full max-w-md mx-auto lg:ml-auto lg:mb-12 cursor-pointer pointer-events-auto order-1 lg:order-2" onClick={handleImageClick}>
-                        <div className="relative aspect-square rounded-2xl overflow-hidden shadow-2xl group border border-white/10 bg-black/50 backdrop-blur-md">
+                        <div className="relative aspect-square rounded-md overflow-hidden shadow-2xl group border border-white/10 bg-black/50 backdrop-blur-md">
                             {track.imageUrl || track.artist.imageUrl ? (
                                 <img
                                     src={track.imageUrl || track.artist.imageUrl || ""}
@@ -140,23 +141,25 @@ export function FeaturedSection({ track }: { track: Track }) {
                             {/* Play Overlay */}
                             <div className={cn(
                                 "absolute inset-0 flex items-center justify-center transition-all duration-300",
-                                isCurrentTrack && isPlaying ? "opacity-0" : "opacity-100"
+                                isCurrentTrack && isPlaying ? "opacity-100 bg-black/40" : "opacity-100"
                             )}>
-                                <div className="rounded-full bg-black/30 backdrop-blur-xl p-6 border border-white/20 hover:scale-110 transition-transform group-hover:bg-black/50">
+                                <div className={cn(
+                                    "rounded-full bg-black/30 backdrop-blur-xl p-6 border border-white/20 hover:scale-110 transition-transform group-hover:bg-black/50",
+                                    isCurrentTrack && isPlaying ? "opacity-100" : "opacity-0 group-hover:opacity-100"
+                                )}>
                                     <PlayButton track={track} variant="icon" />
                                 </div>
                             </div>
 
                             {/* Glassmorphism Overlay Detail */}
                             <div className="absolute top-6 left-6 right-6 flex justify-between items-start text-white/90 z-20 pointer-events-none">
-                                <span className="font-bold text-lg tracking-tighter uppercase mix-blend-overlay opacity-70">Progressive.lk</span>
+                                <span className="font-bold text-lg tracking-tighter uppercase mix-blend-overlay opacity-70">Now Featured</span>
                             </div>
 
                             {/* Bottom Waveform & Info */}
                             <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent p-6 flex flex-col justify-end h-1/2 pointer-events-none">
                                 <div className="flex items-end justify-between">
                                     <div>
-                                        <p className="text-xs uppercase tracking-wider text-white/60 mb-1">Now Featured</p>
                                         <p className="text-lg font-bold text-white tracking-wide">{track.artist.name}</p>
                                     </div>
                                     <WaveformBar isPlaying={isCurrentTrack && isPlaying} count={12} height="h-10" color="bg-primary" />

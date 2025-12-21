@@ -11,6 +11,7 @@ interface Track {
     id: string
     title: string
     audioUrl: string
+    imageUrl?: string | null
     waveformPeaks?: number[] | null
     artist: {
         name: string
@@ -88,11 +89,11 @@ export function FullScreenPlayer({
             {/* Main Content */}
             <div className="flex flex-1 flex-col items-center justify-center gap-8 p-4 md:p-8">
                 {/* Album Art */}
-                <div className="relative aspect-square w-full max-w-sm overflow-hidden rounded-xl shadow-2xl md:max-w-md">
-                    {track.artist?.imageUrl ? (
+                <div className="relative aspect-square w-full max-w-sm overflow-hidden rounded-md shadow-2xl md:max-w-md">
+                    {track.imageUrl || track.artist?.imageUrl ? (
                         <img
-                            src={track.artist.imageUrl}
-                            alt={track.artist?.name || "Artist"}
+                            src={track.imageUrl || track.artist.imageUrl || ""}
+                            alt={track.title || "Track"}
                             className="h-full w-full object-cover"
                         />
                     ) : (

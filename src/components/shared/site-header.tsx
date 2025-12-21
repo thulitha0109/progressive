@@ -77,14 +77,11 @@ export function SiteHeader({ user }: SiteHeaderProps) {
     ]
 
     return (
-        <header className="sticky top-0 z-50 w-full bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60 animate-enter-slide-down border-b border-border/40">
+        <header className="sticky top-0 z-50 w-full bg-background/70 backdrop-blur-md supports-[backdrop-filter]:bg-background/60 animate-enter-slide-down border-border/40">
             <div className="flex h-16 items-center px-4 md:px-8 max-w-[1400px] mx-auto">
                 <div className="mr-8 hidden lg:flex">
                     <Link href="/" className="mr-6 flex items-center space-x-2">
-                        <Music2 className="h-6 w-6 text-primary" />
-                        <span className="hidden font-bold sm:inline-block">
-                            Progressive.lk
-                        </span>
+                        <img src="/SVG-03.svg" alt="Progressive.lk" className="h-10 w-auto invert dark:invert-0" />
                     </Link>
                     <nav className="flex items-center space-x-6 text-sm font-medium">
                         {routes.map((route) => (
@@ -118,8 +115,7 @@ export function SiteHeader({ user }: SiteHeaderProps) {
                             className="flex items-center"
                             onClick={() => setIsOpen(false)}
                         >
-                            <Music2 className="mr-2 h-6 w-6 text-primary" />
-                            <span className="font-bold">Progressive.lk</span>
+                            <img src="/SVG-03.svg" alt="Progressive.lk" className="h-10 w-auto invert dark:invert-0" />
                         </Link>
                         <div className="my-4 pb-10 pl-6">
                             <div className="flex flex-col space-y-3">
@@ -186,7 +182,6 @@ export function SiteHeader({ user }: SiteHeaderProps) {
                                     className="hidden md:flex gap-2"
                                 >
                                     <User className="h-4 w-4" />
-                                    Login
                                 </Button>
                                 <Button
                                     variant="ghost"
