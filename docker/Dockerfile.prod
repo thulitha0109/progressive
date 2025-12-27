@@ -41,69 +41,7 @@ RUN npx tsc scripts/seed-prod.ts --outDir scripts/dist --module commonjs --esMod
 
 
 # Builder for audiowaveform
-FROM alpine:3.20 AS audiowaveform-builder
-RUN apk add --no-cache \
-  git make cmake gcc g++ \
-  libmad-dev \
-  libid3tag-dev \
-  libsndfile-dev \
-  pkgconf \
-  autoconf \
-  automake \
-  libtool \
-  wget \
-  tar \
-  xz \
-  gd-dev \
-  boost-dev \
-  vips-dev \
-  zlib-dev \
-  libpng-dev \
-  libpng-static \
-  zlib-static
-
-WORKDIR /tmp
-
-# Build libogg
-RUN wget https://downloads.xiph.org/releases/ogg/libogg-1.3.5.tar.xz && \
-  tar xf libogg-1.3.5.tar.xz && \
-  cd libogg-1.3.5 && \
-  ./configure --enable-static --disable-shared && \
-  make && \
-  make install
-
-# Build libvorbis
-RUN wget https://downloads.xiph.org/releases/vorbis/libvorbis-1.3.7.tar.xz && \
-  tar xf libvorbis-1.3.7.tar.xz && \
-  cd libvorbis-1.3.7 && \
-  ./configure --enable-static --disable-shared --disable-oggtest && \
-  make && \
-  make install
-
-# Build FLAC
-RUN wget https://downloads.xiph.org/releases/flac/flac-1.4.3.tar.xz && \
-  tar xf flac-1.4.3.tar.xz && \
-  cd flac-1.4.3 && \
-  ./configure --enable-static --disable-shared --disable-ogg-test && \
-  make && \
-  make install
-
-# Build libsndfile
-RUN wget https://github.com/libsndfile/libsndfile/releases/download/1.2.2/libsndfile-1.2.2.tar.xz && \
-  tar xf libsndfile-1.2.2.tar.xz && \
-  cd libsndfile-1.2.2 && \
-  ./configure --enable-static --disable-shared --disable-sqlite && \
-  make && \
-  make install
-
-WORKDIR /tmp
-RUN git clone https://github.com/bbc/audiowaveform.git
-WORKDIR /tmp/audiowaveform
-RUN mkdir build
-WORKDIR /tmp/audiowaveform/build
-RUN cmake -D ENABLE_TESTS=0 -D BUILD_STATIC=1 ..
-RUN make
-RUN strip audiowaveform
+FROM realies/audiowaveform:latest AS audiowaveform-builder
 
 # Production image, copy all the files and run next
 FROM base AS runner
@@ -113,7 +51,7 @@ ENV NODE_ENV production
 # Uncomment the following line in case you want to disable telemetry during runtime.
 # ENV NEXT_TELEMETRY_DISABLED 1
 
-RUN apk add --no-cache openssl ffmpeg libmad libid3tag libsndfile gd
+RUN apk add --no-cache openssl ffmpeg
 
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
@@ -123,7 +61,7 @@ RUN npm install bcryptjs prisma@5.22.0 @prisma/client@5.22.0
 
 
 COPY --from=builder /app/public ./public
-COPY --from=audiowaveform-builder /tmp/audiowaveform/build/audiowaveform /usr/local/bin/
+COPY --from=audiowaveform-builder /usr/local/bin/audiowaveform /usr/local/bin/audiowaveform
 
 # Set the correct permission for prerender cache
 RUN mkdir .next
