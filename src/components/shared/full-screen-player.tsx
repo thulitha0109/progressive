@@ -88,7 +88,7 @@ export function FullScreenPlayer({
 
             {/* Main Content */}
             <div className="flex flex-1 flex-col items-center justify-center gap-8 p-4 md:p-8">
-                {/* Album Art */}
+                {/* Album Art After Isuued fix*/}
                 <div className="relative inline-block aspect-square max-h-[40vh] overflow-hidden rounded-md shadow-2xl">
                     {track.imageUrl || track.artist?.imageUrl ? (
                         <img
