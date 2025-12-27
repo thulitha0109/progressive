@@ -89,7 +89,7 @@ export function FullScreenPlayer({
             {/* Main Content */}
             <div className="flex flex-1 flex-col items-center justify-center gap-8 p-4 md:p-8">
                 {/* Album Art */}
-                <div className="relative aspect-square w-full max-w-sm overflow-hidden rounded-md shadow-2xl md:max-w-md">
+                <div className="relative inline-block aspect-square max-h-[40vh] overflow-hidden rounded-md shadow-2xl">
                     {track.imageUrl || track.artist?.imageUrl ? (
                         <img
                             src={track.imageUrl || track.artist.imageUrl || ""}
@@ -106,22 +106,22 @@ export function FullScreenPlayer({
                 </div>
 
                 {/* Waveform */}
-                <div className="w-full max-w-2xl space-y-4">
-                    <div className="h-32 w-full flex items-center justify-center rounded-md bg-muted/20 p-4">
+                <div className="w-full max-w-2xl space-y-3 sm:space-y-4">
+                    <div className="h-24 sm:h-28 md:h-32 lg:h-24 xl:h-20 w-full flex items-center justify-center rounded-md bg-muted/20 p-3 sm:p-4">
                         {track.audioUrl && audioElement && duration > 0 && (
-                            <Waveform
-                                audioUrl={track.audioUrl}
-                                media={audioElement}
-                                height={100}
-                                waveColor="#52525b" // zinc-600
-                                progressColor="#fafafa" // zinc-50
-                                peaks={track.waveformPeaks as number[] | undefined}
-                                duration={duration}
-                            />
+                        <Waveform
+                            audioUrl={track.audioUrl}
+                            media={audioElement}
+                            height={64}
+                            waveColor="#52525b"
+                            progressColor="#fafafa"
+                            peaks={track.waveformPeaks as number[] | undefined}
+                            duration={duration}
+                        />
                         )}
                     </div>
 
-                    <div className="flex justify-between text-xs text-muted-foreground px-1">
+                    <div className="flex justify-between px-1 text-xs text-muted-foreground">
                         <span>{formatTime(currentTime)}</span>
                         <span>{formatTime(duration)}</span>
                     </div>
