@@ -49,7 +49,7 @@ RUN apk add --no-cache \
   libsndfile-dev \
   gd-dev \
   boost-dev \
-  libvips-dev \
+  vips-dev \
   zlib-dev
 
 WORKDIR /tmp
