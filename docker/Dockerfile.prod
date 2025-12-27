@@ -50,13 +50,11 @@ RUN apk add --no-cache \
   gd-dev \
   boost-dev \
   vips-dev \
-  gd-dev \
-  boost-dev \
-  vips-dev \
   zlib-dev \
   libpng-dev \
   libpng-static \
-  zlib-static
+  zlib-static \
+  libsndfile-static
 
 WORKDIR /tmp
 RUN git clone https://github.com/bbc/audiowaveform.git
