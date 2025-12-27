@@ -54,7 +54,11 @@ RUN apk add --no-cache \
   libpng-dev \
   libpng-static \
   zlib-static \
-  libsndfile-static
+  libsndfile-static \
+  flac-dev \
+  flac-static \
+  libogg-dev \
+  libogg-static
 
 WORKDIR /tmp
 RUN git clone https://github.com/bbc/audiowaveform.git
