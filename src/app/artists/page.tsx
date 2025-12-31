@@ -19,19 +19,19 @@ export default async function ArtistsPage() {
                 <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                     {artists.map((artist) => (
                         <Link key={artist.id} href={`/artists/${artist.slug}`}>
-                            <Card className="overflow-hidden hover:bg-accent/50 transition-colors h-full">
+                            <Card className="overflow-hidden hover:bg-accent/50 transition-colors h-full p-0 border-0">
                                 <div className="aspect-square relative bg-muted flex items-center justify-center">
                                     {artist.imageUrl ? (
                                         <img
                                             src={artist.imageUrl}
                                             alt={artist.name}
-                                            className="h-full w-full object-cover"
+                                            className="h-full w-full object-cover object-top"
                                         />
                                     ) : (
                                         <User className="h-16 w-16 text-muted-foreground" />
                                     )}
                                 </div>
-                                <CardContent className="p-6">
+                                <CardContent className="p-6 pt-4">
                                     <h3 className="font-bold text-xl mb-2">{artist.name}</h3>
                                     <p className="text-sm text-muted-foreground line-clamp-3">
                                         {artist.bio}

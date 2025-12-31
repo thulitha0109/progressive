@@ -22,14 +22,14 @@ export function WaveformBar({
                 <div
                     key={i}
                     className={cn(
-                        "w-1 rounded-t-sm transition-all duration-75",
+                        "w-0.5 rounded-full transition-all duration-75 origin-bottom bg-current",
                         color,
                         isPlaying ? "animate-music-bar" : undefined
                     )}
                     style={{
-                        // Deterministic pseudo-random values to prevent hydration mismatch and remove need for 'mounted' state
                         animationDuration: `${0.6 + ((i * 0.4) % 0.4)}s`,
-                        height: isPlaying ? '100%' : `${10 + ((i * 17) % 30)}%`
+                        height: '100%',
+                        transform: isPlaying ? undefined : `scaleY(${0.1 + ((0.17 * i) % 0.3)})`
                     }}
                 />
             ))}

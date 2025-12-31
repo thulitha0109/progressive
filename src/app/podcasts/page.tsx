@@ -19,13 +19,13 @@ export default async function PodcastsPage() {
                 {podcasts.length > 0 ? (
                     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                         {podcasts.map((podcast) => (
-                            <Card key={podcast.id} className="overflow-hidden">
+                            <Card key={podcast.id} className="overflow-hidden p-0">
                                 <div className="aspect-square relative bg-muted">
                                     {podcast.imageUrl ? (
                                         <img
                                             src={podcast.imageUrl}
                                             alt={podcast.title}
-                                            className="object-cover w-full h-full"
+                                            className="object-cover object-top w-full h-full"
                                         />
                                     ) : (
                                         <div className="flex items-center justify-center h-full text-muted-foreground">
@@ -33,13 +33,13 @@ export default async function PodcastsPage() {
                                         </div>
                                     )}
                                     <div className="absolute bottom-2 right-2">
-                                        <PlayButton track={{ ...podcast, artist: { name: podcast.host || "Unknown Host" } }} />
+                                        <PlayButton track={{ ...podcast, artist: { id: podcast.artist?.id || "", name: podcast.artist?.name || "Unknown Artist", imageUrl: podcast.artist?.imageUrl } }} />
                                     </div>
                                 </div>
                                 <CardContent className="p-4">
                                     <h3 className="font-semibold truncate">{podcast.title}</h3>
                                     <p className="text-sm text-muted-foreground truncate">
-                                        {podcast.host || "Unknown Host"}
+                                        {podcast.artist?.name || "Unknown Artist"}
                                     </p>
                                     <p className="text-xs text-muted-foreground mt-2 line-clamp-2">
                                         {podcast.description}

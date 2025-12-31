@@ -101,6 +101,8 @@ async function seedArtistsAndTracks() {
     const genres = await prisma.genre.findMany()
     const progressive = genres.find(g => g.slug === 'progressive-house')
 
+    const createdArtists = []
+
     for (const a of ARTISTS) {
         const artist = await prisma.artist.create({
             data: {
@@ -110,17 +112,52 @@ async function seedArtistsAndTracks() {
                 imageUrl: a.imageUrl
             }
         })
+        createdArtists.push(artist)
 
-        // Create a dummy track for each
-        await prisma.track.create({
+        // Create dummy tracks for each
+        for (let i = 1; i <= 3; i++) {
+            await prisma.track.create({
+                data: {
+                    title: `${a.name}'s Track ${i}`,
+                    audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3", // Dummy MP3
+                    imageUrl: a.imageUrl,
+                    artistId: artist.id,
+                    genreId: progressive?.id,
+                    // genre: progressive?.name || "Unknown", // Deprecated field
+                    scheduledFor: new Date(),
+                    sequence: i
+                }
+            })
+        }
+    }
+    return { artists: createdArtists, genres }
+}
+
+async function seedPodcasts(artists: any[], genres: any[]) {
+    console.log("Seeding podcasts...")
+    const progressive = genres.find(g => g.slug === 'progressive-house')
+
+    // Seed a few podcasts linked to random artists
+    const PODCASTS = [
+        { title: "Progressive Sessions 001", description: "Deep vibes only." },
+        { title: "Techno Bunker 042", description: "Underground sounds." },
+        { title: "Sunday Morning", description: "Relaxing beats." },
+    ]
+
+    for (const [index, p] of PODCASTS.entries()) {
+        const artist = artists[index % artists.length]
+
+        await prisma.podcast.create({
             data: {
-                title: `${a.name}'s Track`,
-                audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3", // Dummy MP3
-                imageUrl: a.imageUrl,
+                title: p.title,
+                slug: generateSlug(p.title),
+                description: p.description,
+                audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3",
+                imageUrl: "https://images.unsplash.com/photo-1478737270239-2f02b77ac6d5?w=400&h=400&fit=crop",
+                scheduledFor: new Date(),
                 artistId: artist.id,
                 genreId: progressive?.id,
-                genre: progressive?.name || "Unknown",
-                scheduledFor: new Date()
+                sequence: index + 1
             }
         })
     }
@@ -208,7 +245,8 @@ async function main() {
     // Seed
     const admin = await seedAdmin()
     await seedGenres()
-    await seedArtistsAndTracks()
+    const { artists, genres } = await seedArtistsAndTracks()
+    await seedPodcasts(artists, genres)
     await seedEvents()
     await seedShops()
     await seedBlog(admin.id)

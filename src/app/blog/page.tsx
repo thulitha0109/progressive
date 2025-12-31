@@ -52,13 +52,13 @@ export default async function BlogPage({
                 <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
                     {posts.map((post) => (
                         <Link key={post.id} href={`/blog/${post.slug}`} className="group">
-                            <Card className="h-full overflow-hidden border-none bg-secondary/20 hover:bg-secondary/30 transition-colors flex flex-col">
+                            <Card className="h-full overflow-hidden border-none bg-secondary/20 hover:bg-secondary/30 transition-colors flex flex-col p-0">
                                 <div className="aspect-video bg-muted relative overflow-hidden">
                                     {post.coverImage ? (
                                         <img
                                             src={post.coverImage}
                                             alt={post.title}
-                                            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                            className="h-full w-full object-cover object-top transition-transform duration-500 group-hover:scale-105"
                                         />
                                     ) : (
                                         <div className="h-full w-full flex items-center justify-center bg-secondary">

@@ -2,6 +2,7 @@ import { getArtistBySlug } from "@/server/actions/artists"
 import { Button } from "@/components/ui/button"
 import { PlayButton } from "@/components/shared/play-button"
 import { LikeButton } from "@/components/shared/like-button"
+import { FollowButton } from "@/components/artist/follow-button"
 import { Calendar, Play, User, Facebook, Instagram, Twitter, Music, Radio } from "lucide-react"
 import Link from "next/link"
 import { notFound } from "next/navigation"
@@ -27,7 +28,7 @@ export default async function ArtistPage({
                         <img
                             src={artist.imageUrl}
                             alt={artist.name}
-                            className="h-full w-full object-cover opacity-30 blur-sm"
+                            className="h-full w-full object-cover object-top opacity-30 blur-sm"
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-background to-transparent" />
                     </div>
@@ -39,7 +40,7 @@ export default async function ArtistPage({
                                 <img
                                     src={artist.imageUrl}
                                     alt={artist.name}
-                                    className="h-full w-full object-cover"
+                                    className="h-full w-full object-cover object-top"
                                 />
                             ) : (
                                 <User className="h-12 w-12 text-muted-foreground" />
@@ -47,7 +48,10 @@ export default async function ArtistPage({
                         </div>
                         <div className="mb-2">
                             <h1 className="text-4xl font-bold tracking-tight">{artist.name}</h1>
-                            <p className="text-muted-foreground">Artist</p>
+                            <div className="flex items-center gap-3">
+                                <p className="text-muted-foreground">Artist</p>
+                                <FollowButton artistId={artist.id} />
+                            </div>
                             {artist.socialLinks && (
                                 <div className="flex gap-4 mt-4">
                                     {(() => {

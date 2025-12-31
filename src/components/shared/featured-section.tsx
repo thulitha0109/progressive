@@ -25,6 +25,7 @@ interface Track {
         name: string
         imageUrl?: string | null
     }
+    assignedSequence?: number | null
 }
 
 export function FeaturedSection({ track }: { track: Track }) {
@@ -104,15 +105,15 @@ export function FeaturedSection({ track }: { track: Track }) {
                             <div className="space-y-4 flex flex-col lg:items-end w-full">
                                 <div className="relative inline-block text-right">
                                     <h1
-                                        className="text-6xl md:text-8xl lg:text-9xl font-bold tracking-tighter text-foreground drop-shadow-2xl relative z-10 leading-[0.9]"
+                                        className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tighter text-foreground drop-shadow-2xl relative z-10 leading-[0.9]"
                                     >
                                         {track.title}
                                     </h1>
                                 </div>
 
                                 <div className="flex items-center gap-4 justify-end w-full mt-4">
-                                    <span className="text-primary font-medium tracking-widest uppercase text-sm md:text-base bg-primary/10 px-3 py-1 rounded-full backdrop-blur-sm border border-primary/20">
-                                        Featured Track
+                                    <span className="text-primary font-medium tracking-widest uppercase text-sm md:text-base px-3 py-1 rounded border border-[#487cff] text-[#487cff]">
+                                        {track.assignedSequence ? String(track.assignedSequence).padStart(3, '0') : "001"} <span className="mx-2 text-muted-foreground/50">|</span> FEATURED TRACK
                                     </span>
                                 </div>
                             </div>
@@ -138,31 +139,24 @@ export function FeaturedSection({ track }: { track: Track }) {
                                 </div>
                             )}
 
-                            {/* Play Overlay */}
+                            {/* Center Overlay: Waveform Only (Bottom Middle) - Visible ONLY when playing */}
+                            {isCurrentTrack && isPlaying && (
+                                <div className="absolute bottom-12 left-0 right-0 flex justify-center z-10 pointer-events-none">
+                                    <div className="animate-in fade-in duration-300">
+                                        <WaveformBar isPlaying={true} count={16} height="h-8" color="bg-white" />
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Play Overlay - Always Visible */}
                             <div className={cn(
-                                "absolute inset-0 flex items-center justify-center transition-all duration-300",
-                                isCurrentTrack && isPlaying ? "opacity-100 bg-black/40" : "opacity-100"
+                                "absolute inset-0 flex items-center justify-center z-20",
+                                isCurrentTrack && isPlaying ? "bg-black/40" : ""
                             )}>
                                 <div className={cn(
-                                    "rounded-full bg-black/30 backdrop-blur-xl p-6 border border-white/20 hover:scale-110 transition-transform group-hover:bg-black/50",
-                                    isCurrentTrack && isPlaying ? "opacity-100" : "opacity-0 group-hover:opacity-100"
+                                    "rounded-full bg-black/30 backdrop-blur-xl p-6 border border-white/20 hover:scale-110 transition-transform hover:bg-black/50"
                                 )}>
                                     <PlayButton track={track} variant="icon" />
-                                </div>
-                            </div>
-
-                            {/* Glassmorphism Overlay Detail */}
-                            <div className="absolute top-6 left-6 right-6 flex justify-between items-start text-white/90 z-20 pointer-events-none">
-                                <span className="font-bold text-lg tracking-tighter uppercase mix-blend-overlay opacity-70">Now Featured</span>
-                            </div>
-
-                            {/* Bottom Waveform & Info */}
-                            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent p-6 flex flex-col justify-end h-1/2 pointer-events-none">
-                                <div className="flex items-end justify-between">
-                                    <div>
-                                        <p className="text-lg font-bold text-white tracking-wide">{track.artist.name}</p>
-                                    </div>
-                                    <WaveformBar isPlaying={isCurrentTrack && isPlaying} count={12} height="h-10" color="bg-primary" />
                                 </div>
                             </div>
                         </div>

@@ -88,7 +88,43 @@ export default async function ProfilePage() {
                         </div>
                     )}
                 </div>
+
+                <div className="space-y-4">
+                    <h2 className="text-2xl font-semibold tracking-tight">Followed Artists</h2>
+                    <FollowedArtistsList />
+                </div>
             </div>
+        </div>
+    )
+}
+
+import { getFollowedArtists } from "@/server/actions/artists"
+import Link from "next/link"
+
+async function FollowedArtistsList() {
+    const artists = await getFollowedArtists()
+
+    if (artists.length === 0) {
+        return (
+            <div className="text-center py-10 text-muted-foreground border rounded-lg bg-muted/50">
+                <p>You are not following any artists yet.</p>
+            </div>
+        )
+    }
+
+    return (
+        <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-4">
+            {artists.map((artist) => (
+                <Link key={artist.id} href={`/artists/${artist.slug}`}>
+                    <div className="flex items-center gap-3 p-3 rounded-lg border hover:bg-accent transition-colors">
+                        <Avatar className="h-12 w-12">
+                            <AvatarImage src={artist.imageUrl || ""} alt={artist.name} className="object-cover" />
+                            <AvatarFallback>{artist.name[0]}</AvatarFallback>
+                        </Avatar>
+                        <span className="font-medium truncate">{artist.name}</span>
+                    </div>
+                </Link>
+            ))}
         </div>
     )
 }

@@ -80,12 +80,12 @@ export default async function HomePage() {
             {artists.slice(0, 6).map((artist) => (
               <Link key={artist.id} href={`/artists/${artist.slug}`} className="group">
                 <div className="flex flex-col items-center gap-3">
-                  <div className="relative h-32 w-32 md:h-40 md:w-40 overflow-hidden rounded-full border-2 border-muted bg-muted transition-transform group-hover:scale-105">
+                  <div className="relative h-32 w-32 md:h-40 md:w-40 overflow-hidden rounded-md bg-muted transition-transform group-hover:scale-105 shadow-md">
                     {artist.imageUrl ? (
                       <img
                         src={artist.imageUrl}
                         alt={artist.name}
-                        className="h-full w-full object-cover"
+                        className="h-full w-full object-cover object-top"
                       />
                     ) : (
                       <User className="h-12 w-12 text-muted-foreground" />
@@ -117,13 +117,13 @@ export default async function HomePage() {
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {blogPosts.slice(0, 3).map((post) => (
                 <Link key={post.id} href={`/blog/${post.slug}`} className="group">
-                  <Card className="overflow-hidden border-none bg-secondary/20 hover:bg-secondary/30 transition-colors h-full">
+                  <Card className="overflow-hidden border-none bg-secondary/20 hover:bg-secondary/30 transition-colors h-full p-0">
                     <div className="aspect-video bg-muted relative overflow-hidden">
                       {post.coverImage ? (
                         <img
                           src={post.coverImage}
                           alt={post.title}
-                          className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                          className="h-full w-full object-cover object-top transition-transform duration-500 group-hover:scale-105"
                         />
                       ) : (
                         <div className="h-full w-full flex items-center justify-center bg-secondary">

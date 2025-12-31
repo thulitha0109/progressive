@@ -15,7 +15,7 @@ export async function POST(req: NextRequest) {
         const artistId = formData.get("artistId") as string
 
         // Podcast specific
-        const hostName = formData.get("hostName") as string
+        // const hostName = formData.get("hostName") as string // Removed in favor of artistId
 
         console.log(`[Upload] Request received: type=${type}, entityType=${entityType}, fileName=${file?.name}, size=${file?.size}`)
 
@@ -31,23 +31,34 @@ export async function POST(req: NextRequest) {
 
         // 1. Handle Podcast Uploads
         if (entityType === "podcast") {
-            if (!hostName) {
+            if (!artistId) {
+                console.error(`[Upload] Artist ID missing for podcast upload`)
                 return NextResponse.json(
-                    { error: "Host name is required for podcasts" },
+                    { error: "Artist ID is required for podcasts" },
                     { status: 400 }
                 )
             }
-            // Generate simple slug for host
-            const hostSlug = hostName
-                .toLowerCase()
-                .trim()
-                .replace(/\s+/g, '-')
-                .replace(/[^\w\-]+/g, '')
 
+            // Get artist slug
+            const artist = await prisma.artist.findUnique({
+                where: { id: artistId },
+                select: { slug: true }
+            })
+
+            if (!artist) {
+                console.error(`[Upload] Artist not found for id=${artistId}`)
+                return NextResponse.json(
+                    { error: "Artist not found" },
+                    { status: 404 }
+                )
+            }
+
+            // Save to podcasts directory but organize by artist slug
+            // e.g. /uploads/podcasts/artist-slug/file.mp3
             uploadPath = await saveUploadedFile(
                 file,
                 UPLOAD_DIRS.PODCASTS,
-                hostSlug
+                artist.slug
             )
         }
         // 2. Handle Blog Uploads

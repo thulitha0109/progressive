@@ -77,7 +77,7 @@ export function UpcomingCarousel({ tracks }: { tracks: Track[] }) {
                                 <img
                                     src={track.artist.imageUrl}
                                     alt={track.artist.name}
-                                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110 opacity-90 group-hover:opacity-100"
+                                    className="h-full w-full object-cover object-top transition-transform duration-500 group-hover:scale-110 opacity-90 group-hover:opacity-100"
                                     loading="lazy"
                                 />
                             ) : (

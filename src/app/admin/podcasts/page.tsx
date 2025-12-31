@@ -38,7 +38,7 @@ export default async function AdminPodcastsPage({ searchParams }: PodcastsPagePr
                     <TableHeader>
                         <TableRow>
                             <TableHead>Title</TableHead>
-                            <TableHead>Host</TableHead>
+                            <TableHead>Artist</TableHead>
                             <TableHead>Created At</TableHead>
                             <TableHead className="text-right">Actions</TableHead>
                         </TableRow>
@@ -47,7 +47,7 @@ export default async function AdminPodcastsPage({ searchParams }: PodcastsPagePr
                         {podcasts.map((podcast) => (
                             <TableRow key={podcast.id}>
                                 <TableCell className="font-medium">{podcast.title}</TableCell>
-                                <TableCell>{podcast.host || "-"}</TableCell>
+                                <TableCell>{podcast.artist?.name || "-"}</TableCell>
                                 <TableCell>
                                     {new Date(podcast.createdAt).toLocaleDateString()}
                                 </TableCell>

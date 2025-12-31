@@ -247,3 +247,24 @@ export async function deleteArtist(id: string) {
         throw new Error("Failed to delete artist")
     }
 }
+
+export async function getFollowedArtists() {
+    const session = await auth()
+    if (!session?.user?.id) return []
+
+    const user = await prisma.user.findUnique({
+        where: { id: session.user.id },
+        select: {
+            followedArtists: {
+                select: {
+                    id: true,
+                    name: true,
+                    slug: true,
+                    imageUrl: true,
+                }
+            }
+        }
+    })
+
+    return user?.followedArtists || []
+}

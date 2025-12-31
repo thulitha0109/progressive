@@ -18,6 +18,7 @@ model User {
   accounts      Account[]
   sessions      Session[]
   likes         Track[]   @relation("UserLikes")
+  followedArtists Artist[] @relation("UserFollows")
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
   posts         BlogPost[]
@@ -68,6 +69,8 @@ model Artist {
   socialLinks    Json?    // { facebook: string, tiktok: string, spotify: string, ... }
   socialProfiles String?  // Deprecated: use socialLinks
   tracks         Track[]
+  podcasts       Podcast[]
+  followers      User[]   @relation("UserFollows")
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 }
@@ -81,6 +84,7 @@ model Genre {
   parent    Genre?   @relation("SubGenres", fields: [parentId], references: [id])
   subGenres Genre[]  @relation("SubGenres")
   tracks    Track[]
+  podcasts  Podcast[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -98,6 +102,7 @@ model Track {
   artist         Artist    @relation(fields: [artistId], references: [id], onDelete: Cascade)
   likedBy        User[]    @relation("UserLikes")
   isFeatured     Boolean   @default(false)
+  sequence       Int       @default(0)
   waveformPeaks  Json?     // Pre-computed waveform peak data for instant rendering
   deletedAt      DateTime?
   createdAt      DateTime  @default(now())
@@ -111,9 +116,19 @@ model Podcast {
   description String
   audioUrl    String
   imageUrl    String?
-  host        String?
+  // host     String? // Removed
   duration    String?
   scheduledFor DateTime @default(now())
+
+  artistId    String?
+  artist      Artist?   @relation(fields: [artistId], references: [id])
+  
+  genreId     String?
+  genre       Genre?    @relation(fields: [genreId], references: [id])
+  
+  sequence    Int       @default(0)
+  isFeatured  Boolean   @default(false)
+
   deletedAt    DateTime?
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt

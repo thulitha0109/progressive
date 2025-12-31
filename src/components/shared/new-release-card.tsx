@@ -84,7 +84,7 @@ export function NewReleaseCard({ track }: { track: Track }) {
                     <img
                         src={track.imageUrl || track.artist.imageUrl || ""}
                         alt={track.title}
-                        className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-110"
+                        className="absolute inset-0 h-full w-full object-cover object-top transition-transform duration-700 ease-out group-hover:scale-110"
                         loading="lazy"
                     />
                 ) : (

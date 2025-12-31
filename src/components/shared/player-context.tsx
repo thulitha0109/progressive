@@ -6,7 +6,9 @@ interface Track {
     id: string
     title: string
     audioUrl: string
+    imageUrl?: string | null
     artist: {
+        id?: string
         name: string
         imageUrl?: string | null
     }

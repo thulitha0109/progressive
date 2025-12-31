@@ -37,6 +37,9 @@ export const metadata: Metadata = {
     index: true,
     follow: true,
   },
+  icons: {
+    icon: '/SVG-05.svg',
+  },
 };
 
 
@@ -64,19 +67,24 @@ export default async function RootLayout({
         <ThemeProvider
           attribute="class"
           defaultTheme="dark"
-          enableSystem
-          disableTransitionOnChange
+          forcedTheme="dark"
+          enableSystem={false}
         >
-          <PlayerProvider>
-            <div className="relative flex min-h-screen flex-col mx-auto max-w-[1400px]">
-              <SiteHeader user={session?.user} />
-              <main className="flex-1">{children}</main>
-              <SiteFooter />
-            </div>
-            <Player />
-          </PlayerProvider>
+          <Providers session={session}>
+            <PlayerProvider>
+              <div className="relative flex min-h-screen flex-col mx-auto max-w-[1400px]">
+                <SiteHeader user={session?.user} />
+                <main className="flex-1">{children}</main>
+                <SiteFooter />
+              </div>
+              <Player />
+              <Toaster />
+            </PlayerProvider>
+          </Providers>
         </ThemeProvider>
       </body>
     </html>
   );
 }
+import { Toaster } from "@/components/ui/sonner"
+import { Providers } from "@/components/shared/providers"

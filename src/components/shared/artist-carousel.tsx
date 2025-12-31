@@ -47,12 +47,12 @@ export function ArtistCarousel({ artists }: ArtistCarouselProps) {
                     {artists.map((artist) => (
                         <SwiperSlide key={artist.id}>
                             <Link href={`/artists/${artist.id}`} className="group text-center block">
-                                <div className="mx-auto mb-4 h-32 w-32 overflow-hidden rounded-full border-2 border-transparent group-hover:border-primary transition-colors">
+                                <div className="mx-auto mb-4 h-32 w-32 overflow-hidden rounded-md border-2 border-transparent group-hover:border-primary transition-colors">
                                     {artist.imageUrl ? (
                                         <img
                                             src={artist.imageUrl}
                                             alt={artist.name}
-                                            className="h-full w-full object-cover"
+                                            className="h-full w-full object-cover object-top"
                                             loading="lazy"
                                         />
                                     ) : (
@@ -75,12 +75,12 @@ export function ArtistCarousel({ artists }: ArtistCarouselProps) {
                 <div className="hidden lg:grid gap-6 grid-cols-6">
                     {artists.map((artist) => (
                         <Link key={artist.id} href={`/artists/${artist.id}`} className="group text-center">
-                            <div className="mx-auto mb-4 h-32 w-32 overflow-hidden rounded-full border-2 border-transparent group-hover:border-primary transition-colors">
+                            <div className="mx-auto mb-4 h-32 w-32 overflow-hidden rounded-md border-2 border-transparent group-hover:border-primary transition-colors">
                                 {artist.imageUrl ? (
                                     <img
                                         src={artist.imageUrl}
                                         alt={artist.name}
-                                        className="h-full w-full object-cover"
+                                        className="h-full w-full object-cover object-top"
                                         loading="lazy"
                                     />
                                 ) : (
@@ -107,12 +107,12 @@ export function ArtistCarousel({ artists }: ArtistCarouselProps) {
                         {artists.map((artist) => (
                             <SwiperSlide key={artist.id}>
                                 <Link href={`/artists/${artist.id}`} className="group text-center block">
-                                    <div className="mx-auto mb-4 h-32 w-32 overflow-hidden rounded-full border-2 border-transparent group-hover:border-primary transition-colors">
+                                    <div className="mx-auto mb-4 h-32 w-32 overflow-hidden rounded-md border-2 border-transparent group-hover:border-primary transition-colors">
                                         {artist.imageUrl ? (
                                             <img
                                                 src={artist.imageUrl}
                                                 alt={artist.name}
-                                                className="h-full w-full object-cover"
+                                                className="h-full w-full object-cover object-top"
                                                 loading="lazy"
                                             />
                                         ) : (

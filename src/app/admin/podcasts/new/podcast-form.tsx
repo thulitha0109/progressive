@@ -1,3 +1,4 @@
+
 "use client"
 
 import { createPodcast } from "@/server/actions/podcasts"
@@ -5,26 +6,47 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { ArrowLeft, Loader2 } from "lucide-react"
 import Link from "next/link"
 import { useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
+import { Switch } from "@/components/ui/switch"
 
-export default function PodcastForm() {
+interface Artist {
+    id: string
+    name: string
+}
+
+interface Genre {
+    id: string
+    name: string
+    parentId?: string | null
+}
+
+export default function PodcastForm({ artists, genres }: { artists: Artist[], genres: Genre[] }) {
+    const [selectedArtist, setSelectedArtist] = useState("")
     const [error, setError] = useState("")
     const [isPending, startTransition] = useTransition()
     const router = useRouter()
     const [uploadProgress, setUploadProgress] = useState(0)
     const [uploadStatus, setUploadStatus] = useState("")
 
-    async function uploadFile(file: File, type: "audio" | "image", hostName: string): Promise<string> {
+    async function uploadFile(file: File, type: "audio" | "image", artistId: string): Promise<string> {
         return new Promise((resolve, reject) => {
             const formData = new FormData()
             formData.append("file", file)
             formData.append("type", type)
             formData.append("entityType", "podcast")
-            formData.append("hostName", hostName)
+            // Pass artistId instead of hostName for podcast now, logic will be handled in route.ts
+            formData.append("artistId", artistId)
 
             const xhr = new XMLHttpRequest()
             xhr.open("POST", "/api/upload")
@@ -65,7 +87,6 @@ export default function PodcastForm() {
 
         // Client-side validation
         const title = formData.get("title") as string
-        const host = formData.get("host") as string
         const audioFile = formData.get("audioFile") as File
         const imageFile = formData.get("imageFile") as File
 
@@ -74,8 +95,8 @@ export default function PodcastForm() {
             return
         }
 
-        if (!host?.trim()) {
-            setError("Please enter a host name")
+        if (!selectedArtist) {
+            setError("Please select an artist")
             return
         }
 
@@ -84,10 +105,10 @@ export default function PodcastForm() {
             return
         }
 
-        // Validate file size (50MB for audio)
-        const MAX_AUDIO_SIZE = 50 * 1024 * 1024
+        // Validate file size (150MB for podcast audio)
+        const MAX_AUDIO_SIZE = 150 * 1024 * 1024
         if (audioFile.size > MAX_AUDIO_SIZE) {
-            setError(`Audio file is too large. Maximum size is 50MB (${(audioFile.size / 1024 / 1024).toFixed(2)}MB)`)
+            setError(`Audio file is too large. Maximum size is 150MB (${(audioFile.size / 1024 / 1024).toFixed(2)}MB)`)
             return
         }
 
@@ -95,14 +116,14 @@ export default function PodcastForm() {
             try {
                 // 1. Upload Audio
                 setUploadStatus("Uploading audio...")
-                const audioUrl = await uploadFile(audioFile, "audio", host)
+                const audioUrl = await uploadFile(audioFile, "audio", selectedArtist)
                 formData.set("audioUrl", audioUrl)
                 formData.delete("audioFile") // Remove file from server action payload
 
                 // 2. Upload Image (if exists)
                 if (imageFile && imageFile.size > 0) {
                     setUploadStatus("Uploading image...")
-                    const imageUrl = await uploadFile(imageFile, "image", host)
+                    const imageUrl = await uploadFile(imageFile, "image", selectedArtist)
                     formData.set("imageUrl", imageUrl)
                     formData.delete("imageFile")
                 }
@@ -156,15 +177,61 @@ export default function PodcastForm() {
                             />
                         </div>
 
+                        <div className="flex items-center space-x-2">
+                            <Switch id="isFeatured" name="isFeatured" disabled={isPending} />
+                            <Label htmlFor="isFeatured">Featured Podcast</Label>
+                        </div>
+
                         <div className="space-y-2">
-                            <Label htmlFor="host">Host</Label>
-                            <Input
-                                id="host"
-                                name="host"
-                                placeholder="Host Name"
-                                required
+                            <Label htmlFor="artistId">Artist</Label>
+                            <Select
+                                value={selectedArtist}
+                                onValueChange={setSelectedArtist}
                                 disabled={isPending}
-                            />
+                            >
+                                <SelectTrigger id="artistId">
+                                    <SelectValue placeholder="Select an artist" />
+                                </SelectTrigger>
+                                <SelectContent className="max-h-[300px]">
+                                    {artists.map((artist) => (
+                                        <SelectItem key={artist.id} value={artist.id}>
+                                            {artist.name}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                            {/* Hidden input to include artistId in FormData */}
+                            <input type="hidden" name="artistId" value={selectedArtist} />
+                        </div>
+
+                        <div className="space-y-2">
+                            <Label htmlFor="genreId">Genre</Label>
+                            <Select
+                                name="genreId"
+                                disabled={isPending}
+                            >
+                                <SelectTrigger id="genreId">
+                                    <SelectValue placeholder="Select a genre (optional)" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="none">None</SelectItem>
+                                    {genres.filter(g => !g.parentId).map((parent) => (
+                                        <div key={parent.id}>
+                                            <SelectItem value={parent.id} className="font-semibold">
+                                                {parent.name}
+                                            </SelectItem>
+                                            {genres
+                                                .filter(g => g.parentId === parent.id)
+                                                .map(sub => (
+                                                    <SelectItem key={sub.id} value={sub.id} className="pl-6 text-muted-foreground">
+                                                        {sub.name}
+                                                    </SelectItem>
+                                                ))
+                                            }
+                                        </div>
+                                    ))}
+                                </SelectContent>
+                            </Select>
                         </div>
 
                         <div className="space-y-2">
@@ -180,6 +247,24 @@ export default function PodcastForm() {
                         </div>
 
                         <div className="space-y-2">
+                            <Label htmlFor="sequence">Sequence No</Label>
+                            <Input
+                                id="sequence"
+                                name="sequence"
+                                type="text"
+                                inputMode="numeric"
+                                pattern="[0-9]*"
+                                placeholder="001"
+                                required
+                                disabled={isPending}
+                                className="font-mono"
+                            />
+                            <p className="text-xs text-muted-foreground">
+                                Order in which the podcast appears (e.g. 001, 002).
+                            </p>
+                        </div>
+
+                        <div className="space-y-2">
                             <Label htmlFor="audioFile">Audio File</Label>
                             <Input
                                 id="audioFile"
@@ -190,7 +275,7 @@ export default function PodcastForm() {
                                 disabled={isPending}
                             />
                             <p className="text-xs text-muted-foreground">
-                                Upload the MP3 file (Max 50MB).
+                                Upload the MP3 file (Max 150MB).
                             </p>
                         </div>
 

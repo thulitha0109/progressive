@@ -50,6 +50,10 @@ export async function getPodcasts(page: number = 1, pageSize: number = 10) {
         prisma.podcast.findMany({
             where: { deletedAt: null },
             orderBy: { scheduledFor: "desc" },
+            include: {
+                artist: true,
+                genre: true,
+            },
             skip,
             take: pageSize,
         }),
@@ -69,6 +73,10 @@ export async function getPodcasts(page: number = 1, pageSize: number = 10) {
 export async function getPodcast(id: string) {
     return await prisma.podcast.findUnique({
         where: { id },
+        include: {
+            artist: true,
+            genre: true,
+        },
     })
 }
 
@@ -76,7 +84,18 @@ export async function createPodcast(formData: FormData) {
 
     const title = formData.get("title") as string
     const description = formData.get("description") as string
-    const host = formData.get("host") as string
+    const artistId = formData.get("artistId") as string // Changed from host
+    const genreId = formData.get("genreId") as string
+    const sequence = parseInt(formData.get("sequence") as string || "0")
+    // Checkbox returns "on" if checked, but explicit passing "true" works too.
+    // Our form might send "on" or nothing if using standard form submit, or we might manipulate it.
+    // The previous implementation used standard form submission.
+    // Let's assume standard behavior: "on" if checked, null if not.
+    // BUT in EditForm we explicitly set it to "true"/"false".
+    // In CreateForm (New), we used <Switch name="isFeatured">.
+    const isFeaturedRaw = formData.get("isFeatured")
+    const isFeatured = isFeaturedRaw === "true" || isFeaturedRaw === "on"
+
     const scheduledForStr = formData.get("scheduledFor") as string
 
     // Check for pre-uploaded URLs
@@ -87,18 +106,8 @@ export async function createPodcast(formData: FormData) {
     const audioFile = formData.get("audioFile") as File
     const imageFile = formData.get("imageFile") as File
 
-    console.log("Podcast Data:", {
-        title,
-        description,
-        host,
-        scheduledForStr,
-        audioUrl: audioUrlFromForm,
-        imageUrl: imageUrlFromForm
-    })
-
-    if (!title || !description || !host) {
-        console.error("Missing required fields for podcast")
-        throw new Error("Title, Description, and Host are required")
+    if (!title || !description || !artistId) {
+        throw new Error("Title, Description, and Artist are required")
     }
 
     // Ensure we have audio (either URL or File)
@@ -106,38 +115,40 @@ export async function createPodcast(formData: FormData) {
         throw new Error("Audio file is required")
     }
 
-    // Validate file sizes if files are provided directly (server-side upload fallback)
-    const MAX_AUDIO_SIZE = 50 * 1024 * 1024 // 50MB
-    const MAX_IMAGE_SIZE = 10 * 1024 * 1024 // 10MB
-
-    if (audioFile && audioFile.size > MAX_AUDIO_SIZE) {
-        throw new Error(`Audio file is too large. Maximum size is 50MB. Your file is ${(audioFile.size / 1024 / 1024).toFixed(2)}MB`)
-    }
-
-    if (imageFile && imageFile.size > MAX_IMAGE_SIZE) {
-        throw new Error(`Image file is too large. Maximum size is 10MB. Your file is ${(imageFile.size / 1024 / 1024).toFixed(2)}MB`)
-    }
-
     try {
+        // Fetch artist to use slug for file paths
+        const artist = await prisma.artist.findUnique({
+            where: { id: artistId },
+            select: { slug: true }
+        })
+
+        if (!artist) {
+            throw new Error("Invalid artist selected")
+        }
+
         // Generate unique slug from title
         const baseSlug = generateSlug(title)
         const slug = await ensureUniqueSlug(baseSlug)
 
-        // Generate host slug for file path
-        const hostSlug = generateSlug(host)
-
-        // Handle Audio Upload
+        // Handle Audio Upload (Server-side fallback)
         let audioUrl = audioUrlFromForm
         if (!audioUrl && audioFile) {
-            audioUrl = await saveUploadedFile(audioFile, UPLOAD_DIRS.PODCASTS, hostSlug)
-            console.log("Audio uploaded successfully (server-side):", audioUrl)
+            // Validate file sizes if files are provided directly
+            const MAX_AUDIO_SIZE = 150 * 1024 * 1024 // 150MB
+            if (audioFile.size > MAX_AUDIO_SIZE) {
+                throw new Error(`Audio file is too large. Maximum size is 150MB.`)
+            }
+            audioUrl = await saveUploadedFile(audioFile, UPLOAD_DIRS.PODCASTS, artist.slug)
         }
 
-        // Handle Image Upload
+        // Handle Image Upload (Server-side fallback)
         let imageUrl = imageUrlFromForm || null
         if (!imageUrl && imageFile && imageFile.size > 0) {
-            imageUrl = await saveUploadedFile(imageFile, UPLOAD_DIRS.PODCASTS, hostSlug)
-            console.log("Image uploaded successfully (server-side):", imageUrl)
+            const MAX_IMAGE_SIZE = 10 * 1024 * 1024 // 10MB
+            if (imageFile.size > MAX_IMAGE_SIZE) {
+                throw new Error(`Image file is too large. Maximum size is 10MB.`)
+            }
+            imageUrl = await saveUploadedFile(imageFile, UPLOAD_DIRS.PODCASTS, artist.slug)
         }
 
         const scheduledFor = scheduledForStr ? new Date(scheduledForStr) : new Date()
@@ -147,7 +158,10 @@ export async function createPodcast(formData: FormData) {
                 title,
                 slug,
                 description,
-                host,
+                artistId,
+                genreId: genreId || null,
+                sequence,
+                isFeatured,
                 audioUrl,
                 imageUrl,
                 scheduledFor,
@@ -167,25 +181,17 @@ export async function createPodcast(formData: FormData) {
 export async function updatePodcast(id: string, formData: FormData) {
     const title = formData.get("title") as string
     const description = formData.get("description") as string
-    const host = formData.get("host") as string
+    const artistId = formData.get("artistId") as string
+    const genreId = formData.get("genreId") as string
+    const sequence = parseInt(formData.get("sequence") as string || "0")
+    const isFeaturedRaw = formData.get("isFeatured")
+    const isFeatured = isFeaturedRaw === "true" || isFeaturedRaw === "on"
     const scheduledForStr = formData.get("scheduledFor") as string
     const audioFile = formData.get("audioFile") as File
     const imageFile = formData.get("imageFile") as File
 
-    if (!title || !description || !host) {
-        throw new Error("Title, Description, and Host are required")
-    }
-
-    // Validate file sizes
-    const MAX_AUDIO_SIZE = 50 * 1024 * 1024 // 50MB
-    const MAX_IMAGE_SIZE = 10 * 1024 * 1024 // 10MB
-
-    if (audioFile && audioFile.size > MAX_AUDIO_SIZE) {
-        throw new Error(`Audio file is too large. Maximum size is 50MB. Your file is ${(audioFile.size / 1024 / 1024).toFixed(2)}MB`)
-    }
-
-    if (imageFile && imageFile.size > MAX_IMAGE_SIZE) {
-        throw new Error(`Image file is too large. Maximum size is 10MB. Your file is ${(imageFile.size / 1024 / 1024).toFixed(2)}MB`)
+    if (!title || !description || !artistId) {
+        throw new Error("Title, Description, and Artist are required")
     }
 
     const scheduledFor = scheduledForStr ? new Date(scheduledForStr) : undefined
@@ -193,11 +199,23 @@ export async function updatePodcast(id: string, formData: FormData) {
     const data: any = {
         title,
         description,
-        host,
+        artistId,
+        genreId: genreId || null,
+        sequence,
+        isFeatured,
         ...(scheduledFor && { scheduledFor }),
     }
 
     try {
+        const artist = await prisma.artist.findUnique({
+            where: { id: artistId },
+            select: { slug: true }
+        })
+
+        if (!artist) {
+            throw new Error("Invalid artist selected")
+        }
+
         // Get current podcast to check if title changed
         const currentPodcast = await prisma.podcast.findUnique({
             where: { id },
@@ -210,19 +228,22 @@ export async function updatePodcast(id: string, formData: FormData) {
             data.slug = await ensureUniqueSlug(baseSlug, id)
         }
 
-        // Generate host slug for file path
-        const hostSlug = generateSlug(host)
-
         // Handle Audio Upload
         if (audioFile && audioFile.size > 0) {
-            data.audioUrl = await saveUploadedFile(audioFile, UPLOAD_DIRS.PODCASTS, hostSlug)
-            console.log("Audio updated successfully:", data.audioUrl)
+            const MAX_AUDIO_SIZE = 150 * 1024 * 1024
+            if (audioFile.size > MAX_AUDIO_SIZE) {
+                throw new Error(`Audio file is too large. Maximum size is 150MB.`)
+            }
+            data.audioUrl = await saveUploadedFile(audioFile, UPLOAD_DIRS.PODCASTS, artist.slug)
         }
 
         // Handle Image Upload
         if (imageFile && imageFile.size > 0) {
-            data.imageUrl = await saveUploadedFile(imageFile, UPLOAD_DIRS.PODCASTS, hostSlug)
-            console.log("Image updated successfully:", data.imageUrl)
+            const MAX_IMAGE_SIZE = 10 * 1024 * 1024
+            if (imageFile.size > MAX_IMAGE_SIZE) {
+                throw new Error(`Image file is too large. Maximum size is 10MB.`)
+            }
+            data.imageUrl = await saveUploadedFile(imageFile, UPLOAD_DIRS.PODCASTS, artist.slug)
         }
 
         await prisma.podcast.update({

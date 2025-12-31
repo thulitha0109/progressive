@@ -9,6 +9,7 @@ interface Track {
     title: string
     audioUrl: string
     artist: {
+        id?: string
         name: string
         imageUrl?: string | null
     }
@@ -32,7 +33,7 @@ export function PlayButton({ track, variant = "default" }: { track: Track, varia
         return (
             <Button
                 size="icon"
-                className="rounded-full h-10 w-10 opacity-0 group-hover:opacity-100 transition-opacity"
+                className="rounded-full h-10 w-10"
                 onClick={handleClick}
             >
                 {isCurrentTrack && isPlaying ? (
