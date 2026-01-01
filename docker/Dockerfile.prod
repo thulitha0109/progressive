@@ -37,7 +37,7 @@ RUN \
   fi
 
 
-RUN npx tsc scripts/seed-prod.ts --outDir scripts/dist --module commonjs --esModuleInterop --skipLibCheck
+RUN npx tsc scripts/seed-prod.ts scripts/init-storage.ts --outDir scripts/dist --module commonjs --esModuleInterop --skipLibCheck
 
 
 # Builder for audiowaveform
