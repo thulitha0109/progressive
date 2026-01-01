@@ -1,8 +1,8 @@
-import { writeFile, mkdir } from "fs/promises"
+import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3"
 import { join } from "path"
 
 /**
- * File upload utility for handling file storage in both dev and production modes
+ * File upload utility for handling file storage in S3 (MinIO)
  */
 
 export const UPLOAD_DIRS = {
@@ -15,45 +15,34 @@ export const UPLOAD_DIRS = {
     IMAGES: "images",
 } as const
 
-/**
- * Get the absolute path to the uploads directory
- */
-export function getUploadsDir(): string {
-    return join(process.cwd(), "public", "uploads")
-}
+// Initialize S3 Client
+const s3Client = new S3Client({
+    region: process.env.S3_REGION || "us-east-1",
+    endpoint: process.env.S3_ENDPOINT || "http://localhost:9000",
+    credentials: {
+        accessKeyId: process.env.S3_ACCESS_KEY || "minioadmin",
+        secretAccessKey: process.env.S3_SECRET_KEY || "minioadminpassword",
+    },
+    forcePathStyle: true, // Required for MinIO
+})
 
-/**
- * Get the absolute path to a specific upload subdirectory
- */
-export function getUploadSubDir(subDir: string, ...paths: string[]): string {
-    return join(getUploadsDir(), subDir, ...paths)
-}
-
-/**
- * Ensure a directory exists, creating it recursively if needed
- */
-export async function ensureDir(dirPath: string): Promise<void> {
-    try {
-        await mkdir(dirPath, { recursive: true })
-    } catch (error) {
-        console.error(`Failed to create directory ${dirPath}:`, error)
-        throw new Error(`Failed to create upload directory: ${error}`)
-    }
-}
+const BUCKET_NAME = process.env.S3_BUCKET_NAME || "progressive-uploads"
 
 /**
  * Generate a unique filename with timestamp prefix
  */
 export function generateUniqueFilename(originalFilename: string): string {
-    return `${Date.now()}-${originalFilename}`
+    // Sanitize filename to remove special chars that might break S3 keys
+    const sanitized = originalFilename.replace(/[^a-zA-Z0-9.-]/g, '_')
+    return `${Date.now()}-${sanitized}`
 }
 
 /**
- * Save a file to the specified directory
+ * Save a file to S3
  * @param file - The File object to save
- * @param subDir - Subdirectory under uploads/ (e.g., 'artists', 'podcasts')
- * @param additionalPaths - Additional path segments (e.g., artistId)
- * @returns The URL path to access the file (e.g., '/api/uploads/artists/123/file.mp3')
+ * @param subDir - Subdirectory/Prefix (e.g., 'artists', 'podcasts')
+ * @param additionalPaths - Additional path segments
+ * @returns The public URL path to access the file
  */
 export async function saveUploadedFile(
     file: File,
@@ -65,28 +54,52 @@ export async function saveUploadedFile(
     }
 
     try {
-        // Generate unique filename
         const uniqueFilename = generateUniqueFilename(file.name)
 
-        // Create full directory path
-        const uploadDir = getUploadSubDir(subDir, ...additionalPaths)
-        await ensureDir(uploadDir)
+        // Construct S3 Key (path)
+        // e.g., artists/123/timestamp-file.jpg
+        const keyPath = [subDir, ...additionalPaths, uniqueFilename].filter(Boolean).join("/")
 
         // Convert file to buffer
         const bytes = await file.arrayBuffer()
         const buffer = Buffer.from(bytes)
 
-        // Write file
-        const filePath = join(uploadDir, uniqueFilename)
-        await writeFile(filePath, buffer)
+        // Upload to S3
+        const command = new PutObjectCommand({
+            Bucket: BUCKET_NAME,
+            Key: keyPath,
+            Body: buffer,
+            ContentType: file.type,
+            // ACL: "public-read", // MinIO buckets are usually private by default, configured via policy. 
+            // We assume the bucket is configured to allow public reads for these paths.
+        })
 
+        await s3Client.send(command)
 
+        // Return URL
+        // If it's a known public bucket, we can construct the URL directly.
+        // Or proxy it through Next.js if the bucket is private.
+        // For MinIO dev setup, usually: http://localhost:9000/bucket-name/key
+        // But for production via Nginx/CDN, it might be different.
+        // Let's assume a direct public URL structure for now, or map it to an internal API proxy?
+        // The previous implementation returned `/api/uploads/...`.
+        // If we want to keep frontend compatible without changes, we might need to proxy.
+        // HOWEVER, for performance, direct S3/MinIO URLs are better.
+        // Let's return the relative path `/uploads/s3/...` and have a redirect? 
+        // Or better: Return the full S3 URL if possible, or a predictable path we can route.
 
-        // Return URL path using API route
-        const urlParts = [subDir, ...additionalPaths, uniqueFilename].filter(Boolean)
-        return `/api/uploads/${urlParts.join("/")}`
+        // Simpler approach for transition: 
+        // Return a URL that Nginx can proxy to MinIO.
+        // e.g. /media/artists/123/file.jpg -> proxy_pass http://minio/bucket/artists/123/file.jpg
+
+        // Let's use the standard MinIO path structure:
+        // /bucket-name/key
+        // But to make it cleaner on frontend:
+        const endpoint = process.env.NEXT_PUBLIC_S3_PUBLIC_URL || process.env.S3_ENDPOINT || "http://localhost:9000"
+        return `${endpoint}/${BUCKET_NAME}/${keyPath}`
+
     } catch (error) {
-        console.error("Failed to save file:", error)
+        console.error("Failed to save file to S3:", error)
         throw new Error(`Failed to save file: ${error}`)
     }
 }

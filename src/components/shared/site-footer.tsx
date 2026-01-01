@@ -12,8 +12,7 @@ export function SiteFooter() {
                     {/* Branding Section */}
                     <div className="space-y-4">
                         <Link href="/" className="flex items-center space-x-2">
-                            <Music2 className="h-6 w-6" />
-                            <span className="font-bold text-xl">Progressive.lk</span>
+                            <img src="/SVG-03.svg" alt="Progressive.lk" className="h-8 w-auto invert dark:invert-0" />
                         </Link>
                         <p className="text-sm text-muted-foreground">
                             The future of sound. Discover exclusive tracks, upcoming releases, and the artists
@@ -88,46 +87,46 @@ export function SiteFooter() {
                                 href="https://facebook.com"
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="text-muted-foreground hover:text-primary transition-colors"
+                                className="opacity-70 hover:opacity-100 transition-opacity"
                                 aria-label="Facebook"
                             >
-                                <Facebook className="h-5 w-5" />
-                            </Link>
-                            <Link
-                                href="https://twitter.com"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-muted-foreground hover:text-primary transition-colors"
-                                aria-label="Twitter"
-                            >
-                                <Twitter className="h-5 w-5" />
+                                <img src="/images/ICONS/fb.svg" alt="Facebook" className="h-6 w-6 invert dark:invert-0" />
                             </Link>
                             <Link
                                 href="https://instagram.com"
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="text-muted-foreground hover:text-primary transition-colors"
+                                className="opacity-70 hover:opacity-100 transition-opacity"
                                 aria-label="Instagram"
                             >
-                                <Instagram className="h-5 w-5" />
+                                <img src="/images/ICONS/instagram.svg" alt="Instagram" className="h-6 w-6 invert dark:invert-0" />
                             </Link>
                             <Link
                                 href="https://youtube.com"
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="text-muted-foreground hover:text-primary transition-colors"
+                                className="opacity-70 hover:opacity-100 transition-opacity"
                                 aria-label="YouTube"
                             >
-                                <Youtube className="h-5 w-5" />
+                                <img src="/images/ICONS/youtube.svg" alt="YouTube" className="h-6 w-6 invert dark:invert-0" />
                             </Link>
                             <Link
                                 href="https://soundcloud.com"
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="text-muted-foreground hover:text-primary transition-colors"
+                                className="opacity-70 hover:opacity-100 transition-opacity"
                                 aria-label="SoundCloud"
                             >
-                                <Music2 className="h-5 w-5" />
+                                <img src="/images/ICONS/soundcloud.svg" alt="SoundCloud" className="h-6 w-6 invert dark:invert-0" />
+                            </Link>
+                            <Link
+                                href="https://mixcloud.com"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="opacity-70 hover:opacity-100 transition-opacity"
+                                aria-label="Mixcloud"
+                            >
+                                <img src="/images/ICONS/mixcloud.svg" alt="Mixcloud" className="h-6 w-6 invert dark:invert-0" />
                             </Link>
                         </div>
                         <p className="text-sm text-muted-foreground mt-4">
