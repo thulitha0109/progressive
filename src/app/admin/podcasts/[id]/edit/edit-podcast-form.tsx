@@ -67,6 +67,10 @@ export default function EditPodcastForm({ podcast, artists, genres }: EditPodcas
             // Redirect is handled in server action, but refreshes help client state
             // router.push("/admin/podcasts") 
         } catch (error) {
+            // Checks for Next.js redirect error (which is thrown as an error)
+            if (error instanceof Error && (error.message === "NEXT_REDIRECT" || error.message.includes("NEXT_REDIRECT"))) {
+                return
+            }
             console.error(error)
             alert("Failed to update podcast")
         } finally {
