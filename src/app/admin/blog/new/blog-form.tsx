@@ -183,7 +183,7 @@ export default function NewBlogPostForm({ categories }: { categories: Category[]
                                         disabled={isPending}
                                     />
                                     <p className="text-xs text-muted-foreground">
-                                        Upload cover image (optional, Max 10MB)
+                                        Upload cover image (optional, Max 2MB)
                                     </p>
                                 </div>
 

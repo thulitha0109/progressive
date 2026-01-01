@@ -105,10 +105,10 @@ export default function PodcastForm({ artists, genres }: { artists: Artist[], ge
             return
         }
 
-        // Validate file size (150MB for podcast audio)
-        const MAX_AUDIO_SIZE = 150 * 1024 * 1024
+        // Validate file size (100MB for podcast audio)
+        const MAX_AUDIO_SIZE = 100 * 1024 * 1024
         if (audioFile.size > MAX_AUDIO_SIZE) {
-            setError(`Audio file is too large. Maximum size is 150MB (${(audioFile.size / 1024 / 1024).toFixed(2)}MB)`)
+            setError(`Audio file is too large. Maximum size is 100MB (${(audioFile.size / 1024 / 1024).toFixed(2)}MB)`)
             return
         }
 
@@ -275,7 +275,7 @@ export default function PodcastForm({ artists, genres }: { artists: Artist[], ge
                                 disabled={isPending}
                             />
                             <p className="text-xs text-muted-foreground">
-                                Upload the MP3 file (Max 150MB).
+                                Upload the MP3 file (Max 100MB).
                             </p>
                         </div>
 
@@ -289,7 +289,7 @@ export default function PodcastForm({ artists, genres }: { artists: Artist[], ge
                                 disabled={isPending}
                             />
                             <p className="text-xs text-muted-foreground">
-                                Upload cover art (optional, Max 10MB).
+                                Upload cover art (optional, Max 2MB).
                             </p>
                         </div>
 

@@ -101,6 +101,7 @@ export function EventEditForm({ event }: { event: EventWithTickets }) {
                                 value={imageUrl}
                                 onChange={setImageUrl}
                                 folder="events"
+                                helperText="Max 2MB"
                             />
                             {/* Hidden input to ensure value is submitted if JS falls back (though we intercept action) */}
                             <input type="hidden" name="coverImage" value={imageUrl} />

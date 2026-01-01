@@ -67,6 +67,7 @@ export default function ShopForm() {
                             onChange={setImageUrl}
                             disabled={isPending}
                             folder="shops"
+                            helperText="Max 2MB"
                         />
                         <input type="hidden" name="imageUrl" value={imageUrl} />
                     </div>

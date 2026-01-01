@@ -76,6 +76,7 @@ export function ShopEditForm({ shop }: { shop: ShopWithDetails }) {
                             value={imageUrl}
                             onChange={setImageUrl}
                             folder="shops"
+                            helperText="Max 2MB"
                         />
                         <input type="hidden" name="imageUrl" value={imageUrl} />
                     </div>

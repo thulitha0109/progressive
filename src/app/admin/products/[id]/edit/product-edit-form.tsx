@@ -129,6 +129,7 @@ export function ProductEditForm({ product, shops }: { product: Product, shops: S
                                     onChange={(url) => setImageUrl([...imageUrl, url])}
                                     folder="products"
                                     className="w-full"
+                                    helperText="Max 2MB"
                                 />
                             </div>
                         </div>

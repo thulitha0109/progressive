@@ -222,7 +222,7 @@ export default function EditBlogPostForm({
                                         disabled={isPending}
                                     />
                                     <p className="text-xs text-muted-foreground">
-                                        Upload new cover image (optional, Max 10MB)
+                                        Upload new cover image (optional, Max 2MB)
                                     </p>
                                 </div>
 

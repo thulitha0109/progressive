@@ -12,6 +12,7 @@ interface ImageUploadProps {
     disabled?: boolean
     className?: string
     folder?: string
+    helperText?: string
 }
 
 export function ImageUpload({
@@ -19,7 +20,8 @@ export function ImageUpload({
     onChange,
     disabled,
     className,
-    folder = "images"
+    folder = "images",
+    helperText,
 }: ImageUploadProps) {
     const [isUploading, setIsUploading] = useState(false)
     const [progress, setProgress] = useState(0)
@@ -31,30 +33,58 @@ export function ImageUpload({
         setIsUploading(true)
         setProgress(0)
 
-        // Create FormData
-        const formData = new FormData()
-        formData.append("file", file)
-        formData.append("type", folder)
-
         try {
+            // 1. Compress Image
+            console.log(`Original size: ${(file.size / 1024 / 1024).toFixed(2)} MB`)
+
+            // Import dynamically to avoid SSR issues if any (though likely fine in use client)
+            const imageCompression = (await import("browser-image-compression")).default
+
+            const options = {
+                maxSizeMB: 1,           // Max 1MB
+                maxWidthOrHeight: 1920, // Max 1920px
+                useWebWorker: true,
+                onProgress: (p: number) => setProgress(p / 2) // Spending 50% budget on compression
+            }
+
+            let uploadFile = file
+            try {
+                uploadFile = await imageCompression(file, options)
+                console.log(`Compressed size: ${(uploadFile.size / 1024 / 1024).toFixed(2)} MB`)
+            } catch (error) {
+                console.warn("Compression failed, using original file:", error)
+            }
+
+            // 2. Get Presigned URL
+            // Import server action dynamically or use from top level? Top level is cleaner but let's do top level import.
+            // Wait, I can't add imports with replace_file_content easily if I only target this block.
+            // I will add the import in a separate tool call or use the full file replacement for cleaner code.
+            // For now, let's assume I'll add the import at the top.
+            const { getPresignedUrl } = await import("@/server/actions/s3-sign")
+
+            const { signedUrl, publicUrl } = await getPresignedUrl(uploadFile.name, uploadFile.type, folder)
+
+            // 3. Upload to S3
             const xhr = new XMLHttpRequest()
-            xhr.open("POST", "/api/upload")
+            xhr.open("PUT", signedUrl)
+            xhr.setRequestHeader("Content-Type", uploadFile.type)
 
             xhr.upload.onprogress = (event) => {
                 if (event.lengthComputable) {
                     const percentComplete = (event.loaded / event.total) * 100
-                    setProgress(percentComplete)
+                    // Map upload progress to 50-100% range
+                    setProgress(50 + (percentComplete / 2))
                 }
             }
 
             xhr.onload = () => {
                 if (xhr.status === 200) {
-                    const response = JSON.parse(xhr.responseText)
-                    onChange(response.url)
+                    onChange(publicUrl)
+                    setIsUploading(false)
                 } else {
-                    console.error("Upload failed")
+                    console.error("Upload failed", xhr.statusText)
+                    setIsUploading(false)
                 }
-                setIsUploading(false)
             }
 
             xhr.onerror = () => {
@@ -62,7 +92,8 @@ export function ImageUpload({
                 setIsUploading(false)
             }
 
-            xhr.send(formData)
+            xhr.send(uploadFile)
+
         } catch (error) {
             console.error("Upload error:", error)
             setIsUploading(false)
@@ -102,6 +133,12 @@ export function ImageUpload({
                     className="flex-1"
                 />
             </div>
+            {helperText && (
+                <p className="text-xs text-muted-foreground">{helperText}</p>
+            )}
+            {!helperText && (
+                <p className="text-xs text-muted-foreground">Max 2MB</p>
+            )}
             {isUploading && (
                 <div className="space-y-1">
                     <div className="flex justify-between text-xs text-muted-foreground">

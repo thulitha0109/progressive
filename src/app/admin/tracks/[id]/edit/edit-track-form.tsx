@@ -210,7 +210,7 @@ export default function EditTrackForm({ track, artists, genres }: { track: Track
                                 disabled={isPending}
                             />
                             <p className="text-xs text-muted-foreground">
-                                Upload a new audio file to replace the existing one (Max 150MB).
+                                Upload a new audio file to replace the existing one (Max 100MB).
                             </p>
                             {track.audioUrl && (
                                 <div className="mt-2 p-2 bg-secondary/20 rounded text-sm break-all">
@@ -229,7 +229,7 @@ export default function EditTrackForm({ track, artists, genres }: { track: Track
                                 disabled={isPending}
                             />
                             <p className="text-xs text-muted-foreground">
-                                Upload a new cover image to replace the existing one (Max 10MB).
+                                Upload a new cover image to replace the existing one (Max 2MB).
                             </p>
                             {track.imageUrl && (
                                 <div className="mt-2">

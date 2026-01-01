@@ -37,38 +37,55 @@ export default function TrackForm({ artists, genres }: { artists: Artist[], genr
     const [uploadStatus, setUploadStatus] = useState("")
 
     async function uploadFile(file: File, type: "audio" | "image", artistId: string): Promise<string> {
-        return new Promise((resolve, reject) => {
-            const formData = new FormData()
-            formData.append("file", file)
-            formData.append("artistId", artistId)
-            formData.append("type", type)
+        return new Promise(async (resolve, reject) => {
+            try {
+                // Get Presigned URL
+                const { getPresignedUrl } = await import("@/server/actions/s3-sign")
+                // Use a folder structure like: artists/slug/filename
+                // But we don't have the slug here easily without a db call or passing it in.
+                // The current `s3-sign` puts it in `uploads/timestamp-file`.
+                // Ideally we want `artists/slug/...`.
+                // We can pass `artists` as the folder, but the `s3-sign` action might need to be smarter if we want exact structure.
+                // For now, let's trust `s3-sign` to handle "artists" folder, and the filename uniqueness.
+                // The original logic relied on `saveUploadedFile` to fetch slug.
+                // If we want strict paths, we should update `getPresignedUrl` to take a path or fetch the artist slug.
+                // Or we can just use "artists" folder and not worry about sub-slug folders for now (flat structure in artists/).
+                // OR we pass the artist ID and let server action resolve it?
+                // Let's stick to "artists" folder for simplicity in this optimization phase.
 
-            const xhr = new XMLHttpRequest()
-            xhr.open("POST", "/api/upload")
+                const folder = type === "audio" ? "artists" : "images" // Or specific folder logic
 
-            xhr.upload.onprogress = (event) => {
-                if (event.lengthComputable) {
-                    const percentComplete = (event.loaded / event.total) * 100
-                    if (type === "audio") {
-                        setUploadProgress(percentComplete)
+                const { signedUrl, publicUrl } = await getPresignedUrl(file.name, file.type, folder)
+
+                const xhr = new XMLHttpRequest()
+                xhr.open("PUT", signedUrl)
+                xhr.setRequestHeader("Content-Type", file.type)
+
+                xhr.upload.onprogress = (event) => {
+                    if (event.lengthComputable) {
+                        const percentComplete = (event.loaded / event.total) * 100
+                        if (type === "audio") {
+                            setUploadProgress(percentComplete)
+                        }
                     }
                 }
-            }
 
-            xhr.onload = () => {
-                if (xhr.status === 200) {
-                    const response = JSON.parse(xhr.responseText)
-                    resolve(response.url)
-                } else {
+                xhr.onload = () => {
+                    if (xhr.status === 200) {
+                        resolve(publicUrl)
+                    } else {
+                        reject(new Error(`Upload failed: ${xhr.statusText}`))
+                    }
+                }
+
+                xhr.onerror = () => {
                     reject(new Error("Upload failed"))
                 }
-            }
 
-            xhr.onerror = () => {
-                reject(new Error("Upload failed"))
+                xhr.send(file)
+            } catch (err) {
+                reject(err)
             }
-
-            xhr.send(formData)
         })
     }
 
@@ -106,10 +123,10 @@ export default function TrackForm({ artists, genres }: { artists: Artist[], genr
             return
         }
 
-        // Validate file size (50MB for audio)
-        const MAX_AUDIO_SIZE = 50 * 1024 * 1024
+        // Validate file size (100MB for audio)
+        const MAX_AUDIO_SIZE = 100 * 1024 * 1024
         if (audioFile.size > MAX_AUDIO_SIZE) {
-            setError(`Audio file is too large. Maximum size is 50MB (${(audioFile.size / 1024 / 1024).toFixed(2)}MB)`)
+            setError(`Audio file is too large. Maximum size is 100MB (${(audioFile.size / 1024 / 1024).toFixed(2)}MB)`)
             return
         }
 
@@ -241,7 +258,7 @@ export default function TrackForm({ artists, genres }: { artists: Artist[], genr
                                 disabled={isPending}
                             />
                             <p className="text-xs text-muted-foreground">
-                                Upload the MP3 file (Max 50MB).
+                                Upload the MP3 file (Max 100MB).
                             </p>
                         </div>
 
@@ -255,7 +272,7 @@ export default function TrackForm({ artists, genres }: { artists: Artist[], genr
                                 disabled={isPending}
                             />
                             <p className="text-xs text-muted-foreground">
-                                Upload cover art (optional, Max 10MB).
+                                Upload cover art (optional, Max 2MB).
                             </p>
                         </div>
 

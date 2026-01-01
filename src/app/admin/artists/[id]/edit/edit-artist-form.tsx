@@ -193,7 +193,7 @@ export default function EditArtistForm({ artist }: { artist: Artist }) {
                                 disabled={isPending}
                             />
                             <p className="text-xs text-muted-foreground">
-                                Upload new image (optional, Max 10MB)
+                                Upload new image (optional, Max 2MB, Recommended 500x500px)
                             </p>
                         </div>
 

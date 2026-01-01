@@ -192,7 +192,7 @@ export default function EditPodcastForm({ podcast, artists, genres }: EditPodcas
                     disabled={isLoading}
                 />
                 <p className="text-xs text-muted-foreground">
-                    Max 150MB. Upload a new file to replace usages.
+                    Max 100MB. Upload a new file to replace usages.
                 </p>
             </div>
 
@@ -205,6 +205,9 @@ export default function EditPodcastForm({ podcast, artists, genres }: EditPodcas
                     accept="image/*"
                     disabled={isLoading}
                 />
+                <p className="text-xs text-muted-foreground">
+                    Upload new cover (optional, Max 2MB).
+                </p>
                 {podcast.imageUrl && (
                     <div className="mt-2 text-sm text-muted-foreground">
                         Current: <a href={podcast.imageUrl} target="_blank" className="underline">View Image</a>

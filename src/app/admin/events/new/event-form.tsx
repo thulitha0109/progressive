@@ -79,6 +79,7 @@ export default function EventForm() {
                             onChange={setImageUrl}
                             disabled={isPending}
                             folder="events"
+                            helperText="Max 2MB"
                         />
                         <input type="hidden" name="coverImage" value={imageUrl} />
                     </div>

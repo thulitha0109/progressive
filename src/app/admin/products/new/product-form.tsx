@@ -92,6 +92,7 @@ export default function ProductForm({ shops }: { shops: Shop[] }) {
                             onChange={setImageUrl}
                             disabled={isPending}
                             folder="products"
+                            helperText="Max 2MB"
                         />
                         <input type="hidden" name="imageUrl" value={imageUrl} />
                     </div>
