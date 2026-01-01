@@ -191,13 +191,21 @@ export async function createTrack(formData: FormData) {
 
         // Generate waveform peaks asynchronously (don't block the response)
         if (audioUrl) {
-            // Remove '/api/' prefix from audioUrl if present (e.g., '/api/uploads/...' -> '/uploads/...')
-            const cleanAudioUrl = audioUrl.startsWith('/api/') ? audioUrl.replace('/api/', '/') : audioUrl
-            const audioFilePath = path.join(process.cwd(), 'public', cleanAudioUrl)
+            let audioFilePath: string
+
+            // Determine if it's a local file (legacy) or S3/Proxy URL
+            if (audioUrl.startsWith('/s3-storage') || audioUrl.startsWith('http')) {
+                // Pass URL directly to waveform generator (it handles downloading)
+                audioFilePath = audioUrl
+            } else {
+                // Legacy local file in public directory
+                const cleanAudioUrl = audioUrl.startsWith('/api/') ? audioUrl.replace('/api/', '/') : audioUrl
+                audioFilePath = path.join(process.cwd(), 'public', cleanAudioUrl)
+            }
 
             console.log(`[WAVEFORM] Starting peak generation for track ${track.id}`)
             console.log(`[WAVEFORM] Audio URL: ${audioUrl}`)
-            console.log(`[WAVEFORM] File path: ${audioFilePath}`)
+            console.log(`[WAVEFORM] Input path for generator: ${audioFilePath}`)
 
             generateWaveformPeaks(audioFilePath, 1000)
                 .then(async (peaks) => {

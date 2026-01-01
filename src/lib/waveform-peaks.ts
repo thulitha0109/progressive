@@ -32,10 +32,20 @@ export async function generateWaveformPeaks(
     let tempFilePath: string | null = null
 
     try {
+        let downloadUrl = audioPath
+
+        // Handle relative proxy URLs (e.g. /s3-storage/...) by rewriting to internal MinIO
+        if (audioPath.startsWith('/s3-storage')) {
+            // Replace /s3-storage with http://minio:9000
+            // Example: /s3-storage/bucket/key -> http://minio:9000/bucket/key
+            downloadUrl = audioPath.replace('/s3-storage', 'http://minio:9000')
+            console.log(`[WAVEFORM] Rewrote proxy URL to internal: ${downloadUrl}`)
+        }
+
         // Handle URL inputs (S3/MinIO)
-        if (audioPath.startsWith('http')) {
-            console.log(`[WAVEFORM] Downloading remote file: ${audioPath}`)
-            const response = await fetch(audioPath)
+        if (downloadUrl.startsWith('http')) {
+            console.log(`[WAVEFORM] Downloading remote file: ${downloadUrl}`)
+            const response = await fetch(downloadUrl)
             if (!response.ok) {
                 console.error(`[WAVEFORM] Failed to fetch audio file: ${response.statusText}`)
                 return null
@@ -43,7 +53,7 @@ export async function generateWaveformPeaks(
 
             // Create temp file
             const tempDir = os.tmpdir()
-            const ext = path.extname(new URL(audioPath).pathname) || '.mp3'
+            const ext = path.extname(new URL(downloadUrl).pathname) || '.mp3'
             tempFilePath = path.join(tempDir, `waveform-${Date.now()}${ext}`)
 
             // Stream to file
