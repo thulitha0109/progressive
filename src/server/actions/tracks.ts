@@ -352,9 +352,21 @@ export async function updateTrack(id: string, formData: FormData) {
 
         // Generate waveform peaks if audio was updated
         if (data.audioUrl) {
-            // Remove '/api/' prefix from audioUrl if present
-            const cleanAudioUrl = data.audioUrl.startsWith('/api/') ? data.audioUrl.replace('/api/', '/') : data.audioUrl
-            const audioFilePath = path.join(process.cwd(), 'public', cleanAudioUrl)
+            let audioFilePath: string
+            const audioUrl = data.audioUrl
+
+            // Determine if it's a local file (legacy) or S3/Proxy URL
+            if (audioUrl.startsWith('/s3-storage') || audioUrl.startsWith('http')) {
+                audioFilePath = audioUrl
+            } else {
+                const cleanAudioUrl = audioUrl.startsWith('/api/') ? audioUrl.replace('/api/', '/') : audioUrl
+                audioFilePath = path.join(process.cwd(), 'public', cleanAudioUrl)
+            }
+
+            console.log(`[WAVEFORM-UPDATE] Starting peak generation for track ${id}`)
+            console.log(`[WAVEFORM-UPDATE] Audio URL: ${audioUrl}`)
+            console.log(`[WAVEFORM-UPDATE] Input path for generator: ${audioFilePath}`)
+
             generateWaveformPeaks(audioFilePath, 1000)
                 .then(async (peaks) => {
                     if (peaks) {
