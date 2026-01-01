@@ -4,6 +4,8 @@ import { prisma } from "@/lib/prisma"
 import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
 import { saveUploadedFile, UPLOAD_DIRS } from "@/lib/file-upload"
+import { generateWaveformPeaks } from "@/lib/waveform-peaks"
+import path from "path"
 
 /**
  * Generate URL-friendly slug from a string
@@ -153,7 +155,7 @@ export async function createPodcast(formData: FormData) {
 
         const scheduledFor = scheduledForStr ? new Date(scheduledForStr) : new Date()
 
-        await prisma.podcast.create({
+        const podcast = await prisma.podcast.create({
             data: {
                 title,
                 slug,
@@ -167,6 +169,33 @@ export async function createPodcast(formData: FormData) {
                 scheduledFor,
             },
         })
+
+        // Generate waveform peaks asynchronously
+        if (audioUrl) {
+            let audioFilePath: string
+
+            // Determine if it's a local file (legacy) or S3/Proxy URL
+            if (audioUrl.startsWith('/s3-storage') || audioUrl.startsWith('http')) {
+                audioFilePath = audioUrl
+            } else {
+                const cleanAudioUrl = audioUrl.startsWith('/api/') ? audioUrl.replace('/api/', '/') : audioUrl
+                audioFilePath = path.join(process.cwd(), 'public', cleanAudioUrl)
+            }
+
+            console.log(`[WAVEFORM] Starting peak generation for podcast ${podcast.id}`)
+
+            generateWaveformPeaks(audioFilePath, 1000)
+                .then(async (peaks) => {
+                    if (peaks) {
+                        await prisma.podcast.update({
+                            where: { id: podcast.id },
+                            data: { waveformPeaks: peaks },
+                        })
+                        console.log(`[WAVEFORM] ✅ Peaks saved for podcast: ${podcast.id}`)
+                    }
+                })
+                .catch(err => console.error(`[WAVEFORM] ❌ Failed podcast peaks: ${err}`))
+        }
 
         revalidatePath("/admin/podcasts")
     } catch (error) {
@@ -250,6 +279,31 @@ export async function updatePodcast(id: string, formData: FormData) {
             where: { id },
             data,
         })
+
+        // Generate waveforms if audio updated
+        if (data.audioUrl) {
+            let audioFilePath: string
+            const audioUrl = data.audioUrl
+
+            if (audioUrl.startsWith('/s3-storage') || audioUrl.startsWith('http')) {
+                audioFilePath = audioUrl
+            } else {
+                const cleanAudioUrl = audioUrl.startsWith('/api/') ? audioUrl.replace('/api/', '/') : audioUrl
+                audioFilePath = path.join(process.cwd(), 'public', cleanAudioUrl)
+            }
+
+            generateWaveformPeaks(audioFilePath, 1000)
+                .then(async (peaks) => {
+                    if (peaks) {
+                        await prisma.podcast.update({
+                            where: { id },
+                            data: { waveformPeaks: peaks },
+                        })
+                        console.log(`[WAVEFORM] ✅ Peaks updated for podcast: ${id}`)
+                    }
+                })
+                .catch(err => console.error(`[WAVEFORM] ❌ Failed podcast peaks: ${err}`))
+        }
 
         revalidatePath("/admin/podcasts")
     } catch (error) {
