@@ -95,8 +95,14 @@ export async function saveUploadedFile(
         // Let's use the standard MinIO path structure:
         // /bucket-name/key
         // But to make it cleaner on frontend:
-        const endpoint = process.env.NEXT_PUBLIC_S3_PUBLIC_URL || process.env.S3_ENDPOINT || "http://localhost:9000"
-        return `${endpoint}/${BUCKET_NAME}/${keyPath}`
+        // Use the configured public URL (proxy path) or fall back to logical defaults
+        // In docker-compose, we set NEXT_PUBLIC_S3_PUBLIC_URL=/s3-storage
+        const publicBaseUrl = process.env.NEXT_PUBLIC_S3_PUBLIC_URL || "/s3-storage"
+
+        // Ensure no double slashes
+        const normalizedBase = publicBaseUrl.endsWith('/') ? publicBaseUrl.slice(0, -1) : publicBaseUrl
+
+        return `${normalizedBase}/${BUCKET_NAME}/${keyPath}`
 
     } catch (error) {
         console.error("Failed to save file to S3:", error)
