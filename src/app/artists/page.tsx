@@ -1,3 +1,4 @@
+import Image from "next/image"
 import Link from "next/link"
 import { getArtists } from "@/server/actions/artists"
 import { User } from "lucide-react"
@@ -22,10 +23,12 @@ export default async function ArtistsPage() {
                             <Card className="overflow-hidden hover:bg-accent/50 transition-colors h-full p-0 border-0">
                                 <div className="aspect-square relative bg-muted flex items-center justify-center">
                                     {artist.imageUrl ? (
-                                        <img
+                                        <Image
                                             src={artist.imageUrl}
                                             alt={artist.name}
-                                            className="h-full w-full object-cover object-top"
+                                            fill
+                                            className="object-cover object-top"
+                                            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
                                         />
                                     ) : (
                                         <User className="h-16 w-16 text-muted-foreground" />

@@ -1,5 +1,7 @@
 "use client"
 
+import Image from "next/image"
+
 import { usePlayer } from "@/components/shared/player-context"
 import { LikeButton } from "@/components/shared/like-button"
 import { PlayButton } from "@/components/shared/play-button"
@@ -81,11 +83,12 @@ export function NewReleaseCard({ track }: { track: Track }) {
             <div className="relative w-28 sm:w-40 self-stretch shrink-0 overflow-hidden rounded-md shadow-lg isolate ring-1 ring-white/10 ring-inset">
                 <div className="absolute inset-0 bg-gradient-to-br from-black/20 to-transparent z-10 pointer-events-none" />
                 {track.imageUrl || track.artist.imageUrl ? (
-                    <img
+                    <Image
                         src={track.imageUrl || track.artist.imageUrl || ""}
                         alt={track.title}
-                        className="absolute inset-0 h-full w-full object-cover object-top transition-transform duration-700 ease-out group-hover:scale-110"
-                        loading="lazy"
+                        fill
+                        className="object-cover object-top transition-transform duration-700 ease-out group-hover:scale-110"
+                        sizes="(max-width: 640px) 112px, 160px"
                     />
                 ) : (
                     <div className="h-full w-full bg-secondary flex items-center justify-center">

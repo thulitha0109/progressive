@@ -1,5 +1,7 @@
 "use client"
 
+import Image from "next/image"
+
 import { Swiper, SwiperSlide } from "swiper/react"
 import { FreeMode } from "swiper/modules"
 import "swiper/css"
@@ -74,11 +76,12 @@ export function UpcomingCarousel({ tracks }: { tracks: Track[] }) {
                         <div className="group relative aspect-square overflow-hidden rounded-md bg-muted shadow-lg transition-all hover:shadow-xl isolate ring-1 ring-white/10 ring-inset">
                             {/* Full Image Background */}
                             {track.artist.imageUrl ? (
-                                <img
+                                <Image
                                     src={track.artist.imageUrl}
                                     alt={track.artist.name}
-                                    className="h-full w-full object-cover object-top transition-transform duration-500 group-hover:scale-110 opacity-90 group-hover:opacity-100"
-                                    loading="lazy"
+                                    fill
+                                    className="object-cover object-top transition-transform duration-500 group-hover:scale-110 opacity-90 group-hover:opacity-100"
+                                    sizes="(max-width: 640px) 40vw, (max-width: 1024px) 30vw, 25vw"
                                 />
                             ) : (
                                 <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-gray-900 to-gray-800">

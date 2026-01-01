@@ -1,3 +1,4 @@
+import Image from "next/image"
 import { getPodcasts } from "@/server/actions/podcasts"
 import { Card, CardContent } from "@/components/ui/card"
 import { PlayButton } from "@/components/shared/play-button"
@@ -22,10 +23,12 @@ export default async function PodcastsPage() {
                             <Card key={podcast.id} className="overflow-hidden p-0">
                                 <div className="aspect-square relative bg-muted">
                                     {podcast.imageUrl ? (
-                                        <img
+                                        <Image
                                             src={podcast.imageUrl}
                                             alt={podcast.title}
-                                            className="object-cover object-top w-full h-full"
+                                            fill
+                                            className="object-cover object-top"
+                                            sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
                                         />
                                     ) : (
                                         <div className="flex items-center justify-center h-full text-muted-foreground">

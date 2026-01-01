@@ -1,5 +1,7 @@
 "use client"
 
+import Image from "next/image"
+
 import Link from "next/link"
 import { User } from "lucide-react"
 import { Swiper, SwiperSlide } from "swiper/react"
@@ -47,13 +49,14 @@ export function ArtistCarousel({ artists }: ArtistCarouselProps) {
                     {artists.map((artist) => (
                         <SwiperSlide key={artist.id}>
                             <Link href={`/artists/${artist.id}`} className="group text-center block">
-                                <div className="mx-auto mb-4 h-32 w-32 overflow-hidden rounded-md border-2 border-transparent group-hover:border-primary transition-colors">
+                                <div className="relative mx-auto mb-4 h-32 w-32 overflow-hidden rounded-md border-2 border-transparent group-hover:border-primary transition-colors">
                                     {artist.imageUrl ? (
-                                        <img
+                                        <Image
                                             src={artist.imageUrl}
                                             alt={artist.name}
-                                            className="h-full w-full object-cover object-top"
-                                            loading="lazy"
+                                            fill
+                                            className="object-cover object-top"
+                                            sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, 33vw"
                                         />
                                     ) : (
                                         <div className="h-full w-full bg-muted flex items-center justify-center">
@@ -75,13 +78,14 @@ export function ArtistCarousel({ artists }: ArtistCarouselProps) {
                 <div className="hidden lg:grid gap-6 grid-cols-6">
                     {artists.map((artist) => (
                         <Link key={artist.id} href={`/artists/${artist.id}`} className="group text-center">
-                            <div className="mx-auto mb-4 h-32 w-32 overflow-hidden rounded-md border-2 border-transparent group-hover:border-primary transition-colors">
+                            <div className="relative mx-auto mb-4 h-32 w-32 overflow-hidden rounded-md border-2 border-transparent group-hover:border-primary transition-colors">
                                 {artist.imageUrl ? (
-                                    <img
+                                    <Image
                                         src={artist.imageUrl}
                                         alt={artist.name}
-                                        className="h-full w-full object-cover object-top"
-                                        loading="lazy"
+                                        fill
+                                        className="object-cover object-top"
+                                        sizes="128px"
                                     />
                                 ) : (
                                     <div className="h-full w-full bg-muted flex items-center justify-center">
@@ -107,13 +111,14 @@ export function ArtistCarousel({ artists }: ArtistCarouselProps) {
                         {artists.map((artist) => (
                             <SwiperSlide key={artist.id}>
                                 <Link href={`/artists/${artist.id}`} className="group text-center block">
-                                    <div className="mx-auto mb-4 h-32 w-32 overflow-hidden rounded-md border-2 border-transparent group-hover:border-primary transition-colors">
+                                    <div className="relative mx-auto mb-4 h-32 w-32 overflow-hidden rounded-md border-2 border-transparent group-hover:border-primary transition-colors">
                                         {artist.imageUrl ? (
-                                            <img
+                                            <Image
                                                 src={artist.imageUrl}
                                                 alt={artist.name}
-                                                className="h-full w-full object-cover object-top"
-                                                loading="lazy"
+                                                fill
+                                                className="object-cover object-top"
+                                                sizes="128px"
                                             />
                                         ) : (
                                             <div className="h-full w-full bg-muted flex items-center justify-center">
