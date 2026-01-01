@@ -60,11 +60,14 @@ export async function getPresignedUrl(
 
         // If endpoint is set (e.g. http://minio:9000), replace it with publicBaseUrl
         // Special handling if endpoints have different protocols or ports
+        // If endpoint is set (e.g. http://minio:9000), replace it with localhost:9000 for direct browser upload
+        // We use localhost:9000 to bypass Next.js 10MB proxy limit.
+        const directUploadHost = process.env.NEXT_PUBLIC_S3_DIRECT_URL || "http://localhost:9000"
+
         if (signedUrl.startsWith(endpoint)) {
-            clientUploadUrl = signedUrl.replace(endpoint, normalizedBase)
+            clientUploadUrl = signedUrl.replace(endpoint, directUploadHost)
         } else if (signedUrl.includes("minio:9000")) {
-            // Fallback for docker internal hostname if not matched by S3_ENDPOINT exactly
-            clientUploadUrl = signedUrl.replace("http://minio:9000", normalizedBase)
+            clientUploadUrl = signedUrl.replace("http://minio:9000", directUploadHost)
         }
 
         // Ensure browser treats it as absolute path or full URL
