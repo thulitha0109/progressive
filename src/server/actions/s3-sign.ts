@@ -3,6 +3,7 @@
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner"
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3"
 import { auth } from "@/auth"
+import { headers } from "next/headers"
 
 // Initialize S3 Client (Same config as file-upload.ts, but standard initialization)
 const s3Client = new S3Client({
@@ -60,9 +61,17 @@ export async function getPresignedUrl(
 
         // If endpoint is set (e.g. http://minio:9000), replace it with publicBaseUrl
         // Special handling if endpoints have different protocols or ports
-        // If endpoint is set (e.g. http://minio:9000), replace it with localhost:9000 for direct browser upload
-        // We use localhost:9000 to bypass Next.js 10MB proxy limit.
-        const directUploadHost = process.env.NEXT_PUBLIC_S3_DIRECT_URL || "http://localhost:9000"
+        // If endpoint is set (e.g. http://minio:9000), replace it with the browser-accessible URL
+        // We attempt to dynamically determine the host from the request headers to support LAN/Remote access
+        const headersList = await headers()
+        const host = headersList.get("host") || "localhost:3000"
+
+        // Strip port if present to get hostname
+        const hostname = host.split(":")[0]
+
+        // Construct Direct MinIO URL: http://<hostname>:9000
+        // Use NEXT_PUBLIC_S3_DIRECT_URL if set, otherwise fallback to dynamic construction
+        const directUploadHost = process.env.NEXT_PUBLIC_S3_DIRECT_URL || `http://${hostname}:9000`
 
         if (signedUrl.startsWith(endpoint)) {
             clientUploadUrl = signedUrl.replace(endpoint, directUploadHost)
