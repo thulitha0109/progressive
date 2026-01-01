@@ -136,7 +136,8 @@ async function generateWithAudiowaveform(audioPath: string, peakCount: number): 
         }
 
         // Normalize and resample
-        const maxValue = Math.max(...maxPeaks, 1)
+        // Avoid spread operator for large arrays (stack overflow risk)
+        const maxValue = maxPeaks.reduce((max, current) => Math.max(max, current), 1)
         const normalizedPeaks = maxPeaks.map(peak => peak / maxValue)
         return resamplePeaks(normalizedPeaks, peakCount)
     } catch (error) {
