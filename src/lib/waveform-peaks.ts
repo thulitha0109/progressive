@@ -1,8 +1,11 @@
 import { exec } from 'child_process'
 import { promisify } from 'util'
-import { existsSync } from 'fs'
+import { existsSync, createWriteStream } from 'fs'
 import { unlink } from 'fs/promises'
 import path from 'path'
+import os from 'os'
+import { Readable } from 'stream'
+import { pipeline } from 'stream/promises'
 
 const execAsync = promisify(exec)
 
@@ -26,7 +29,32 @@ export async function generateWaveformPeaks(
     audioPath: string,
     peakCount: number = 1000
 ): Promise<number[] | null> {
+    let tempFilePath: string | null = null
+
     try {
+        // Handle URL inputs (S3/MinIO)
+        if (audioPath.startsWith('http')) {
+            console.log(`[WAVEFORM] Downloading remote file: ${audioPath}`)
+            const response = await fetch(audioPath)
+            if (!response.ok) {
+                console.error(`[WAVEFORM] Failed to fetch audio file: ${response.statusText}`)
+                return null
+            }
+
+            // Create temp file
+            const tempDir = os.tmpdir()
+            const ext = path.extname(new URL(audioPath).pathname) || '.mp3'
+            tempFilePath = path.join(tempDir, `waveform-${Date.now()}${ext}`)
+
+            // Stream to file
+            const fileStream = createWriteStream(tempFilePath)
+            // @ts-ignore - ReadableStream/Node stream mismatch
+            await pipeline(Readable.fromWeb(response.body), fileStream)
+
+            console.log(`[WAVEFORM] Downloaded to: ${tempFilePath}`)
+            audioPath = tempFilePath
+        }
+
         // First try audiowaveform (more efficient)
         const hasAudiowaveform = await checkCommand('audiowaveform')
         if (hasAudiowaveform) {
@@ -46,6 +74,11 @@ export async function generateWaveformPeaks(
     } catch (error) {
         console.error('Failed to generate waveform peaks:', error)
         return null
+    } finally {
+        // Clean up temp file if we created one
+        if (tempFilePath && existsSync(tempFilePath)) {
+            await unlink(tempFilePath).catch(() => { })
+        }
     }
 }
 
