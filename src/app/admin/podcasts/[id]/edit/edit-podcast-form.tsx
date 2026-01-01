@@ -12,6 +12,8 @@ import {
     SelectValue,
 } from "@/components/ui/select"
 import { updatePodcast } from "@/server/actions/podcasts"
+import { getPresignedUrl } from "@/server/actions/s3-sign"
+import imageCompression from "browser-image-compression"
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { Loader2 } from "lucide-react"
@@ -56,12 +58,53 @@ export default function EditPodcastForm({ podcast, artists, genres }: EditPodcas
     const scheduledForString = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
 
 
+    async function uploadFile(file: File): Promise<string> {
+        try {
+            const { signedUrl, publicUrl } = await getPresignedUrl(file.name, file.type)
+            const uploadResponse = await fetch(signedUrl, {
+                method: "PUT",
+                body: file,
+                headers: { "Content-Type": file.type },
+            })
+            if (!uploadResponse.ok) throw new Error("Failed to upload file to storage")
+            return publicUrl
+        } catch (err) {
+            console.error("Upload error:", err)
+            throw new Error("Failed to upload file")
+        }
+    }
+
     async function onSubmit(formData: FormData) {
         setIsLoading(true)
         try {
             // Handle checkbox boolean
             const isFeatured = (document.getElementById('isFeatured') as HTMLInputElement).checked
             formData.set("isFeatured", isFeatured ? "true" : "false")
+
+            // Handle Direct Uploads
+            const audioFile = formData.get("audioFile") as File
+            const imageFile = formData.get("imageFile") as File
+
+            if (audioFile && audioFile.size > 0) {
+                // Upload Audio
+                const audioUrl = await uploadFile(audioFile)
+                formData.set("audioUrl", audioUrl)
+                formData.delete("audioFile")
+            }
+
+            if (imageFile && imageFile.size > 0) {
+                // Compress & Upload Image
+                const options = { maxSizeMB: 1, maxWidthOrHeight: 1500, useWebWorker: true }
+                let fileToUpload = imageFile
+                try {
+                    fileToUpload = await imageCompression(imageFile, options)
+                } catch (err) {
+                    console.warn("Image compression failed, using original:", err)
+                }
+                const imageUrl = await uploadFile(fileToUpload)
+                formData.set("imageUrl", imageUrl)
+                formData.delete("imageFile")
+            }
 
             await updatePodcast(podcast.id, formData)
             // Redirect is handled in server action, but refreshes help client state

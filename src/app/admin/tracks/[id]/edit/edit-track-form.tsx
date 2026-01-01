@@ -1,6 +1,8 @@
 "use client"
 
 import { updateTrack } from "@/server/actions/tracks"
+import { getPresignedUrl } from "@/server/actions/s3-sign"
+import imageCompression from "browser-image-compression"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -45,17 +47,38 @@ export default function EditTrackForm({ track, artists, genres }: { track: Track
     const [isPending, startTransition] = useTransition()
     const router = useRouter()
 
+    const [uploadStatus, setUploadStatus] = useState("")
+
     // Format date for datetime-local input
     const d = new Date(track.scheduledFor);
     const pad = (n: number) => n < 10 ? '0' + n : n;
     const scheduledForString = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
 
+    async function uploadFile(file: File): Promise<string> {
+        try {
+            const { signedUrl, publicUrl } = await getPresignedUrl(file.name, file.type)
+            const uploadResponse = await fetch(signedUrl, {
+                method: "PUT",
+                body: file,
+                headers: { "Content-Type": file.type },
+            })
+            if (!uploadResponse.ok) throw new Error("Failed to upload file")
+            return publicUrl
+        } catch (err) {
+            console.error("Upload error:", err)
+            throw new Error("Failed to upload file")
+        }
+    }
+
     async function handleSubmit(formData: FormData) {
         setError("")
+        setUploadStatus("")
 
         // Client-side validation
         const title = formData.get("title") as string
         const scheduledFor = formData.get("scheduledFor") as string
+        const audioFile = formData.get("audioFile") as File
+        const imageFile = formData.get("imageFile") as File
 
         if (!title?.trim()) {
             setError("Please enter a track title")
@@ -72,13 +95,46 @@ export default function EditTrackForm({ track, artists, genres }: { track: Track
             return
         }
 
+        if (audioFile && audioFile.size > 100 * 1024 * 1024) {
+            setError(`Audio file is too large. Maximum size is 100MB (${(audioFile.size / 1024 / 1024).toFixed(2)}MB)`)
+            return
+        }
+
         startTransition(async () => {
             try {
+                // Upload Audio
+                if (audioFile && audioFile.size > 0) {
+                    setUploadStatus("Uploading audio...")
+                    const audioUrl = await uploadFile(audioFile)
+                    formData.set("audioUrl", audioUrl)
+                }
+                formData.delete("audioFile")
+
+                // Upload Image
+                if (imageFile && imageFile.size > 0) {
+                    setUploadStatus("Compressing & Uploading image...")
+                    const options = { maxSizeMB: 1, maxWidthOrHeight: 1500, useWebWorker: true }
+                    let fileToUpload = imageFile
+                    try {
+                        fileToUpload = await imageCompression(imageFile, options)
+                    } catch (err) {
+                        console.warn("Compression failed, using original:", err)
+                    }
+                    const imageUrl = await uploadFile(fileToUpload)
+                    formData.set("imageUrl", imageUrl)
+                }
+                formData.delete("imageFile")
+
+                setUploadStatus("Saving changes...")
                 await updateTrack(track.id, formData)
                 router.push("/admin/tracks")
                 router.refresh()
             } catch (err: any) {
+                if (err.message === "NEXT_REDIRECT" || err.message.includes("NEXT_REDIRECT")) {
+                    return // Redirecting
+                }
                 setError(err.message || "Failed to update track. Please try again.")
+                setUploadStatus("")
             }
         })
     }
@@ -107,6 +163,15 @@ export default function EditTrackForm({ track, artists, genres }: { track: Track
                     )}
 
                     <form action={handleSubmit} className="space-y-6">
+                        {/* ... existing fields ... */}
+
+                        {isPending && uploadStatus && (
+                            <div className="flex items-center gap-2 text-sm text-muted-foreground px-1">
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                                {uploadStatus}
+                            </div>
+                        )}
+
                         <div className="space-y-2">
                             <Label htmlFor="title">Title</Label>
                             <Input

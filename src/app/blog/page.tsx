@@ -1,4 +1,5 @@
 import Link from "next/link"
+import Image from "next/image"
 import { getBlogPosts, getCategories } from "@/server/actions/blog"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -55,10 +56,12 @@ export default async function BlogPage({
                             <Card className="h-full overflow-hidden border-none bg-secondary/20 hover:bg-secondary/30 transition-colors flex flex-col p-0">
                                 <div className="aspect-video bg-muted relative overflow-hidden">
                                     {post.coverImage ? (
-                                        <img
+                                        <Image
                                             src={post.coverImage}
                                             alt={post.title}
-                                            className="h-full w-full object-cover object-top transition-transform duration-500 group-hover:scale-105"
+                                            fill
+                                            className="object-cover object-top transition-transform duration-500 group-hover:scale-105"
+                                            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                                         />
                                     ) : (
                                         <div className="h-full w-full flex items-center justify-center bg-secondary">

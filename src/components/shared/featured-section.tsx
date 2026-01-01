@@ -1,5 +1,7 @@
 "use client"
 
+import Image from "next/image"
+
 import { PlayButton } from "@/components/shared/play-button"
 import { LikeButton } from "@/components/shared/like-button"
 import { Card } from "@/components/ui/card"
@@ -81,11 +83,12 @@ export function FeaturedSection({ track }: { track: Track }) {
                             <div className="flex flex-col items-end space-y-6">
                                 <div className="relative h-24 w-24 md:h-32 md:w-32 overflow-hidden rounded-full border-2 border-white/20 shadow-lg">
                                     {track.artist.imageUrl ? (
-                                        <img
+                                        <Image
                                             src={track.artist.imageUrl}
                                             alt={track.artist.name}
-                                            className="h-full w-full object-cover"
-                                            loading="lazy"
+                                            fill
+                                            className="object-cover"
+                                            sizes="128px"
                                         />
                                     ) : (
                                         <div className="h-full w-full bg-muted flex items-center justify-center">
@@ -124,14 +127,16 @@ export function FeaturedSection({ track }: { track: Track }) {
                     <div className="relative w-full max-w-md mx-auto lg:ml-auto lg:mb-12 cursor-pointer pointer-events-auto order-1 lg:order-2" onClick={handleImageClick}>
                         <div className="relative aspect-square rounded-md overflow-hidden shadow-2xl group border border-white/10 bg-black/50 backdrop-blur-md">
                             {track.imageUrl || track.artist.imageUrl ? (
-                                <img
+                                <Image
                                     src={track.imageUrl || track.artist.imageUrl || ""}
                                     alt={track.title}
+                                    fill
                                     className={cn(
-                                        "w-full h-full object-cover transition-all duration-700 group-hover:scale-105 opacity-80 group-hover:opacity-100",
+                                        "object-cover transition-all duration-700 group-hover:scale-105 opacity-80 group-hover:opacity-100",
                                         isCurrentTrack && isPlaying && "scale-105 opacity-100"
                                     )}
-                                    loading="lazy"
+                                    priority
+                                    sizes="(max-width: 768px) 100vw, 50vw"
                                 />
                             ) : (
                                 <div className="w-full h-full bg-secondary flex items-center justify-center">

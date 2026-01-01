@@ -3,6 +3,8 @@
 import { useState, useTransition } from "react"
 import Link from "next/link"
 import { updateBlogPost } from "@/server/actions/admin/blog"
+import { getPresignedUrl } from "@/server/actions/s3-sign"
+import imageCompression from "browser-image-compression"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -45,29 +47,19 @@ export default function EditBlogPostForm({
     const [uploadStatus, setUploadStatus] = useState("")
 
     async function uploadImage(file: File): Promise<string> {
-        return new Promise((resolve, reject) => {
-            const formData = new FormData()
-            formData.append("file", file)
-            formData.append("type", "blog")
-
-            const xhr = new XMLHttpRequest()
-            xhr.open("POST", "/api/upload")
-
-            xhr.onload = () => {
-                if (xhr.status === 200) {
-                    const response = JSON.parse(xhr.responseText)
-                    resolve(response.url)
-                } else {
-                    reject(new Error("Image upload failed"))
-                }
-            }
-
-            xhr.onerror = () => {
-                reject(new Error("Image upload failed"))
-            }
-
-            xhr.send(formData)
-        })
+        try {
+            const { signedUrl, publicUrl } = await getPresignedUrl(file.name, file.type)
+            const uploadResponse = await fetch(signedUrl, {
+                method: "PUT",
+                body: file,
+                headers: { "Content-Type": file.type },
+            })
+            if (!uploadResponse.ok) throw new Error("Failed to upload image")
+            return publicUrl
+        } catch (err) {
+            console.error("Upload error:", err)
+            throw new Error("Failed to upload image")
+        }
     }
 
     async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -82,8 +74,17 @@ export default function EditBlogPostForm({
             try {
                 // Upload new cover image if provided
                 if (coverImageFile && coverImageFile.size > 0) {
-                    setUploadStatus("Uploading cover image...")
-                    const imageUrl = await uploadImage(coverImageFile)
+                    setUploadStatus("Compressing & Uploading cover image...")
+
+                    const options = { maxSizeMB: 1, maxWidthOrHeight: 1920, useWebWorker: true }
+                    let fileToUpload = coverImageFile
+                    try {
+                        fileToUpload = await imageCompression(coverImageFile, options)
+                    } catch (err) {
+                        console.warn("Compression failed, using original:", err)
+                    }
+
+                    const imageUrl = await uploadImage(fileToUpload)
                     formData.set("coverImage", imageUrl)
                 } else if (post.coverImage) {
                     // Keep existing image

@@ -4,6 +4,8 @@ import { useState, useTransition } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { createArtist } from "@/server/actions/artists"
+import { getPresignedUrl } from "@/server/actions/s3-sign"
+import imageCompression from "browser-image-compression"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -18,29 +20,19 @@ export default function NewArtistForm() {
     const [imagePreview, setImagePreview] = useState<string | null>(null)
 
     async function uploadImage(file: File): Promise<string> {
-        return new Promise((resolve, reject) => {
-            const formData = new FormData()
-            formData.append("file", file)
-            formData.append("type", "images")
-
-            const xhr = new XMLHttpRequest()
-            xhr.open("POST", "/api/upload")
-
-            xhr.onload = () => {
-                if (xhr.status === 200) {
-                    const response = JSON.parse(xhr.responseText)
-                    resolve(response.url)
-                } else {
-                    reject(new Error("Image upload failed"))
-                }
-            }
-
-            xhr.onerror = () => {
-                reject(new Error("Image upload failed"))
-            }
-
-            xhr.send(formData)
-        })
+        try {
+            const { signedUrl, publicUrl } = await getPresignedUrl(file.name, file.type)
+            const uploadResponse = await fetch(signedUrl, {
+                method: "PUT",
+                body: file,
+                headers: { "Content-Type": file.type },
+            })
+            if (!uploadResponse.ok) throw new Error("Failed to upload image")
+            return publicUrl
+        } catch (err) {
+            console.error("Upload error:", err)
+            throw new Error("Failed to upload image")
+        }
     }
 
     async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -55,8 +47,17 @@ export default function NewArtistForm() {
             try {
                 // Upload image if provided
                 if (imageFile && imageFile.size > 0) {
-                    setUploadStatus("Uploading image...")
-                    const imageUrl = await uploadImage(imageFile)
+                    setUploadStatus("Compressing & Uploading image...")
+
+                    const options = { maxSizeMB: 1, maxWidthOrHeight: 1500, useWebWorker: true }
+                    let fileToUpload = imageFile
+                    try {
+                        fileToUpload = await imageCompression(imageFile, options)
+                    } catch (err) {
+                        console.warn("Compression failed, using original:", err)
+                    }
+
+                    const imageUrl = await uploadImage(fileToUpload)
                     formData.set("imageUrl", imageUrl)
                 }
                 formData.delete("imageFile")

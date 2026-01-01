@@ -2,6 +2,8 @@
 "use client"
 
 import { createPodcast } from "@/server/actions/podcasts"
+import { getPresignedUrl } from "@/server/actions/s3-sign"
+import imageCompression from "browser-image-compression"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -39,42 +41,27 @@ export default function PodcastForm({ artists, genres }: { artists: Artist[], ge
     const [uploadProgress, setUploadProgress] = useState(0)
     const [uploadStatus, setUploadStatus] = useState("")
 
-    async function uploadFile(file: File, type: "audio" | "image", artistId: string): Promise<string> {
-        return new Promise((resolve, reject) => {
-            const formData = new FormData()
-            formData.append("file", file)
-            formData.append("type", type)
-            formData.append("entityType", "podcast")
-            // Pass artistId instead of hostName for podcast now, logic will be handled in route.ts
-            formData.append("artistId", artistId)
+    async function uploadFile(file: File, type: "audio" | "image"): Promise<string> {
+        try {
+            // 1. Get Presigned URL
+            const { signedUrl, publicUrl } = await getPresignedUrl(file.name, file.type)
 
-            const xhr = new XMLHttpRequest()
-            xhr.open("POST", "/api/upload")
+            // 2. Upload to S3 directly (using the signed URL)
+            const uploadResponse = await fetch(signedUrl, {
+                method: "PUT",
+                body: file,
+                headers: {
+                    "Content-Type": file.type,
+                },
+            })
 
-            xhr.upload.onprogress = (event) => {
-                if (event.lengthComputable) {
-                    const percentComplete = (event.loaded / event.total) * 100
-                    if (type === "audio") {
-                        setUploadProgress(percentComplete)
-                    }
-                }
-            }
+            if (!uploadResponse.ok) throw new Error("Failed to upload file")
 
-            xhr.onload = () => {
-                if (xhr.status === 200) {
-                    const response = JSON.parse(xhr.responseText)
-                    resolve(response.url)
-                } else {
-                    reject(new Error("Upload failed"))
-                }
-            }
-
-            xhr.onerror = () => {
-                reject(new Error("Upload failed"))
-            }
-
-            xhr.send(formData)
-        })
+            return publicUrl
+        } catch (err) {
+            console.error("Upload error:", err)
+            throw new Error("Failed to upload file")
+        }
     }
 
     async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -116,14 +103,32 @@ export default function PodcastForm({ artists, genres }: { artists: Artist[], ge
             try {
                 // 1. Upload Audio
                 setUploadStatus("Uploading audio...")
-                const audioUrl = await uploadFile(audioFile, "audio", selectedArtist)
+                // Note: We're not tracking progress for fetch here as it's complex without XHR/Streams, 
+                // but direct S3 is fast. Can add Axios if progress is critical.
+                const audioUrl = await uploadFile(audioFile, "audio")
                 formData.set("audioUrl", audioUrl)
                 formData.delete("audioFile") // Remove file from server action payload
 
                 // 2. Upload Image (if exists)
                 if (imageFile && imageFile.size > 0) {
-                    setUploadStatus("Uploading image...")
-                    const imageUrl = await uploadFile(imageFile, "image", selectedArtist)
+                    setUploadStatus("Compressing & Uploading image...")
+
+                    // Compress Image
+                    const options = {
+                        maxSizeMB: 1,
+                        maxWidthOrHeight: 1500,
+                        useWebWorker: true,
+                    }
+
+                    let fileToUpload = imageFile
+                    try {
+                        const compressedFile = await imageCompression(imageFile, options)
+                        fileToUpload = compressedFile
+                    } catch (err) {
+                        console.warn("Image compression failed, uploading original:", err)
+                    }
+
+                    const imageUrl = await uploadFile(fileToUpload, "image")
                     formData.set("imageUrl", imageUrl)
                     formData.delete("imageFile")
                 }

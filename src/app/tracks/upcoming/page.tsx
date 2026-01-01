@@ -1,4 +1,5 @@
 import { getUpcomingTracks } from "@/server/actions/tracks"
+import Image from "next/image"
 import { PlayButton } from "@/components/shared/play-button"
 import { LikeButton } from "@/components/shared/like-button"
 import { User, Calendar } from "lucide-react"
@@ -24,10 +25,12 @@ export default async function UpcomingTracksPage() {
                         >
                             <div className="relative h-16 w-16 flex-shrink-0 overflow-hidden rounded bg-muted">
                                 {track.imageUrl ? (
-                                    <img
+                                    <Image
                                         src={track.imageUrl}
                                         alt={track.title}
-                                        className="h-full w-full object-cover opacity-70"
+                                        fill
+                                        className="object-cover opacity-70"
+                                        sizes="64px"
                                     />
                                 ) : (
                                     <User className="h-8 w-8 m-auto text-muted-foreground" />
