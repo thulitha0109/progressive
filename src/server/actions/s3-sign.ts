@@ -36,6 +36,29 @@ export async function getPresignedUrl(
     const uniqueFilename = `${Date.now()}-${sanitized}`
     const key = `${folder}/${uniqueFilename}`
 
+    // Dynamically determine the host from the request headers to support LAN/Remote access
+    const headersList = await headers()
+    const host = headersList.get("host") || "localhost:3000"
+
+    // Strip port if present to get hostname
+    const hostname = host.split(":")[0]
+
+    // Construct Direct MinIO URL: http://<hostname>:9000
+    // Use NEXT_PUBLIC_S3_DIRECT_URL if set, otherwise fallback to dynamic construction
+    const directUploadHost = process.env.NEXT_PUBLIC_S3_DIRECT_URL || `http://${hostname}:9000`
+
+    // Create a request-specific S3 Client using the external endpoint
+    // This ensures the Host header in the signature matches the client's upload request
+    const signingClient = new S3Client({
+        region: process.env.S3_REGION || "us-east-1",
+        endpoint: directUploadHost,
+        credentials: {
+            accessKeyId: process.env.S3_ACCESS_KEY || "minioadmin",
+            secretAccessKey: process.env.S3_SECRET_KEY || "minioadminpassword",
+        },
+        forcePathStyle: true,
+    })
+
     const command = new PutObjectCommand({
         Bucket: BUCKET_NAME,
         Key: key,
@@ -44,43 +67,16 @@ export async function getPresignedUrl(
     })
 
     try {
-        const signedUrl = await getSignedUrl(s3Client, command, { expiresIn: 3600 })
+        const signedUrl = await getSignedUrl(signingClient, command, { expiresIn: 3600 })
 
         // Construct the public URL (what the database will save)
+        // We use the rewrite path /s3-storage for public access to keep it clean
         const publicBaseUrl = process.env.NEXT_PUBLIC_S3_PUBLIC_URL || "/s3-storage"
         const normalizedBase = publicBaseUrl.endsWith('/') ? publicBaseUrl.slice(0, -1) : publicBaseUrl
         const publicUrl = `${normalizedBase}/${BUCKET_NAME}/${key}`
 
-        // Rewrite the signed URL to use the proxy path for the browser
-        // The signedUrl will look like: http://minio:9000/bucket/key?X-Amz-...
-        // We want it to be: /s3-storage/bucket/key?X-Amz-... (or full URL)
-        // Since Next.js proxy handles "http://minio:9000" destination, we can just replace the endpoint.
-
-        let clientUploadUrl = signedUrl
-        const endpoint = process.env.S3_ENDPOINT || "http://localhost:9000"
-
-        // If endpoint is set (e.g. http://minio:9000), replace it with publicBaseUrl
-        // Special handling if endpoints have different protocols or ports
-        // If endpoint is set (e.g. http://minio:9000), replace it with the browser-accessible URL
-        // We attempt to dynamically determine the host from the request headers to support LAN/Remote access
-        const headersList = await headers()
-        const host = headersList.get("host") || "localhost:3000"
-
-        // Strip port if present to get hostname
-        const hostname = host.split(":")[0]
-
-        // Construct Direct MinIO URL: http://<hostname>:9000
-        // Use NEXT_PUBLIC_S3_DIRECT_URL if set, otherwise fallback to dynamic construction
-        const directUploadHost = process.env.NEXT_PUBLIC_S3_DIRECT_URL || `http://${hostname}:9000`
-
-        if (signedUrl.startsWith(endpoint)) {
-            clientUploadUrl = signedUrl.replace(endpoint, directUploadHost)
-        } else if (signedUrl.includes("minio:9000")) {
-            clientUploadUrl = signedUrl.replace("http://minio:9000", directUploadHost)
-        }
-
-        // Ensure browser treats it as absolute path or full URL
-        return { signedUrl: clientUploadUrl, publicUrl, key }
+        // The signedUrl is already correct because we initialized the client with directUploadHost
+        return { signedUrl, publicUrl, key }
     } catch (error) {
         console.error("Error generating presigned URL:", error)
         throw new Error("Failed to generate upload URL")
