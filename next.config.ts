@@ -38,6 +38,10 @@ const nextConfig: NextConfig = {
         source: "/uploads/:path*",
         destination: "/api/uploads/:path*",
       },
+      {
+        source: "/s3-storage/:path*",
+        destination: "http://minio:9000/:path*",
+      },
     ];
   },
   // Optimize output for production
