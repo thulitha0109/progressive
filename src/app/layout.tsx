@@ -38,7 +38,7 @@ export const metadata: Metadata = {
     follow: true,
   },
   icons: {
-    icon: '/SVG-05.svg',
+    icon: '/PFavicon.png',
   },
 };
 
