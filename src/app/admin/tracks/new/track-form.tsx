@@ -35,6 +35,7 @@ export default function TrackForm({ artists, genres }: { artists: Artist[], genr
     const router = useRouter()
     const [uploadProgress, setUploadProgress] = useState(0)
     const [uploadStatus, setUploadStatus] = useState("")
+    const [isUploading, setIsUploading] = useState(false)
 
     async function uploadFile(file: File, type: "audio" | "image", artistId: string): Promise<string> {
         return new Promise(async (resolve, reject) => {
@@ -130,34 +131,45 @@ export default function TrackForm({ artists, genres }: { artists: Artist[], genr
             return
         }
 
-        startTransition(async () => {
-            try {
-                // 1. Upload Audio
-                setUploadStatus("Uploading audio...")
-                const audioUrl = await uploadFile(audioFile, "audio", selectedArtist)
-                formData.set("audioUrl", audioUrl)
-                formData.delete("audioFile") // Remove file from server action payload
+        setIsUploading(true)
 
-                // 2. Upload Image (if exists)
-                if (imageFile && imageFile.size > 0) {
-                    setUploadStatus("Uploading image...")
-                    const imageUrl = await uploadFile(imageFile, "image", selectedArtist)
-                    formData.set("imageUrl", imageUrl)
-                    formData.delete("imageFile")
-                }
+        try {
+            // 1. Upload Audio
+            setUploadStatus("Uploading audio...")
+            const audioUrl = await uploadFile(audioFile, "audio", selectedArtist)
+            formData.set("audioUrl", audioUrl)
+            formData.delete("audioFile") // Remove file from server action payload
 
-                // 3. Create Track
-                setUploadStatus("Saving track...")
-                await createTrack(formData)
-            } catch (err: any) {
-                if (err.message === "NEXT_REDIRECT" || err.message.includes("NEXT_REDIRECT")) {
-                    return // Redirecting, so no error
-                }
-                console.error("Upload error:", err)
-                setError(err.message || "Failed to upload track. Please try again.")
-                setUploadStatus("")
+            // 2. Upload Image (if exists)
+            if (imageFile && imageFile.size > 0) {
+                setUploadStatus("Uploading image...")
+                const imageUrl = await uploadFile(imageFile, "image", selectedArtist)
+                formData.set("imageUrl", imageUrl)
+                formData.delete("imageFile")
             }
-        })
+
+            // 3. Create Track
+            setUploadStatus("Saving track...")
+
+            startTransition(async () => {
+                try {
+                    await createTrack(formData)
+                } catch (err: any) {
+                    if (err.message === "NEXT_REDIRECT" || err.message.includes("NEXT_REDIRECT")) {
+                        return // Redirecting
+                    }
+                    console.error("Creation error:", err)
+                    setError(err.message || "Failed to create track.")
+                    setUploadStatus("")
+                    setIsUploading(false)
+                }
+            })
+        } catch (err: any) {
+            console.error("Upload error:", err)
+            setError(err.message || "Failed to upload files.")
+            setUploadStatus("")
+            setIsUploading(false)
+        }
     }
 
     return (
@@ -308,7 +320,7 @@ export default function TrackForm({ artists, genres }: { artists: Artist[], genr
                             </p>
                         </div>
 
-                        {isPending && (
+                        {(isUploading || isPending) && (
                             <div className="space-y-2">
                                 <div className="flex justify-between text-sm">
                                     <span>{uploadStatus}</span>
@@ -324,9 +336,9 @@ export default function TrackForm({ artists, genres }: { artists: Artist[], genr
                         )}
 
                         <div className="flex justify-end">
-                            <Button type="submit" disabled={isPending}>
-                                {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                                {isPending ? "Processing..." : "Upload Track"}
+                            <Button type="submit" disabled={isUploading || isPending}>
+                                {(isUploading || isPending) && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                {(isUploading || isPending) ? (uploadStatus || "Processing...") : "Upload Track"}
                             </Button>
                         </div>
                     </form>

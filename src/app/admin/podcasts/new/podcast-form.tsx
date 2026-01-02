@@ -40,28 +40,47 @@ export default function PodcastForm({ artists, genres }: { artists: Artist[], ge
     const router = useRouter()
     const [uploadProgress, setUploadProgress] = useState(0)
     const [uploadStatus, setUploadStatus] = useState("")
+    const [isUploading, setIsUploading] = useState(false)
 
     async function uploadFile(file: File, type: "audio" | "image"): Promise<string> {
-        try {
-            // 1. Get Presigned URL
-            const { signedUrl, publicUrl } = await getPresignedUrl(file.name, file.type)
+        return new Promise(async (resolve, reject) => {
+            try {
+                // 1. Get Presigned URL
+                const { signedUrl, publicUrl } = await getPresignedUrl(file.name, file.type)
 
-            // 2. Upload to S3 directly (using the signed URL)
-            const uploadResponse = await fetch(signedUrl, {
-                method: "PUT",
-                body: file,
-                headers: {
-                    "Content-Type": file.type,
-                },
-            })
+                // 2. Upload to S3 directly (using the signed URL)
+                const xhr = new XMLHttpRequest()
+                xhr.open("PUT", signedUrl)
+                xhr.setRequestHeader("Content-Type", file.type)
 
-            if (!uploadResponse.ok) throw new Error("Failed to upload file")
+                xhr.upload.onprogress = (event) => {
+                    if (event.lengthComputable) {
+                        const percentComplete = (event.loaded / event.total) * 100
+                        // Only track progress for the main audio file to avoid jumping
+                        if (type === "audio") {
+                            setUploadProgress(percentComplete)
+                        }
+                    }
+                }
 
-            return publicUrl
-        } catch (err) {
-            console.error("Upload error:", err)
-            throw new Error("Failed to upload file")
-        }
+                xhr.onload = () => {
+                    if (xhr.status === 200) {
+                        resolve(publicUrl)
+                    } else {
+                        reject(new Error("Failed to upload file"))
+                    }
+                }
+
+                xhr.onerror = () => {
+                    reject(new Error("Network error during upload"))
+                }
+
+                xhr.send(file)
+            } catch (err) {
+                console.error("Upload error:", err)
+                reject(new Error("Failed to upload file"))
+            }
+        })
     }
 
     async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -99,52 +118,62 @@ export default function PodcastForm({ artists, genres }: { artists: Artist[], ge
             return
         }
 
-        startTransition(async () => {
-            try {
-                // 1. Upload Audio
-                setUploadStatus("Uploading audio...")
-                // Note: We're not tracking progress for fetch here as it's complex without XHR/Streams, 
-                // but direct S3 is fast. Can add Axios if progress is critical.
-                const audioUrl = await uploadFile(audioFile, "audio")
-                formData.set("audioUrl", audioUrl)
-                formData.delete("audioFile") // Remove file from server action payload
+        setIsUploading(true) // Start explicit loading state
 
-                // 2. Upload Image (if exists)
-                if (imageFile && imageFile.size > 0) {
-                    setUploadStatus("Compressing & Uploading image...")
+        try {
+            // 1. Upload Audio
+            setUploadStatus("Uploading audio...")
+            // Note: We're not tracking progress for fetch here as it's complex without XHR/Streams, 
+            // but direct S3 is fast. Can add Axios if progress is critical.
+            const audioUrl = await uploadFile(audioFile, "audio")
+            formData.set("audioUrl", audioUrl)
+            formData.delete("audioFile") // Remove file from server action payload
 
-                    // Compress Image
-                    const options = {
-                        maxSizeMB: 1,
-                        maxWidthOrHeight: 1500,
-                        useWebWorker: true,
-                    }
+            // 2. Upload Image (if exists)
+            if (imageFile && imageFile.size > 0) {
+                setUploadStatus("Compressing & Uploading image...")
 
-                    let fileToUpload = imageFile
-                    try {
-                        const compressedFile = await imageCompression(imageFile, options)
-                        fileToUpload = compressedFile
-                    } catch (err) {
-                        console.warn("Image compression failed, uploading original:", err)
-                    }
-
-                    const imageUrl = await uploadFile(fileToUpload, "image")
-                    formData.set("imageUrl", imageUrl)
-                    formData.delete("imageFile")
+                // Compress Image
+                const options = {
+                    maxSizeMB: 1,
+                    maxWidthOrHeight: 1500,
+                    useWebWorker: true,
                 }
 
-                // 3. Create Podcast
-                setUploadStatus("Saving podcast...")
-                await createPodcast(formData)
-            } catch (err: any) {
-                if (err.message === "NEXT_REDIRECT" || err.message.includes("NEXT_REDIRECT")) {
-                    return // Redirecting, so no error
+                let fileToUpload = imageFile
+                try {
+                    const compressedFile = await imageCompression(imageFile, options)
+                    fileToUpload = compressedFile
+                } catch (err) {
+                    console.warn("Image compression failed, uploading original:", err)
                 }
-                console.error("Upload error:", err)
-                setError(err.message || "Failed to upload podcast. Please try again.")
-                setUploadStatus("")
+
+                const imageUrl = await uploadFile(fileToUpload, "image")
+                formData.set("imageUrl", imageUrl)
+                formData.delete("imageFile")
             }
-        })
+
+            // 3. Create Podcast
+            setUploadStatus("Saving podcast...")
+            startTransition(async () => {
+                try {
+                    await createPodcast(formData)
+                } catch (err: any) {
+                    if (err.message === "NEXT_REDIRECT" || err.message.includes("NEXT_REDIRECT")) {
+                        return // Redirecting, so no error
+                    }
+                    console.error("Creation error:", err)
+                    setError(err.message || "Failed to create podcast.")
+                    setUploadStatus("")
+                    setIsUploading(false)
+                }
+            })
+        } catch (err: any) {
+            console.error("Upload error:", err)
+            setError(err.message || "Failed to upload files.")
+            setUploadStatus("")
+            setIsUploading(false)
+        }
     }
 
     return (
@@ -311,7 +340,8 @@ export default function PodcastForm({ artists, genres }: { artists: Artist[], ge
                             </p>
                         </div>
 
-                        {isPending && (
+                        {/* Show progress if manually uploading OR transition is pending */}
+                        {(isUploading || isPending) && (
                             <div className="space-y-2">
                                 <div className="flex justify-between text-sm">
                                     <span>{uploadStatus}</span>
@@ -327,9 +357,9 @@ export default function PodcastForm({ artists, genres }: { artists: Artist[], ge
                         )}
 
                         <div className="flex justify-end">
-                            <Button type="submit" disabled={isPending}>
-                                {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                                {isPending ? "Processing..." : "Create Podcast"}
+                            <Button type="submit" disabled={isUploading || isPending}>
+                                {(isUploading || isPending) && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                {(isUploading || isPending) ? (uploadStatus || "Processing...") : "Create Podcast"}
                             </Button>
                         </div>
                     </form>

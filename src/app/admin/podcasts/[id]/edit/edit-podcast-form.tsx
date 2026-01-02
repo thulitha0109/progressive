@@ -49,6 +49,8 @@ interface EditPodcastFormProps {
 
 export default function EditPodcastForm({ podcast, artists, genres }: EditPodcastFormProps) {
     const [isLoading, setIsLoading] = useState(false)
+    const [uploadProgress, setUploadProgress] = useState(0)
+    const [uploadStatus, setUploadStatus] = useState("")
     const [selectedArtist, setSelectedArtist] = useState<string>(podcast.artistId || "")
     const router = useRouter()
 
@@ -59,19 +61,36 @@ export default function EditPodcastForm({ podcast, artists, genres }: EditPodcas
 
 
     async function uploadFile(file: File): Promise<string> {
-        try {
-            const { signedUrl, publicUrl } = await getPresignedUrl(file.name, file.type)
-            const uploadResponse = await fetch(signedUrl, {
-                method: "PUT",
-                body: file,
-                headers: { "Content-Type": file.type },
-            })
-            if (!uploadResponse.ok) throw new Error("Failed to upload file to storage")
-            return publicUrl
-        } catch (err) {
-            console.error("Upload error:", err)
-            throw new Error("Failed to upload file")
-        }
+        return new Promise(async (resolve, reject) => {
+            try {
+                const { signedUrl, publicUrl } = await getPresignedUrl(file.name, file.type)
+                const xhr = new XMLHttpRequest()
+                xhr.open("PUT", signedUrl)
+                xhr.setRequestHeader("Content-Type", file.type)
+
+                xhr.upload.onprogress = (event) => {
+                    if (event.lengthComputable) {
+                        const percentComplete = (event.loaded / event.total) * 100
+                        // Update progress for checking
+                        setUploadProgress(percentComplete)
+                    }
+                }
+
+                xhr.onload = () => {
+                    if (xhr.status === 200) {
+                        resolve(publicUrl)
+                    } else {
+                        reject(new Error("Failed to upload file to storage"))
+                    }
+                }
+
+                xhr.onerror = () => reject(new Error("Network error during upload"))
+                xhr.send(file)
+            } catch (err) {
+                console.error("Upload error:", err)
+                reject(new Error("Failed to upload file"))
+            }
+        })
     }
 
     async function onSubmit(formData: FormData) {
@@ -87,6 +106,7 @@ export default function EditPodcastForm({ podcast, artists, genres }: EditPodcas
 
             if (audioFile && audioFile.size > 0) {
                 // Upload Audio
+                setUploadStatus("Uploading audio...")
                 const audioUrl = await uploadFile(audioFile)
                 formData.set("audioUrl", audioUrl)
                 formData.delete("audioFile")
@@ -94,6 +114,7 @@ export default function EditPodcastForm({ podcast, artists, genres }: EditPodcas
 
             if (imageFile && imageFile.size > 0) {
                 // Compress & Upload Image
+                setUploadStatus("Uploading image...")
                 const options = { maxSizeMB: 1, maxWidthOrHeight: 1500, useWebWorker: true }
                 let fileToUpload = imageFile
                 try {
@@ -106,9 +127,11 @@ export default function EditPodcastForm({ podcast, artists, genres }: EditPodcas
                 formData.delete("imageFile")
             }
 
+            setUploadStatus("Saving changes...")
             await updatePodcast(podcast.id, formData)
             // Redirect is handled in server action, but refreshes help client state
             // router.push("/admin/podcasts") 
+            router.refresh()
         } catch (error) {
             // Checks for Next.js redirect error (which is thrown as an error)
             if (error instanceof Error && (error.message === "NEXT_REDIRECT" || error.message.includes("NEXT_REDIRECT"))) {
@@ -273,7 +296,7 @@ export default function EditPodcastForm({ podcast, artists, genres }: EditPodcas
                 </Button>
                 <Button type="submit" disabled={isLoading}>
                     {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                    {isLoading ? "Saving..." : "Save Changes"}
+                    {isLoading ? (uploadStatus || "Saving...") : "Save Changes"}
                 </Button>
             </div>
         </form >

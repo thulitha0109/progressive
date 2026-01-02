@@ -45,6 +45,8 @@ export default function EditTrackForm({ track, artists, genres }: { track: Track
     const [selectedArtist, setSelectedArtist] = useState(track.artistId)
     const [error, setError] = useState("")
     const [isPending, startTransition] = useTransition()
+    const [isUploading, setIsUploading] = useState(false)
+    const [uploadProgress, setUploadProgress] = useState(0)
     const router = useRouter()
 
     const [uploadStatus, setUploadStatus] = useState("")
@@ -55,19 +57,35 @@ export default function EditTrackForm({ track, artists, genres }: { track: Track
     const scheduledForString = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
 
     async function uploadFile(file: File): Promise<string> {
-        try {
-            const { signedUrl, publicUrl } = await getPresignedUrl(file.name, file.type)
-            const uploadResponse = await fetch(signedUrl, {
-                method: "PUT",
-                body: file,
-                headers: { "Content-Type": file.type },
-            })
-            if (!uploadResponse.ok) throw new Error("Failed to upload file")
-            return publicUrl
-        } catch (err) {
-            console.error("Upload error:", err)
-            throw new Error("Failed to upload file")
-        }
+        return new Promise(async (resolve, reject) => {
+            try {
+                const { signedUrl, publicUrl } = await getPresignedUrl(file.name, file.type)
+                const xhr = new XMLHttpRequest()
+                xhr.open("PUT", signedUrl)
+                xhr.setRequestHeader("Content-Type", file.type)
+
+                xhr.upload.onprogress = (event) => {
+                    if (event.lengthComputable) {
+                        const percentComplete = (event.loaded / event.total) * 100
+                        setUploadProgress(percentComplete)
+                    }
+                }
+
+                xhr.onload = () => {
+                    if (xhr.status === 200) {
+                        resolve(publicUrl)
+                    } else {
+                        reject(new Error("Failed to upload file to storage"))
+                    }
+                }
+
+                xhr.onerror = () => reject(new Error("Network error during upload"))
+                xhr.send(file)
+            } catch (err) {
+                console.error("Upload error:", err)
+                reject(new Error("Failed to upload file"))
+            }
+        })
     }
 
     async function handleSubmit(formData: FormData) {
@@ -100,43 +118,53 @@ export default function EditTrackForm({ track, artists, genres }: { track: Track
             return
         }
 
-        startTransition(async () => {
-            try {
-                // Upload Audio
-                if (audioFile && audioFile.size > 0) {
-                    setUploadStatus("Uploading audio...")
-                    const audioUrl = await uploadFile(audioFile)
-                    formData.set("audioUrl", audioUrl)
-                }
-                formData.delete("audioFile")
+        setIsUploading(true)
 
-                // Upload Image
-                if (imageFile && imageFile.size > 0) {
-                    setUploadStatus("Compressing & Uploading image...")
-                    const options = { maxSizeMB: 1, maxWidthOrHeight: 1500, useWebWorker: true }
-                    let fileToUpload = imageFile
-                    try {
-                        fileToUpload = await imageCompression(imageFile, options)
-                    } catch (err) {
-                        console.warn("Compression failed, using original:", err)
-                    }
-                    const imageUrl = await uploadFile(fileToUpload)
-                    formData.set("imageUrl", imageUrl)
-                }
-                formData.delete("imageFile")
-
-                setUploadStatus("Saving changes...")
-                await updateTrack(track.id, formData)
-                router.push("/admin/tracks")
-                router.refresh()
-            } catch (err: any) {
-                if (err.message === "NEXT_REDIRECT" || err.message.includes("NEXT_REDIRECT")) {
-                    return // Redirecting
-                }
-                setError(err.message || "Failed to update track. Please try again.")
-                setUploadStatus("")
+        try {
+            // Upload Audio
+            if (audioFile && audioFile.size > 0) {
+                setUploadStatus("Uploading audio...")
+                const audioUrl = await uploadFile(audioFile)
+                formData.set("audioUrl", audioUrl)
             }
-        })
+            formData.delete("audioFile")
+
+            // Upload Image
+            if (imageFile && imageFile.size > 0) {
+                setUploadStatus("Compressing & Uploading image...")
+                const options = { maxSizeMB: 1, maxWidthOrHeight: 1500, useWebWorker: true }
+                let fileToUpload = imageFile
+                try {
+                    fileToUpload = await imageCompression(imageFile, options)
+                } catch (err) {
+                    console.warn("Compression failed, using original:", err)
+                }
+                const imageUrl = await uploadFile(fileToUpload)
+                formData.set("imageUrl", imageUrl)
+            }
+            formData.delete("imageFile")
+
+            setUploadStatus("Saving changes...")
+            startTransition(async () => {
+                try {
+                    await updateTrack(track.id, formData)
+                    router.push("/admin/tracks")
+                    router.refresh()
+                } catch (err: any) {
+                    if (err.message === "NEXT_REDIRECT" || err.message.includes("NEXT_REDIRECT")) {
+                        return // Redirecting
+                    }
+                    setError(err.message || "Failed to update track. Please try again.")
+                    setUploadStatus("")
+                    setIsUploading(false)
+                }
+            })
+        } catch (err: any) {
+            console.error("Upload error:", err)
+            setError(err.message || "Failed to upload files.")
+            setUploadStatus("")
+            setIsUploading(false)
+        }
     }
 
     return (
@@ -165,10 +193,21 @@ export default function EditTrackForm({ track, artists, genres }: { track: Track
                     <form action={handleSubmit} className="space-y-6">
                         {/* ... existing fields ... */}
 
-                        {isPending && uploadStatus && (
-                            <div className="flex items-center gap-2 text-sm text-muted-foreground px-1">
-                                <Loader2 className="h-4 w-4 animate-spin" />
-                                {uploadStatus}
+                        {(isUploading || isPending) && uploadStatus && (
+                            <div className="space-y-1 mb-4">
+                                <div className="flex items-center justify-between gap-2 text-sm text-muted-foreground px-1">
+                                    <div className="flex items-center gap-2">
+                                        <Loader2 className="h-4 w-4 animate-spin" />
+                                        {uploadStatus}
+                                    </div>
+                                    <span>{Math.round(uploadProgress)}%</span>
+                                </div>
+                                <div className="h-2 bg-secondary rounded-full overflow-hidden">
+                                    <div
+                                        className="h-full bg-primary transition-all duration-300"
+                                        style={{ width: `${uploadProgress}%` }}
+                                    />
+                                </div>
                             </div>
                         )}
 
@@ -309,9 +348,9 @@ export default function EditTrackForm({ track, artists, genres }: { track: Track
                         </div>
 
                         <div className="flex justify-end">
-                            <Button type="submit" disabled={isPending}>
-                                {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                                {isPending ? "Saving..." : "Save Changes"}
+                            <Button type="submit" disabled={isUploading || isPending}>
+                                {(isUploading || isPending) && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                {(isUploading || isPending) ? "Saving..." : "Save Changes"}
                             </Button>
                         </div>
                     </form>
