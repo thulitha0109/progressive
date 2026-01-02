@@ -46,14 +46,14 @@ export async function getPresignedUrl(
 
     // Construct Upload URL using the /s3-storage rewrite proxy
     // This avoids direct access to port 9000 (which is HTTP only) preventing SSL Protocol Errors
-    const publicBaseUrl = process.env.NEXT_PUBLIC_S3_PUBLIC_URL || "/s3-storage"
-    const directUploadHost = process.env.NEXT_PUBLIC_S3_DIRECT_URL || `${protocol}://${host}${publicBaseUrl}`
+    // Use the internal endpoint for signing configuration
+    // This ensures the signature matches the Host header MinIO sees (which is 'minio:9000' after Next.js proxy)
+    const internalEndpoint = process.env.S3_ENDPOINT || "http://localhost:9000"
 
-    // Create a request-specific S3 Client using the external endpoint
-    // This ensures the Host header in the signature matches the client's upload request
+    // Create a request-specific S3 Client using the internal endpoint
     const signingClient = new S3Client({
         region: process.env.S3_REGION || "us-east-1",
-        endpoint: directUploadHost,
+        endpoint: internalEndpoint,
         credentials: {
             accessKeyId: process.env.S3_ACCESS_KEY || "minioadmin",
             secretAccessKey: process.env.S3_SECRET_KEY || "minioadminpassword",
@@ -69,14 +69,45 @@ export async function getPresignedUrl(
     })
 
     try {
-        const signedUrl = await getSignedUrl(signingClient, command, { expiresIn: 3600 })
+        const rawSignedUrl = await getSignedUrl(signingClient, command, { expiresIn: 3600 })
+
+        // The signed URL points to the internal endpoint (e.g. http://minio:9000/...)
+        // We need to rewrite the origin to the public proxy path so the client can reach it
+        // The signature in the query params remains valid for the internal host
+        const publicBaseUrl = process.env.NEXT_PUBLIC_S3_PUBLIC_URL || "/s3-storage"
+
+        // Replace the internal origin with the public proxy base
+        // We construct the client-facing URL by taking the path and query from the raw signed URL
+        // and appending it to the public base
+        const internalUrl = new URL(rawSignedUrl)
+
+        // internalUrl.pathname includes /bucket-name/key
+        // publicBaseUrl might be /s3-storage
+        // We want: https://progressive.lk/s3-storage/bucket-name/key?signature
+
+        // Determine the public origin (protocol + host)
+        const publicOrigin = `${protocol}://${host}`
+
+        // Remove leading slash from pathname if publicBaseUrl has trailing, or handle join cleanly
+        // But simply: new URL(path, base) might be tricky with the proxy path
+
+        // Let's manually construct to be safe
+        // rawSignedUrl: http://minio:9000/bucket/key?query
+        // We want: https://progressive.lk/s3-storage/bucket/key?query
+
+        // NOTE: Next.js rewrite is /s3-storage/:path* -> http://minio:9000/:path*
+        // So /s3-storage maps to root of minio:9000
+
+        const pathAndQuery = internalUrl.pathname + internalUrl.search
+        const safePublicBase = publicBaseUrl.endsWith('/') ? publicBaseUrl.slice(0, -1) : publicBaseUrl
+
+        // Final URL: https://progressive.lk/s3-storage/bucket/key?...
+        const signedUrl = `${publicOrigin}${safePublicBase}${pathAndQuery}`
 
         // Construct the public URL (what the database will save)
-        // We use the rewrite path /s3-storage for public access to keep it clean
-        const normalizedBase = publicBaseUrl.endsWith('/') ? publicBaseUrl.slice(0, -1) : publicBaseUrl
+        const normalizedBase = safePublicBase
         const publicUrl = `${normalizedBase}/${BUCKET_NAME}/${key}`
 
-        // The signedUrl is already correct because we initialized the client with directUploadHost
         return { signedUrl, publicUrl, key }
     } catch (error) {
         console.error("Error generating presigned URL:", error)
