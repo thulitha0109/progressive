@@ -40,14 +40,14 @@ export async function getPresignedUrl(
     const headersList = await headers()
     const host = headersList.get("host") || "localhost:3000"
 
-    // Strip port if present to get hostname
+    // Strip port if present to get hostname for protocol check
     const hostname = host.split(":")[0]
-
-    // Construct Direct MinIO URL
-    // Use NEXT_PUBLIC_S3_DIRECT_URL if set, otherwise fallback to dynamic construction
-    // Use https for non-localhost environments to avoid Mixed Content errors
     const protocol = (hostname === "localhost" || hostname === "127.0.0.1") ? "http" : "https"
-    const directUploadHost = process.env.NEXT_PUBLIC_S3_DIRECT_URL || `${protocol}://${hostname}:9000`
+
+    // Construct Upload URL using the /s3-storage rewrite proxy
+    // This avoids direct access to port 9000 (which is HTTP only) preventing SSL Protocol Errors
+    const publicBaseUrl = process.env.NEXT_PUBLIC_S3_PUBLIC_URL || "/s3-storage"
+    const directUploadHost = process.env.NEXT_PUBLIC_S3_DIRECT_URL || `${protocol}://${host}${publicBaseUrl}`
 
     // Create a request-specific S3 Client using the external endpoint
     // This ensures the Host header in the signature matches the client's upload request
@@ -73,7 +73,6 @@ export async function getPresignedUrl(
 
         // Construct the public URL (what the database will save)
         // We use the rewrite path /s3-storage for public access to keep it clean
-        const publicBaseUrl = process.env.NEXT_PUBLIC_S3_PUBLIC_URL || "/s3-storage"
         const normalizedBase = publicBaseUrl.endsWith('/') ? publicBaseUrl.slice(0, -1) : publicBaseUrl
         const publicUrl = `${normalizedBase}/${BUCKET_NAME}/${key}`
 
