@@ -14,24 +14,33 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://progressive.lk"),
   title: {
-    default: "Progressive.lk | The Future of Sound",
+    default: "Progressive.lk | Ceylon EDM Culture",
     template: "%s | Progressive.lk",
   },
-  description: "Discover exclusive tracks, upcoming releases, and the artists behind the progressive sound of Sri Lanka.",
+  description: "Enter the void that offers more than just fun: the history, the present and the future of the Sri Lankan EDM industry!",
   keywords: ["progressive house", "techno", "electronic music", "sri lanka", "underground music"],
   authors: [{ name: "Progressive.lk" }],
   openGraph: {
     type: "website",
     locale: "en_US",
     url: "/",
-    title: "Progressive.lk | The Future of Sound",
-    description: "Discover exclusive tracks, upcoming releases, and the artists behind the progressive sound of Sri Lanka.",
+    title: "Progressive.lk | Ceylon EDM Culture",
+    description: "Enter the void that offers more than just fun: the history, the present and the future of the Sri Lankan EDM industry!",
     siteName: "Progressive.lk",
+    images: [
+      {
+        url: "/socialicon.png",
+        width: 1200,
+        height: 630,
+        alt: "Progressive.lk",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Progressive.lk | The Future of Sound",
-    description: "Discover exclusive tracks, upcoming releases, and the artists behind the progressive sound of Sri Lanka.",
+    title: "Progressive.lk | Ceylon EDM Culture",
+    description: "Enter the void that offers more than just fun: the history, the present and the future of the Sri Lankan EDM industry!",
+    images: ["/socialicon.png"],
   },
   robots: {
     index: true,

@@ -28,7 +28,7 @@ export default function EditArtistForm({ artist }: { artist: Artist }) {
     const [uploadStatus, setUploadStatus] = useState("")
     const [imagePreview, setImagePreview] = useState<string | null>(artist.imageUrl || null)
 
-    let socialProfiles: any = { instagram: "", twitter: "", soundcloud: "", facebook: "", tiktok: "", spotify: "" }
+    let socialProfiles: any = { instagram: "", youtube: "", mixcloud: "", soundcloud: "", facebook: "", tiktok: "", spotify: "" }
     try {
         if (artist.socialLinks) {
             socialProfiles = artist.socialLinks
@@ -211,13 +211,24 @@ export default function EditArtistForm({ artist }: { artist: Artist }) {
                                 />
                             </div>
                             <div className="space-y-2">
-                                <Label htmlFor="twitter">Twitter</Label>
+                                <Label htmlFor="youtube">YouTube</Label>
                                 <Input
-                                    id="twitter"
-                                    name="twitter"
-                                    placeholder="https://twitter.com/..."
+                                    id="youtube"
+                                    name="youtube"
+                                    placeholder="https://youtube.com/..."
                                     type="url"
-                                    defaultValue={socialProfiles.twitter || ""}
+                                    defaultValue={socialProfiles.youtube || ""}
+                                    disabled={isPending}
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="mixcloud">Mixcloud</Label>
+                                <Input
+                                    id="mixcloud"
+                                    name="mixcloud"
+                                    placeholder="https://mixcloud.com/..."
+                                    type="url"
+                                    defaultValue={socialProfiles.mixcloud || ""}
                                     disabled={isPending}
                                 />
                             </div>

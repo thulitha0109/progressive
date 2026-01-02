@@ -81,7 +81,7 @@ export default async function HomePage() {
             {artists.slice(0, 6).map((artist) => (
               <Link key={artist.id} href={`/artists/${artist.slug}`} className="group">
                 <div className="flex flex-col items-center gap-3">
-                  <div className="relative h-32 w-32 md:h-40 md:w-40 overflow-hidden rounded-md bg-muted transition-transform group-hover:scale-105 shadow-md">
+                  <div className="relative h-32 w-32 md:h-40 md:w-40 overflow-hidden rounded-full bg-muted transition-transform group-hover:scale-105 shadow-md">
                     {artist.imageUrl ? (
                       <Image
                         src={artist.imageUrl}

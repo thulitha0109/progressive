@@ -66,7 +66,7 @@ model Artist {
   slug           String   @unique
   bio            String
   imageUrl       String?
-  socialLinks    Json?    // { facebook: string, tiktok: string, spotify: string, ... }
+  socialLinks    Json?    // { facebook: string, instagram: string, youtube: string, mixcloud: string, ... }
   socialProfiles String?  // Deprecated: use socialLinks
   tracks         Track[]
   podcasts       Podcast[]

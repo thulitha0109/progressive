@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button"
 import { PlayButton } from "@/components/shared/play-button"
 import { LikeButton } from "@/components/shared/like-button"
 import { FollowButton } from "@/components/artist/follow-button"
-import { Calendar, Play, User, Facebook, Instagram, Twitter, Music, Radio } from "lucide-react"
+import { Calendar, Play, User } from "lucide-react"
 import Link from "next/link"
 import { notFound } from "next/navigation"
 
@@ -34,8 +34,8 @@ export default async function ArtistPage({
                     </div>
                 )}
                 <div className="container relative flex h-full flex-col justify-end px-4 md:px-6 pb-8">
-                    <div className="flex items-end gap-6">
-                        <div className="h-32 w-32 overflow-hidden rounded-full border-4 border-background bg-muted flex items-center justify-center shadow-xl">
+                    <div className="flex flex-col md:flex-row md:items-end gap-6">
+                        <div className="h-32 w-32 overflow-hidden rounded-full border-4 border-background bg-muted flex items-center justify-center shadow-xl shrink-0">
                             {artist.imageUrl ? (
                                 <img
                                     src={artist.imageUrl}
@@ -46,52 +46,51 @@ export default async function ArtistPage({
                                 <User className="h-12 w-12 text-muted-foreground" />
                             )}
                         </div>
-                        <div className="mb-2">
-                            <h1 className="text-4xl font-bold tracking-tight">{artist.name}</h1>
-                            <div className="flex items-center gap-3">
+                        <div className="mb-2 w-full">
+                            <h1 className="text-3xl md:text-4xl font-bold tracking-tight break-words">{artist.name}</h1>
+                            <div className="flex flex-wrap items-center gap-3 mt-2">
                                 <p className="text-muted-foreground">Artist</p>
                                 <FollowButton artistId={artist.id} />
                             </div>
                             {artist.socialLinks && (
-                                <div className="flex gap-4 mt-4">
+                                <div className="flex flex-wrap gap-4 mt-4">
                                     {(() => {
                                         const links = artist.socialLinks as any
                                         return (
                                             <>
                                                 {links.instagram && (
-                                                    <a href={links.instagram} target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary transition-colors">
-                                                        <Instagram className="h-5 w-5" />
-                                                        <span className="sr-only">Instagram</span>
+                                                    <a href={links.instagram} target="_blank" rel="noopener noreferrer" className="hover:opacity-80 transition-opacity">
+                                                        <img src="/images/ICONS/instagram.svg" alt="Instagram" className="h-6 w-6" />
                                                     </a>
                                                 )}
-                                                {links.twitter && (
-                                                    <a href={links.twitter} target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary transition-colors">
-                                                        <Twitter className="h-5 w-5" />
-                                                        <span className="sr-only">Twitter</span>
+                                                {links.youtube && (
+                                                    <a href={links.youtube} target="_blank" rel="noopener noreferrer" className="hover:opacity-80 transition-opacity">
+                                                        <img src="/images/ICONS/youtube.svg" alt="YouTube" className="h-6 w-6" />
                                                     </a>
                                                 )}
-                                                {links.facebook && (
-                                                    <a href={links.facebook} target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary transition-colors">
-                                                        <Facebook className="h-5 w-5" />
-                                                        <span className="sr-only">Facebook</span>
+                                                {links.mixcloud && (
+                                                    <a href={links.mixcloud} target="_blank" rel="noopener noreferrer" className="hover:opacity-80 transition-opacity">
+                                                        <img src="/images/ICONS/mixcloud.svg" alt="Mixcloud" className="h-6 w-6" />
                                                     </a>
                                                 )}
                                                 {links.soundcloud && (
-                                                    <a href={links.soundcloud} target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary transition-colors">
-                                                        <Music className="h-5 w-5" />
-                                                        <span className="sr-only">SoundCloud</span>
+                                                    <a href={links.soundcloud} target="_blank" rel="noopener noreferrer" className="hover:opacity-80 transition-opacity">
+                                                        <img src="/images/ICONS/soundcloud.svg" alt="SoundCloud" className="h-6 w-6" />
+                                                    </a>
+                                                )}
+                                                {links.facebook && (
+                                                    <a href={links.facebook} target="_blank" rel="noopener noreferrer" className="hover:opacity-80 transition-opacity">
+                                                        <img src="/images/ICONS/fb.svg" alt="Facebook" className="h-6 w-6" />
                                                     </a>
                                                 )}
                                                 {links.spotify && (
-                                                    <a href={links.spotify} target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary transition-colors">
-                                                        <Radio className="h-5 w-5" />
-                                                        <span className="sr-only">Spotify</span>
+                                                    <a href={links.spotify} target="_blank" rel="noopener noreferrer" className="hover:opacity-80 transition-opacity">
+                                                        <img src="/images/ICONS/spotify.svg" alt="Spotify" className="h-6 w-6" />
                                                     </a>
                                                 )}
                                                 {links.tiktok && (
-                                                    <a href={links.tiktok} target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary transition-colors">
-                                                        <Music className="h-5 w-5" />
-                                                        <span className="sr-only">TikTok</span>
+                                                    <a href={links.tiktok} target="_blank" rel="noopener noreferrer" className="hover:opacity-80 transition-opacity">
+                                                        <img src="/images/ICONS/tiktok.svg" alt="TikTok" className="h-6 w-6" />
                                                     </a>
                                                 )}
                                             </>

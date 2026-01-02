@@ -69,7 +69,8 @@ export async function createArtist(formData: FormData) {
     const bio = formData.get("bio") as string
     const imageUrl = formData.get("imageUrl") as string
     const instagram = formData.get("instagram") as string
-    const twitter = formData.get("twitter") as string
+    const youtube = formData.get("youtube") as string
+    const mixcloud = formData.get("mixcloud") as string
     const soundcloud = formData.get("soundcloud") as string
 
     const facebook = formData.get("facebook") as string
@@ -81,7 +82,8 @@ export async function createArtist(formData: FormData) {
 
     const socialLinks = {
         instagram,
-        twitter,
+        youtube,
+        mixcloud,
         soundcloud,
         facebook,
         tiktok,
@@ -190,7 +192,8 @@ export async function updateArtist(id: string, formData: FormData) {
     const bio = formData.get("bio") as string
     const imageUrl = formData.get("imageUrl") as string
     const instagram = formData.get("instagram") as string
-    const twitter = formData.get("twitter") as string
+    const youtube = formData.get("youtube") as string
+    const mixcloud = formData.get("mixcloud") as string
     const soundcloud = formData.get("soundcloud") as string
 
     const facebook = formData.get("facebook") as string
@@ -202,7 +205,8 @@ export async function updateArtist(id: string, formData: FormData) {
 
     const socialLinks = {
         instagram,
-        twitter,
+        youtube,
+        mixcloud,
         soundcloud,
         facebook,
         tiktok,

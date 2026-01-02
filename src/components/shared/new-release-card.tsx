@@ -16,6 +16,7 @@ interface Track {
     imageUrl?: string | null
     scheduledFor: Date
     genre?: string | null
+    sequence: number
     genreRel?: {
         name: string
         parent?: {
@@ -109,9 +110,16 @@ export function NewReleaseCard({ track }: { track: Track }) {
             <div className="flex flex-col justify-between h-full min-w-0 z-10 relative py-3 pr-3 sm:py-4 sm:pr-4">
                 {/* Top Row: Date (Left) and Like (Right) */}
                 <div className="flex justify-between items-start w-full">
-                    <div className="flex items-center gap-1 text-[10px] sm:text-xs text-muted-foreground font-medium bg-white/5 px-2 py-0.5 rounded-md">
-                        <Calendar className="h-3 w-3" />
-                        {new Date(track.scheduledFor).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                    <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-1 text-[10px] sm:text-xs text-muted-foreground font-medium bg-white/5 px-2 py-0.5 rounded-md">
+                            <Calendar className="h-3 w-3" />
+                            {new Date(track.scheduledFor).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                        </div>
+                        {track.sequence > 0 && (
+                            <div className="flex items-center gap-1 text-[10px] sm:text-xs text-muted-foreground font-medium bg-white/5 px-2 py-0.5 rounded-md">
+                                <span>#{track.sequence}</span>
+                            </div>
+                        )}
                     </div>
 
                     <div onClick={(e) => e.stopPropagation()} className="transform transition-transform active:scale-95 text-muted-foreground hover:text-red-500">

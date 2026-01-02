@@ -43,9 +43,11 @@ export async function getPresignedUrl(
     // Strip port if present to get hostname
     const hostname = host.split(":")[0]
 
-    // Construct Direct MinIO URL: http://<hostname>:9000
+    // Construct Direct MinIO URL
     // Use NEXT_PUBLIC_S3_DIRECT_URL if set, otherwise fallback to dynamic construction
-    const directUploadHost = process.env.NEXT_PUBLIC_S3_DIRECT_URL || `http://${hostname}:9000`
+    // Use https for non-localhost environments to avoid Mixed Content errors
+    const protocol = (hostname === "localhost" || hostname === "127.0.0.1") ? "http" : "https"
+    const directUploadHost = process.env.NEXT_PUBLIC_S3_DIRECT_URL || `${protocol}://${hostname}:9000`
 
     // Create a request-specific S3 Client using the external endpoint
     // This ensures the Host header in the signature matches the client's upload request

@@ -185,11 +185,21 @@ export default function NewArtistForm() {
                                 />
                             </div>
                             <div className="space-y-2">
-                                <Label htmlFor="twitter">Twitter</Label>
+                                <Label htmlFor="youtube">YouTube</Label>
                                 <Input
-                                    id="twitter"
-                                    name="twitter"
-                                    placeholder="https://twitter.com/..."
+                                    id="youtube"
+                                    name="youtube"
+                                    placeholder="https://youtube.com/..."
+                                    type="url"
+                                    disabled={isPending}
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="mixcloud">Mixcloud</Label>
+                                <Input
+                                    id="mixcloud"
+                                    name="mixcloud"
+                                    placeholder="https://mixcloud.com/..."
                                     type="url"
                                     disabled={isPending}
                                 />
