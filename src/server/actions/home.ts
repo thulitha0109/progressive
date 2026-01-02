@@ -57,6 +57,14 @@ export async function getHomeData() {
         },
     })
 
+    const featuredPodcastPromise = prisma.podcast.findFirst({
+        where: { isFeatured: true, deletedAt: null },
+        include: {
+            artist: true,
+            genre: true,
+        },
+    })
+
     const artistsPromise = prisma.artist.findMany({
         orderBy: { createdAt: "desc" },
         take: 6,
@@ -81,12 +89,14 @@ export async function getHomeData() {
         upcomingTracksRaw,
         publishedTracksRaw,
         featuredTrackRaw,
+        featuredPodcastRaw,
         artists,
         blogPosts,
     ] = await Promise.all([
         upcomingTracksPromise,
         publishedTracksPromise,
         featuredTrackPromise,
+        featuredPodcastPromise,
         artistsPromise,
         blogPostsPromise,
     ])
@@ -116,11 +126,25 @@ export async function getHomeData() {
         isLiked: likedTrackIds.has(track.id),
     }))
 
-    const featuredTrack = featuredTrackRaw ? {
-        ...featuredTrackRaw,
-        likesCount: (featuredTrackRaw as any)._count.likedBy,
-        isLiked: likedTrackIds.has(featuredTrackRaw.id),
-    } : null
+    // Determine featured item (Track or Podcast)
+    let featuredItem = null
 
-    return { upcomingTracks, publishedTracks, featuredTrack, artists, blogPosts }
+    if (featuredTrackRaw) {
+        featuredItem = {
+            ...featuredTrackRaw,
+            type: "TRACK" as const,
+            likesCount: (featuredTrackRaw as any)._count.likedBy,
+            isLiked: likedTrackIds.has(featuredTrackRaw.id),
+        }
+    } else if (featuredPodcastRaw) {
+        featuredItem = {
+            ...featuredPodcastRaw,
+            type: "PODCAST" as const,
+            // Podcasts don't have likes yet
+            likesCount: 0,
+            isLiked: false,
+        }
+    }
+
+    return { upcomingTracks, publishedTracks, featuredItem, artists, blogPosts }
 }

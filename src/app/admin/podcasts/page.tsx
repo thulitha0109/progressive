@@ -11,26 +11,50 @@ import {
     TableRow,
 } from "@/components/ui/table"
 import { Pagination } from "@/components/ui/pagination"
+import { FeatureButton } from "./_components/feature-button"
 
 interface PodcastsPageProps {
-    searchParams: Promise<{ page?: string }>
+    searchParams: Promise<{ page?: string; status?: 'published' | 'upcoming' | 'all' }>
 }
 
 export default async function AdminPodcastsPage({ searchParams }: PodcastsPageProps) {
     const params = await searchParams
     const currentPage = Number(params.page) || 1
-    const { podcasts, totalCount, totalPages } = await getPodcasts(currentPage)
+    const status = params.status || 'published'
+    const { podcasts, totalCount, totalPages } = await getPodcasts(currentPage, 10, status)
 
     return (
         <div className="container py-10">
-            <div className="flex items-center justify-between mb-8">
-                <h1 className="text-3xl font-bold">Podcasts</h1>
-                <Link href="/admin/podcasts/new">
-                    <Button>
-                        <Plus className="mr-2 h-4 w-4" />
-                        Add Podcast
+            <div className="flex flex-col gap-6 mb-8">
+                <div className="flex items-center justify-between">
+                    <h1 className="text-3xl font-bold">Podcasts</h1>
+                    <div className="flex gap-2">
+                        <Button variant="outline" asChild>
+                            <Link href="/admin/podcasts/trash">
+                                <Trash className="mr-2 h-4 w-4" />
+                                Trash
+                            </Link>
+                        </Button>
+                        <Link href="/admin/podcasts/new">
+                            <Button>
+                                <Plus className="mr-2 h-4 w-4" />
+                                Add Podcast
+                            </Button>
+                        </Link>
+                    </div>
+                </div>
+
+                <div className="flex items-center gap-2">
+                    <Button variant={!params.status || params.status === 'published' ? "secondary" : "ghost"} asChild>
+                        <Link href="/admin/podcasts">Published</Link>
                     </Button>
-                </Link>
+                    <Button variant={params.status === 'upcoming' ? "secondary" : "ghost"} asChild>
+                        <Link href="/admin/podcasts?status=upcoming">Upcoming</Link>
+                    </Button>
+                    <Button variant={params.status === 'all' ? "secondary" : "ghost"} asChild>
+                        <Link href="/admin/podcasts?status=all">All</Link>
+                    </Button>
+                </div>
             </div>
 
             <div className="rounded-md border">
@@ -39,6 +63,7 @@ export default async function AdminPodcastsPage({ searchParams }: PodcastsPagePr
                         <TableRow>
                             <TableHead>Title</TableHead>
                             <TableHead>Artist</TableHead>
+                            <TableHead>Scheduled For</TableHead>
                             <TableHead>Created At</TableHead>
                             <TableHead className="text-right">Actions</TableHead>
                         </TableRow>
@@ -49,10 +74,14 @@ export default async function AdminPodcastsPage({ searchParams }: PodcastsPagePr
                                 <TableCell className="font-medium">{podcast.title}</TableCell>
                                 <TableCell>{podcast.artist?.name || "-"}</TableCell>
                                 <TableCell>
+                                    {new Date(podcast.scheduledFor).toLocaleString()}
+                                </TableCell>
+                                <TableCell>
                                     {new Date(podcast.createdAt).toLocaleDateString()}
                                 </TableCell>
                                 <TableCell className="text-right">
-                                    <div className="flex justify-end gap-2">
+                                    <div className="flex justify-end gap-2 items-center">
+                                        <FeatureButton podcastId={podcast.id} isFeatured={podcast.isFeatured} />
                                         <Link href={`/admin/podcasts/${podcast.id}/edit`}>
                                             <Button variant="ghost" size="icon">
                                                 <Edit className="h-4 w-4" />
@@ -74,7 +103,7 @@ export default async function AdminPodcastsPage({ searchParams }: PodcastsPagePr
                         ))}
                         {podcasts.length === 0 && (
                             <TableRow>
-                                <TableCell colSpan={4} className="h-24 text-center">
+                                <TableCell colSpan={5} className="h-24 text-center">
                                     No podcasts found.
                                 </TableCell>
                             </TableRow>

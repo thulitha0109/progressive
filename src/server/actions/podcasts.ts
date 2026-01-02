@@ -45,12 +45,20 @@ async function ensureUniqueSlug(baseSlug: string, excludeId?: string): Promise<s
     }
 }
 
-export async function getPodcasts(page: number = 1, pageSize: number = 10) {
+export async function getPodcasts(page: number = 1, pageSize: number = 10, status: 'published' | 'upcoming' | 'all' = 'published') {
     const skip = (page - 1) * pageSize
+    const now = new Date()
+    const where: any = { deletedAt: null }
+
+    if (status === 'published') {
+        where.scheduledFor = { lte: now }
+    } else if (status === 'upcoming') {
+        where.scheduledFor = { gt: now }
+    }
 
     const [podcasts, totalCount] = await Promise.all([
         prisma.podcast.findMany({
-            where: { deletedAt: null },
+            where,
             orderBy: { scheduledFor: "desc" },
             include: {
                 artist: true,
@@ -59,7 +67,7 @@ export async function getPodcasts(page: number = 1, pageSize: number = 10) {
             skip,
             take: pageSize,
         }),
-        prisma.podcast.count({ where: { deletedAt: null } }),
+        prisma.podcast.count({ where }),
     ])
 
     const totalPages = Math.ceil(totalCount / pageSize)
@@ -360,6 +368,39 @@ export async function getTrashedPodcasts() {
         where: {
             deletedAt: { not: null }
         },
+        include: {
+            artist: true,
+            genre: true,
+        },
         orderBy: { deletedAt: "desc" },
     })
+}
+
+export async function setFeaturedPodcast(id: string) {
+    try {
+        // Unset all featured podcasts
+        await prisma.podcast.updateMany({
+            where: { isFeatured: true },
+            data: { isFeatured: false },
+        })
+
+        // Unset all featured tracks (Shared exclusivity)
+        await prisma.track.updateMany({
+            where: { isFeatured: true },
+            data: { isFeatured: false },
+        })
+
+        // Set the new featured podcast
+        await prisma.podcast.update({
+            where: { id },
+            data: { isFeatured: true },
+        })
+
+        revalidatePath("/admin/podcasts")
+        revalidatePath("/admin/tracks")
+        revalidatePath("/")
+    } catch (error) {
+        console.error("Failed to set featured podcast:", error)
+        throw new Error("Failed to set featured podcast")
+    }
 }

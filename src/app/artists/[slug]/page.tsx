@@ -105,44 +105,72 @@ export default async function ArtistPage({
 
             <div className="container px-4 md:px-6 py-8 grid gap-10 md:grid-cols-[2fr_1fr]">
                 {/* Tracks */}
-                <div>
-                    <h2 className="text-2xl font-bold tracking-tight mb-6">Tracks</h2>
-                    <div className="space-y-2">
-                        {artist.tracks.map((track) => (
-                            <div
-                                key={track.id}
-                                className="group flex items-center gap-4 rounded-lg border p-3 hover:bg-accent transition-colors"
-                            >
-                                <div className="flex items-center justify-center h-10 w-10 rounded bg-primary/10 text-primary">
-                                    <Play className="h-5 w-5 ml-0.5" />
-                                </div>
-                                <div className="flex-1 min-w-0">
-                                    <h3 className="font-medium truncate">{track.title}</h3>
-                                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                                        <Calendar className="h-3 w-3" />
-                                        {new Date(track.scheduledFor).toLocaleDateString()}
+                {/* Tracks */}
+                <div className="space-y-10">
+                    {/* Released Tracks */}
+                    <div>
+                        <h2 className="text-2xl font-bold tracking-tight mb-6">Released Tracks</h2>
+                        <div className="space-y-2">
+                            {artist.tracks
+                                .filter((track) => track.isReleased)
+                                .map((track) => (
+                                    <div
+                                        key={track.id}
+                                        className="group flex items-center gap-4 rounded-lg border p-3 hover:bg-accent transition-colors overflow-hidden"
+                                    >
+                                        <div className="flex items-center justify-center h-10 w-10 rounded bg-primary/10 text-primary shrink-0">
+                                            <PlayButton track={track} variant="icon" />
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                            <h3 className="font-medium truncate pr-2">{track.title}</h3>
+                                            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                                <Calendar className="h-3 w-3" />
+                                                {new Date(track.scheduledFor).toLocaleDateString()}
+                                            </div>
+                                        </div>
+                                        <div className="shrink-0">
+                                            <LikeButton
+                                                trackId={track.id}
+                                                initialLikes={track.likesCount}
+                                                initialIsLiked={track.isLiked}
+                                            />
+                                        </div>
                                     </div>
-                                </div>
-                                <LikeButton
-                                    trackId={track.id}
-                                    initialLikes={track.likesCount}
-                                    initialIsLiked={track.isLiked}
-                                />
-                                {track.isReleased ? (
-                                    <Button asChild size="sm" variant="ghost">
-                                        <PlayButton track={track} />
-                                    </Button>
-                                ) : (
-                                    <div className="px-3 py-1 text-xs font-medium bg-muted text-muted-foreground rounded-full">
-                                        Upcoming
-                                    </div>
-                                )}
-                            </div>
-                        ))}
-                        {artist.tracks.length === 0 && (
-                            <p className="text-muted-foreground">No tracks released yet.</p>
-                        )}
+                                ))}
+                            {artist.tracks.filter((track) => track.isReleased).length === 0 && (
+                                <p className="text-muted-foreground">No tracks released yet.</p>
+                            )}
+                        </div>
                     </div>
+
+                    {/* Upcoming Tracks */}
+                    {artist.tracks.some((track) => !track.isReleased) && (
+                        <div>
+                            <h2 className="text-2xl font-bold tracking-tight mb-6">Upcoming Releases</h2>
+                            <div className="space-y-2">
+                                {artist.tracks
+                                    .filter((track) => !track.isReleased)
+                                    .map((track) => (
+                                        <div
+                                            key={track.id}
+                                            className="group flex items-center gap-4 rounded-lg border p-3 bg-muted/30 overflow-hidden opacity-80"
+                                        >
+                                            <div className="flex items-center justify-center h-10 w-10 rounded bg-muted text-muted-foreground shrink-0">
+                                                <Calendar className="h-5 w-5" />
+                                            </div>
+                                            <div className="flex-1 min-w-0">
+                                                <h3 className="font-medium truncate pr-2">{track.title}</h3>
+                                                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                                    <span className="font-semibold text-primary">Pre-Release</span>
+                                                    <span>•</span>
+                                                    {new Date(track.scheduledFor).toLocaleDateString()}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                            </div>
+                        </div>
+                    )}
                 </div>
 
                 {/* Bio */}

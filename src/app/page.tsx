@@ -13,15 +13,16 @@ import { UpcomingCarousel } from "@/components/shared/upcoming-carousel"
 import { NewReleasesCarousel } from "@/components/home/new-releases-carousel"
 
 export default async function HomePage() {
-  const { upcomingTracks, publishedTracks, featuredTrack, artists, blogPosts } = await getHomeData()
+  const { upcomingTracks, publishedTracks, featuredItem, artists, blogPosts } = await getHomeData()
+
+  // Fallback to latest published track if no featured item
+  const displayItem = featuredItem || (publishedTracks.length > 0 ? { ...publishedTracks[0], type: "TRACK" as const } : null)
 
   return (
     <div className="min-h-screen bg-background pb-24">
       {/* Featured Section (Replaces Hero) */}
-      {featuredTrack ? (
-        <FeaturedSection track={featuredTrack} />
-      ) : publishedTracks.length > 0 ? (
-        <FeaturedSection track={publishedTracks[0]} />
+      {displayItem ? (
+        <FeaturedSection item={displayItem} />
       ) : (
         <section className="relative h-[400px] w-full overflow-hidden bg-primary/5">
           <div className="absolute inset-0 bg-gradient-to-b from-transparent to-background" />

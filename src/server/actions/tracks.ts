@@ -391,18 +391,30 @@ export async function updateTrack(id: string, formData: FormData) {
 }
 
 export async function setFeaturedTrack(id: string) {
-    // Unset all featured tracks
-    await prisma.track.updateMany({
-        where: { isFeatured: true },
-        data: { isFeatured: false },
-    })
+    try {
+        // Unset all featured tracks
+        await prisma.track.updateMany({
+            where: { isFeatured: true },
+            data: { isFeatured: false },
+        })
 
-    // Set the new featured track
-    await prisma.track.update({
-        where: { id },
-        data: { isFeatured: true },
-    })
+        // Unset all featured podcasts (Shared exclusivity)
+        await prisma.podcast.updateMany({
+            where: { isFeatured: true },
+            data: { isFeatured: false },
+        })
 
-    revalidatePath("/admin/tracks")
-    revalidatePath("/")
+        // Set the new featured track
+        await prisma.track.update({
+            where: { id },
+            data: { isFeatured: true },
+        })
+
+        revalidatePath("/admin/tracks")
+        revalidatePath("/admin/podcasts")
+        revalidatePath("/")
+    } catch (error) {
+        console.error("Failed to set featured track:", error)
+        throw new Error("Failed to set featured track")
+    }
 }

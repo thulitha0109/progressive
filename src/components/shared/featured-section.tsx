@@ -14,7 +14,7 @@ import { cn } from "@/lib/utils"
 import { WaveformBar } from "@/components/shared/waveform-bar"
 import { LiquidBackground } from "@/components/shared/liquid-background"
 
-interface Track {
+interface FeaturedItem {
     id: string
     title: string
     audioUrl: string
@@ -22,19 +22,20 @@ interface Track {
     scheduledFor: Date
     likesCount: number
     isLiked: boolean
-    artist: {
+    artist?: {
         id: string
         name: string
         imageUrl?: string | null
-    }
+    } | null
     assignedSequence?: number | null
+    type?: 'TRACK' | 'PODCAST'
 }
 
-export function FeaturedSection({ track }: { track: Track }) {
+export function FeaturedSection({ item }: { item: FeaturedItem }) {
     const { currentTrack, isPlaying, togglePlay, playTrack } = usePlayer()
     const [progress, setProgress] = useState(0)
 
-    const isCurrentTrack = currentTrack?.id === track.id
+    const isCurrentTrack = currentTrack?.id === item.id
     const [mousePosition, setMousePosition] = useState<{ x: number; y: number } | null>(null)
     // Remove complex glitch state, replace with simple mouse tracking for liquid effect
 
@@ -49,12 +50,18 @@ export function FeaturedSection({ track }: { track: Track }) {
         if (isCurrentTrack) {
             togglePlay()
         } else {
-            playTrack(track)
+            // Need to ensure item has all Track properties required by playTrack
+            // For now casting, but playTrack might need type update or item normalization
+            playTrack(item as any)
         }
     }
 
     // We no longer need to hold back the content, as the LiquidBackground now has a static fallback
     // that renders immediately. This fixes the "double load" / invisible content issue.
+
+    const artistName = item.artist?.name || "Progressive.lk"
+    const artistImage = item.artist?.imageUrl || null
+    const sequence = item.assignedSequence ? String(item.assignedSequence).padStart(3, '0') : "001"
 
     return (
         <section
@@ -82,10 +89,10 @@ export function FeaturedSection({ track }: { track: Track }) {
                             {/* Artist Info (Vertical Layout: Image -> Name) */}
                             <div className="flex flex-col items-end space-y-6">
                                 <div className="relative h-24 w-24 md:h-32 md:w-32 overflow-hidden rounded-full border-2 border-white/20 shadow-lg">
-                                    {track.artist.imageUrl ? (
+                                    {artistImage ? (
                                         <Image
-                                            src={track.artist.imageUrl}
-                                            alt={track.artist.name}
+                                            src={artistImage}
+                                            alt={artistName}
                                             fill
                                             className="object-cover"
                                             sizes="128px"
@@ -93,14 +100,14 @@ export function FeaturedSection({ track }: { track: Track }) {
                                     ) : (
                                         <div className="h-full w-full bg-muted flex items-center justify-center">
                                             <span className="text-xl font-bold text-muted-foreground">
-                                                {track.artist.name[0]}
+                                                {artistName[0]}
                                             </span>
                                         </div>
                                     )}
                                 </div>
 
                                 <h3 className="text-2xl md:text-3xl font-light text-foreground/80 tracking-wide">
-                                    {track.artist.name}
+                                    {artistName}
                                 </h3>
                             </div>
 
@@ -110,13 +117,13 @@ export function FeaturedSection({ track }: { track: Track }) {
                                     <h1
                                         className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tighter text-foreground drop-shadow-2xl relative z-10 leading-[0.9]"
                                     >
-                                        {track.title}
+                                        {item.title}
                                     </h1>
                                 </div>
 
                                 <div className="flex items-center gap-4 justify-end w-full mt-4">
                                     <span className="text-primary font-medium tracking-widest uppercase text-sm md:text-base px-3 py-1 rounded border border-[#487cff] text-[#487cff]">
-                                        {track.assignedSequence ? String(track.assignedSequence).padStart(3, '0') : "001"} <span className="mx-2 text-muted-foreground/50">|</span> FEATURED TRACK
+                                        {sequence} <span className="mx-2 text-muted-foreground/50">|</span> FEATURED {item.type || 'TRACK'}
                                     </span>
                                 </div>
                             </div>
@@ -126,10 +133,10 @@ export function FeaturedSection({ track }: { track: Track }) {
                     {/* Right Side: Player Card - (Order 1 on Mobile, 2 on Desktop) */}
                     <div className="relative w-full max-w-md mx-auto lg:ml-auto lg:mb-12 cursor-pointer pointer-events-auto order-1 lg:order-2" onClick={handleImageClick}>
                         <div className="relative aspect-square rounded-md overflow-hidden shadow-2xl group border border-white/10 bg-black/50 backdrop-blur-md">
-                            {track.imageUrl || track.artist.imageUrl ? (
+                            {item.imageUrl || (item.artist && item.artist.imageUrl) ? (
                                 <Image
-                                    src={track.imageUrl || track.artist.imageUrl || ""}
-                                    alt={track.title}
+                                    src={item.imageUrl || item.artist?.imageUrl || ""}
+                                    alt={item.title}
                                     fill
                                     className={cn(
                                         "object-cover transition-all duration-700 group-hover:scale-105 opacity-80 group-hover:opacity-100",
@@ -161,7 +168,7 @@ export function FeaturedSection({ track }: { track: Track }) {
                                 <div className={cn(
                                     "rounded-full bg-black/30 backdrop-blur-xl p-6 border border-white/20 hover:scale-110 transition-transform hover:bg-black/50"
                                 )}>
-                                    <PlayButton track={track} variant="icon" />
+                                    <PlayButton track={item as any} variant="icon" />
                                 </div>
                             </div>
                         </div>
