@@ -106,13 +106,18 @@ export async function getHomeData() {
     ])
 
     let likedTrackIds = new Set<string>()
-    if (userId) {
-        const userLikes = await prisma.user.findUnique({
-            where: { id: userId },
-            select: { likes: { select: { id: true } } },
-        })
-        if (userLikes) {
-            likedTrackIds = new Set(userLikes.likes.map((t: { id: string }) => t.id))
+
+    if (userId && typeof userId === 'string' && userId.length > 0) {
+        try {
+            const userLikes = await prisma.user.findUnique({
+                where: { id: userId },
+                select: { likes: { select: { id: true } } },
+            })
+            if (userLikes) {
+                likedTrackIds = new Set(userLikes.likes.map((t: { id: string }) => t.id))
+            }
+        } catch (error) {
+            console.error("[getHomeData] Error fetching user likes:", error)
         }
     }
 

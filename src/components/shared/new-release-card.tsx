@@ -53,7 +53,7 @@ function getGenreBorderColor(genre: string) {
     return key ? GENRE_BORDERS[key] : "border-white/10 hover:border-white/30"
 }
 
-export function NewReleaseCard({ track }: { track: Track }) {
+export function NewReleaseCard({ track, hideLikeButton = false }: { track: Track, hideLikeButton?: boolean }) {
     const { playTrack, currentTrack, isPlaying, togglePlay } = usePlayer()
     const isCurrentTrack = currentTrack?.id === track.id
 
@@ -125,13 +125,15 @@ export function NewReleaseCard({ track }: { track: Track }) {
                         )}
                     </div>
 
-                    <div onClick={(e) => e.stopPropagation()} className="transform transition-transform active:scale-95 text-muted-foreground hover:text-red-500">
-                        <LikeButton
-                            trackId={track.id}
-                            initialLikes={track.likesCount}
-                            initialIsLiked={track.isLiked}
-                        />
-                    </div>
+                    {!hideLikeButton && (
+                        <div onClick={(e) => e.stopPropagation()} className="transform transition-transform active:scale-95 text-muted-foreground hover:text-red-500">
+                            <LikeButton
+                                trackId={track.id}
+                                initialLikes={track.likesCount}
+                                initialIsLiked={track.isLiked}
+                            />
+                        </div>
+                    )}
                 </div>
 
                 {/* Track Title */}

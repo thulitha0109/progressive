@@ -15,9 +15,10 @@ export default function AdminLayout({
     return (
         <div className="flex min-h-screen w-full">
             <aside className="hidden w-64 flex-col border-r bg-background p-6 md:flex">
-                <div className="mb-8 flex items-center gap-2 text-lg font-bold">
-                    <Music className="h-6 w-6" />
-                    <span>Admin Panel</span>
+                <div className="mb-8 flex items-center justify-start">
+                    <Link href="/" className="flex items-center">
+                        <img src="/progressive.lk-logo.svg" alt="Progressive.lk" className="h-6 w-auto invert dark:invert-0" />
+                    </Link>
                 </div>
                 <nav className="flex flex-col gap-2">
                     <Link
@@ -127,6 +128,18 @@ export default function AdminLayout({
                     >
                         <Package className="h-4 w-4" />
                         Products
+                    </Link>
+                    <Link
+                        href="/admin/users"
+                        className={cn(
+                            "flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-primary",
+                            pathname.startsWith("/admin/users")
+                                ? "bg-secondary text-primary"
+                                : "text-muted-foreground"
+                        )}
+                    >
+                        <Users className="h-4 w-4" />
+                        Users
                     </Link>
                 </nav>
             </aside>

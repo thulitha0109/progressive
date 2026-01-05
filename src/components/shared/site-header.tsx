@@ -25,6 +25,8 @@ import { useState } from "react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { InlineSearch } from "@/components/shared/inline-search"
 
+import { useSession } from "next-auth/react"
+
 interface SiteHeaderProps {
     user?: {
         name?: string | null
@@ -34,9 +36,14 @@ interface SiteHeaderProps {
     }
 }
 
-export function SiteHeader({ user }: SiteHeaderProps) {
+export function SiteHeader({ user: initialUser }: SiteHeaderProps) {
     const pathname = usePathname()
     const [isOpen, setIsOpen] = useState(false)
+    const { data: session, status } = useSession()
+    // Prefer session user if available, otherwise use initialUser (for SSR/first paint)
+    // BUT if session is explicitly "unauthenticated", force user to null (logout state)
+    // This prevents falling back to stale initialUser after client-side logout
+    const user = status === "unauthenticated" ? null : (session?.user || initialUser)
 
     const routes = [
         // {
@@ -164,6 +171,7 @@ export function SiteHeader({ user }: SiteHeaderProps) {
                                         className="text-destructive focus:text-destructive cursor-pointer"
                                         onClick={async () => {
                                             await logout()
+                                            window.location.href = "/"
                                         }}
                                     >
                                         Log out

@@ -59,6 +59,9 @@ import { SiteFooter } from "@/components/shared/site-footer"
 import { ThemeProvider } from "@/components/shared/theme-provider"
 import { auth } from "@/auth"
 import "./globals.css";
+import { Toaster } from "@/components/ui/sonner"
+import { Providers } from "@/components/shared/providers"
+import ProgressProvider from "@/components/shared/progress-provider"
 
 export default async function RootLayout({
   children,
@@ -80,20 +83,20 @@ export default async function RootLayout({
           enableSystem={false}
         >
           <Providers session={session}>
-            <PlayerProvider>
-              <div className="relative flex min-h-screen flex-col mx-auto max-w-[1400px]">
-                <SiteHeader user={session?.user} />
-                <main className="flex-1">{children}</main>
-                <SiteFooter />
-              </div>
-              <Player />
-              <Toaster />
-            </PlayerProvider>
+            <ProgressProvider>
+              <PlayerProvider>
+                <div className="relative flex min-h-screen flex-col mx-auto max-w-[1400px]">
+                  <SiteHeader user={session?.user} />
+                  <main className="flex-1">{children}</main>
+                  <SiteFooter />
+                </div>
+                <Player />
+                <Toaster />
+              </PlayerProvider>
+            </ProgressProvider>
           </Providers>
         </ThemeProvider>
       </body>
     </html>
   );
 }
-import { Toaster } from "@/components/ui/sonner"
-import { Providers } from "@/components/shared/providers"

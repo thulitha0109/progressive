@@ -1,65 +1,61 @@
-import Image from "next/image"
 import { getPodcasts } from "@/server/actions/podcasts"
-import { Card, CardContent } from "@/components/ui/card"
-import { PlayButton } from "@/components/shared/play-button"
+import { NewReleaseCard } from "@/components/shared/new-release-card"
 import { Music2 } from "lucide-react"
 
+export const dynamic = 'force-dynamic'
+
 export default async function PodcastsPage() {
-    const { podcasts } = await getPodcasts()
+    const { podcasts } = await getPodcasts(1, 100) // Fetch more for now, implement pagination later if needed
 
     return (
-        <div className="container py-10 px-4 md:px-8">
-            <div className="flex flex-col gap-4 md:gap-8">
-                <div className="flex flex-col gap-2">
-                    <h1 className="text-3xl font-bold tracking-tight">Podcasts</h1>
-                    <p className="text-muted-foreground">
-                        Listen to our latest podcast episodes and discussions.
-                    </p>
+        <div className="container py-10 px-4 md:px-8 min-h-screen animate-enter-fade-in relative max-w-[1400px]">
+            <div className="flex flex-col gap-8">
+                <div className="flex flex-col gap-6 z-10 relative">
+                    <div className="flex flex-col xl:flex-row xl:items-end xl:justify-between gap-6">
+                        <div className="flex flex-col gap-2 max-w-2xl">
+                            <h1 className="text-4xl sm:text-5xl font-bold tracking-tight bg-gradient-to-br from-foreground to-foreground/60 bg-clip-text text-transparent">
+                                Podcasts
+                            </h1>
+                            <p className="text-lg text-muted-foreground leading-relaxed">
+                                Listen to our exclusive guest mixes and radio shows.
+                            </p>
+                        </div>
+                    </div>
                 </div>
 
-                {podcasts.length > 0 ? (
-                    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                        {podcasts.map((podcast) => (
-                            <Card key={podcast.id} className="overflow-hidden p-0">
-                                <div className="aspect-square relative bg-muted">
-                                    {podcast.imageUrl ? (
-                                        <Image
-                                            src={podcast.imageUrl}
-                                            alt={podcast.title}
-                                            fill
-                                            className="object-cover object-top"
-                                            sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                                        />
-                                    ) : (
-                                        <div className="flex items-center justify-center h-full text-muted-foreground">
-                                            <Music2 className="h-12 w-12" />
-                                        </div>
-                                    )}
-                                    <div className="absolute bottom-2 right-2">
-                                        <PlayButton track={{ ...podcast, artist: { id: podcast.artist?.id || "", name: podcast.artist?.name || "Unknown Artist", imageUrl: podcast.artist?.imageUrl } }} />
-                                    </div>
-                                </div>
-                                <CardContent className="p-4">
-                                    <h3 className="font-semibold truncate">{podcast.title}</h3>
-                                    <p className="text-sm text-muted-foreground truncate">
-                                        {podcast.artist?.name || "Unknown Artist"}
-                                    </p>
-                                    <p className="text-xs text-muted-foreground mt-2 line-clamp-2">
-                                        {podcast.description}
-                                    </p>
-                                </CardContent>
-                            </Card>
-                        ))}
-                    </div>
-                ) : (
-                    <div className="text-center py-20 text-muted-foreground">
-                        <Music2 className="h-12 w-12 mx-auto mb-4" />
-                        <h3 className="text-lg font-medium">No podcasts yet</h3>
-                        <p className="text-muted-foreground">
-                            Check back later for new episodes.
-                        </p>
-                    </div>
-                )}
+                <div className="w-full mt-4">
+                    {podcasts.length > 0 ? (
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            {podcasts.map((podcast) => (
+                                <NewReleaseCard
+                                    key={podcast.id}
+                                    track={{
+                                        ...podcast,
+                                        artist: {
+                                            id: podcast.artist?.id || "unknown",
+                                            name: podcast.artist?.name || "Unknown Artist",
+                                            imageUrl: podcast.artist?.imageUrl
+                                        },
+                                        type: podcast.type || null,
+                                        genreRel: podcast.genre ? {
+                                            name: podcast.genre.name
+                                        } : null,
+                                        // Mock likes as Podcast model doesn't support it yet
+                                        likesCount: 0,
+                                        isLiked: false
+                                    }}
+                                    hideLikeButton={true}
+                                />
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="flex flex-col items-center justify-center py-32 text-center border-2 border-dashed rounded-md border-muted">
+                            <Music2 className="h-12 w-12 text-muted-foreground mb-4" />
+                            <p className="text-xl font-medium text-muted-foreground">No podcasts found.</p>
+                            <p className="text-sm text-muted-foreground/60 mt-2">Check back later for new episodes.</p>
+                        </div>
+                    )}
+                </div>
             </div>
         </div>
     )

@@ -6,11 +6,13 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { useState, useTransition } from "react"
 import { LiquidBackground } from "@/components/shared/liquid-background"
 import { Music2 } from "lucide-react"
 
 export default function SignupPage() {
+    const router = useRouter()
     const [error, setError] = useState<string | null>(null)
     const [isPending, startTransition] = useTransition()
 
@@ -20,6 +22,9 @@ export default function SignupPage() {
             const result = await signup(formData)
             if (result?.error) {
                 setError(result.error)
+            } else if (result?.success) {
+                // Force a full page reload to ensure session is updated
+                window.location.href = "/profile"
             }
         })
     }
@@ -29,10 +34,7 @@ export default function SignupPage() {
             {/* Left: Form */}
             <div className="flex flex-col justify-center px-6 md:px-12 lg:px-24 py-12 bg-background">
                 <div className="w-full max-w-sm mx-auto flex flex-col gap-8">
-                    <Link href="/" className="flex items-center gap-2 mb-2 w-fit hover:opacity-80 transition-opacity">
-                        <Music2 className="h-6 w-6" />
-                        <span className="text-xl font-bold">Progressive.lk</span>
-                    </Link>
+                    {/* Logo removed as requested */}
 
                     <div className="flex flex-col gap-2">
                         <h1 className="text-3xl font-bold tracking-tight">Join the Community</h1>

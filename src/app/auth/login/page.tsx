@@ -23,8 +23,8 @@ export default function LoginPage() {
             if (result?.error) {
                 setError(result.error)
             } else if (result?.success) {
-                router.refresh()
-                router.push("/admin/artists")
+                // Force a full page reload to ensure session is updated
+                window.location.href = "/profile"
             }
         })
     }
@@ -34,10 +34,7 @@ export default function LoginPage() {
             {/* Left: Form */}
             <div className="flex flex-col justify-center px-6 md:px-12 lg:px-24 py-12 bg-background">
                 <div className="w-full max-w-sm mx-auto flex flex-col gap-8">
-                    <Link href="/" className="flex items-center gap-2 mb-2 w-fit hover:opacity-80 transition-opacity">
-                        <Music2 className="h-6 w-6" />
-                        <span className="text-xl font-bold">Progressive.lk</span>
-                    </Link>
+                    {/* Logo removed as requested */}
 
                     <div className="flex flex-col gap-2">
                         <h1 className="text-3xl font-bold tracking-tight">Welcome back</h1>
@@ -95,7 +92,6 @@ export default function LoginPage() {
                     className="absolute inset-0 w-full h-full z-10"
                     objectFit="contain"
                 />
-
             </div>
         </div>
     )

@@ -71,10 +71,10 @@ export default async function TracksPage({ searchParams }: TracksPageProps) {
                                 {track.type && (
                                     <span className={cn(
                                         "text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md border",
-                                        track.type === "Warm" && "bg-yellow-500/10 text-yellow-500 border-yellow-500/20",
-                                        track.type === "Drive" && "bg-orange-500/10 text-orange-500 border-orange-500/20",
-                                        track.type === "Peak" && "bg-red-500/10 text-red-500 border-red-500/20",
-                                        !["Warm", "Drive", "Peak"].includes(track.type) && "bg-primary/10 text-primary border-primary/20"
+                                        track.type === "Remix" && "bg-blue-500/10 text-blue-500 border-blue-500/20",
+                                        track.type === "Bootleg" && "bg-purple-500/10 text-purple-500 border-purple-500/20",
+                                        track.type === "Mashup" && "bg-pink-500/10 text-pink-500 border-pink-500/20",
+                                        !["Remix", "Bootleg", "Mashup"].includes(track.type) && "bg-primary/10 text-primary border-primary/20"
                                     )}>
                                         {track.type}
                                     </span>

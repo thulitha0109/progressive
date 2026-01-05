@@ -115,7 +115,16 @@ export async function getLikedTracks(userId: string) {
         },
         include: {
             artist: true,
-            genreRel: true,
+            genreRel: {
+                include: {
+                    parent: true
+                }
+            },
+            _count: {
+                select: {
+                    likedBy: true
+                }
+            }
         },
         orderBy: { createdAt: "desc" },
     })
