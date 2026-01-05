@@ -82,12 +82,12 @@ export function FeaturedSection({ item }: { item: FeaturedItem }) {
             <div className="container px-4 md:px-6 relative z-10 py-12 pointer-events-none">
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-6 items-end">
                     {/* Left Side: Content - Text Data (Order 2 on Mobile, 1 on Desktop) */}
-                    <div className="flex flex-col space-y-6 md:space-y-8 lg:items-end lg:text-right pointer-events-none lg:mb-12 order-2 lg:order-1">
+                    <div className="flex flex-col space-y-6 md:space-y-8 items-center text-center lg:items-end lg:text-right pointer-events-none lg:mb-12 order-2 lg:order-1">
                         {/* Wrapper div for content to allow pointer events on text if needed, but mainly visual */}
-                        <div className="pointer-events-auto w-full flex flex-col items-end space-y-8">
+                        <div className="pointer-events-auto w-full flex flex-col items-center lg:items-end space-y-8">
 
                             {/* Artist Info (Vertical Layout: Image -> Name) */}
-                            <div className="flex flex-col items-end space-y-6">
+                            <div className="flex flex-col items-center lg:items-end space-y-6">
                                 <div className="relative h-24 w-24 md:h-32 md:w-32 overflow-hidden rounded-full border-2 border-white/20 shadow-lg">
                                     {artistImage ? (
                                         <Image
@@ -112,8 +112,8 @@ export function FeaturedSection({ item }: { item: FeaturedItem }) {
                             </div>
 
                             {/* Track Info (NOW ON BOTTOM) */}
-                            <div className="space-y-4 flex flex-col lg:items-end w-full">
-                                <div className="relative inline-block text-right">
+                            <div className="space-y-4 flex flex-col items-center lg:items-end w-full">
+                                <div className="relative inline-block text-center lg:text-right">
                                     <h1
                                         className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tighter text-foreground drop-shadow-2xl relative z-10 leading-[0.9]"
                                     >
@@ -121,7 +121,7 @@ export function FeaturedSection({ item }: { item: FeaturedItem }) {
                                     </h1>
                                 </div>
 
-                                <div className="flex items-center gap-4 justify-end w-full mt-4">
+                                <div className="flex items-center gap-4 justify-center lg:justify-end w-full mt-4">
                                     <span className="text-primary font-medium tracking-widest uppercase text-sm md:text-base px-3 py-1 rounded border border-[#487cff] text-[#487cff]">
                                         {sequence} <span className="mx-2 text-muted-foreground/50">|</span> FEATURED {item.type || 'TRACK'}
                                     </span>
