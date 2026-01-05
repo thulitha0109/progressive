@@ -57,8 +57,9 @@ export async function login(formData: FormData) {
         await signIn("credentials", {
             email,
             password,
-            redirectTo: "/admin/artists",
+            redirect: false,
         })
+        return { success: true }
     } catch (error) {
         if (error instanceof AuthError) {
             switch (error.type) {

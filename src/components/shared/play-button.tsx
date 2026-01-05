@@ -16,7 +16,7 @@ interface Track {
     scheduledFor?: Date | string
 }
 
-export function PlayButton({ track, variant = "default" }: { track: Track, variant?: "default" | "ghost" | "icon" }) {
+export function PlayButton({ track, variant = "default", ignoreReleaseDate = false }: { track: Track, variant?: "default" | "ghost" | "icon", ignoreReleaseDate?: boolean }) {
     const { currentTrack, isPlaying, playTrack, togglePlay } = usePlayer()
 
     const isCurrentTrack = currentTrack?.id === track.id
@@ -27,7 +27,7 @@ export function PlayButton({ track, variant = "default" }: { track: Track, varia
     const handleClick = (e: React.MouseEvent) => {
         e.preventDefault() // Prevent link navigation if inside a link
 
-        if (!isReleased) return
+        if (!isReleased && !ignoreReleaseDate) return
 
         if (isCurrentTrack) {
             togglePlay()
@@ -36,7 +36,7 @@ export function PlayButton({ track, variant = "default" }: { track: Track, varia
         }
     }
 
-    if (!isReleased) {
+    if (!isReleased && !ignoreReleaseDate) {
         if (variant === "icon") {
             return (
                 <Button

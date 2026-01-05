@@ -47,6 +47,7 @@
     "swiper": "^12.0.3",
     "tailwind-merge": "^3.4.0",
     "three": "^0.182.0",
+    "use-debounce": "^10.0.6",
     "wavesurfer.js": "^7.11.1"
   },
   "devDependencies": {

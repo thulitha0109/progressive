@@ -1,79 +1,57 @@
-
 "use client"
 
 import { Button } from "@/components/ui/button"
 import { useSession } from "next-auth/react"
-import { useEffect, useState } from "react"
+import { useState, useTransition } from "react"
 import { UserCheck, UserPlus } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
 import { useRouter } from "next/navigation"
+import { toggleFollowArtist } from "@/server/actions/social"
 
 interface FollowButtonProps {
     artistId: string
     className?: string
     showText?: boolean
+    initialIsFollowing?: boolean
 }
 
-export function FollowButton({ artistId, className, showText = true }: FollowButtonProps) {
+export function FollowButton({ artistId, className, showText = true, initialIsFollowing = false }: FollowButtonProps) {
     const { data: session } = useSession()
-    const [isFollowing, setIsFollowing] = useState(false)
-    const [isLoading, setIsLoading] = useState(false)
+    const [isFollowing, setIsFollowing] = useState(initialIsFollowing)
+    const [isPending, startTransition] = useTransition()
     const router = useRouter()
 
-    useEffect(() => {
-        if (session?.user) {
-            checkFollowStatus()
-        }
-    }, [artistId, session])
-
-    async function checkFollowStatus() {
-        try {
-            const res = await fetch(`/api/artists/${artistId}/follow`)
-            if (res.ok) {
-                const data = await res.json()
-                setIsFollowing(data.followed)
-            }
-        } catch (error) {
-            console.error("Failed to check follow status", error)
-        }
-    }
-
-    async function toggleFollow() {
+    async function handleToggle() {
         if (!session?.user) {
             toast.error("Please login to follow artists")
             router.push(`/auth/login?callbackUrl=${encodeURIComponent(window.location.href)}`)
             return
         }
 
-        setIsLoading(true)
-        try {
-            const res = await fetch(`/api/artists/${artistId}/follow`, {
-                method: "POST"
-            })
+        const previousState = isFollowing
+        setIsFollowing(!isFollowing) // Optimistic update
 
-            if (res.ok) {
-                const data = await res.json()
-                setIsFollowing(data.followed)
-                toast.success(data.followed ? "Following artist" : "Unfollowed artist")
+        startTransition(async () => {
+            try {
+                const result = await toggleFollowArtist(artistId)
+                setIsFollowing(result.isFollowing)
+                toast.success(result.isFollowing ? "Following artist" : "Unfollowed artist")
                 router.refresh()
-            } else {
-                toast.error("Something went wrong")
+            } catch (error) {
+                console.error(error)
+                setIsFollowing(previousState) // Revert on error
+                toast.error("Failed to update follow status")
             }
-        } catch (error) {
-            console.error(error)
-            toast.error("Failed to update follow status")
-        } finally {
-            setIsLoading(false)
-        }
+        })
     }
 
     return (
         <Button
             variant="ghost"
             size={showText ? "sm" : "icon"}
-            onClick={toggleFollow}
-            disabled={isLoading}
+            onClick={handleToggle}
+            disabled={isPending}
             className={cn(showText ? "gap-2" : "rounded-full h-8 w-8 hover:bg-white/10 hover:text-white", className)}
         >
             {isFollowing ? (

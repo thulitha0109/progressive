@@ -163,7 +163,7 @@ export function NewReleasesCarousel({ tracks }: { tracks: Track[] }) {
                 </div>
 
                 {/* Negative margin to breakout on mobile, but keeping padding for shadows */}
-                <div className="-mx-4 px-4 overflow-visible py-4 -my-4 sm:mx-0 sm:px-0 sm:overflow-hidden relative">
+                <div className="relative px-0.5 sm:px-0 overflow-hidden">
                     <Swiper
                         onSwiper={(swiper) => {
                             swiperRef.current = swiper
@@ -174,7 +174,7 @@ export function NewReleasesCarousel({ tracks }: { tracks: Track[] }) {
                         spaceBetween={16}
                         centeredSlides={false}
                         loop={false}
-                        className="w-full py-4 !overflow-visible sm:!overflow-hidden"
+                        className="w-full py-4"
                         onSlideChange={(swiper) => {
                             setCurrentIndex(swiper.realIndex)
                             setIsBeginning(swiper.isBeginning)
@@ -193,7 +193,7 @@ export function NewReleasesCarousel({ tracks }: { tracks: Track[] }) {
                     >
                         {tracks.map((track) => (
                             <SwiperSlide key={track.id} className="h-full !h-auto">
-                                <div className="p-1 h-full"> {/* Padding for potential hover scale/shadow clipping */}
+                                <div className="h-full">
                                     <NewReleaseCard track={track} />
                                 </div>
                             </SwiperSlide>

@@ -6,11 +6,13 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { useState, useTransition } from "react"
 import { LiquidBackground } from "@/components/shared/liquid-background"
 import { Music2 } from "lucide-react"
 
 export default function LoginPage() {
+    const router = useRouter()
     const [error, setError] = useState<string | null>(null)
     const [isPending, startTransition] = useTransition()
 
@@ -20,6 +22,9 @@ export default function LoginPage() {
             const result = await login(formData)
             if (result?.error) {
                 setError(result.error)
+            } else if (result?.success) {
+                router.refresh()
+                router.push("/admin/artists")
             }
         })
     }

@@ -78,12 +78,18 @@ export function SiteHeader({ user }: SiteHeaderProps) {
 
     return (
         <header className="sticky top-0 z-50 w-full bg-background/70 backdrop-blur-md supports-[backdrop-filter]:bg-background/60 animate-enter-slide-down border-border/40 mb-0 md:mb-8">
-            <div className="flex h-16 items-center px-4 md:px-8 max-w-[1400px] mx-auto">
-                <div className="mr-8 hidden lg:flex">
+            <div className="flex h-16 items-center px-4 md:px-8 max-w-[1400px] mx-auto justify-between">
+                {/* Left: Logo (Mobile & Desktop) */}
+                <div className="flex items-center">
                     <Link href="/" className="mr-6 flex items-center space-x-2">
-                        <img src="/SVG-03.svg" alt="Progressive.lk" className="h-10 w-auto invert dark:invert-0" />
+                        {/* Mobile Icon Logo */}
+                        <img src="/progressive.lk-icon.svg" alt="Progressive.lk" className="h-6 w-auto invert dark:invert-0 lg:hidden" />
+                        {/* Desktop Full Logo */}
+                        <img src="/progressive.lk-logo.svg" alt="Progressive.lk" className="h-4 w-auto invert dark:invert-0 hidden lg:block" />
                     </Link>
-                    <nav className="flex items-center space-x-6 text-sm font-medium">
+
+                    {/* Desktop Navigation */}
+                    <nav className="hidden lg:flex items-center space-x-6 text-sm font-medium">
                         {routes.map((route) => (
                             <Link
                                 key={route.href}
@@ -98,48 +104,38 @@ export function SiteHeader({ user }: SiteHeaderProps) {
                         ))}
                     </nav>
                 </div>
-                <Sheet open={isOpen} onOpenChange={setIsOpen}>
-                    <SheetTrigger asChild>
-                        <Button
-                            variant="ghost"
-                            className="mr-2 px-0 text-base hover:bg-transparent focus-visible:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 lg:hidden"
-                        >
-                            <Menu className="h-6 w-6" />
-                            <span className="sr-only">Toggle Menu</span>
-                        </Button>
-                    </SheetTrigger>
-                    <SheetContent side="left" className="pr-0">
-                        <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
-                        <Link
-                            href="/"
-                            className="flex items-center"
-                            onClick={() => setIsOpen(false)}
-                        >
-                            <img src="/SVG-03.svg" alt="Progressive.lk" className="h-10 w-auto invert dark:invert-0" />
-                        </Link>
-                        <div className="my-4 pb-10 pl-6">
-                            <div className="flex flex-col space-y-3">
-                                {routes.map((route) => (
-                                    <Link
-                                        key={route.href}
-                                        href={route.href}
-                                        onClick={() => setIsOpen(false)}
-                                        className={cn(
-                                            "text-muted-foreground transition-colors hover:text-foreground",
-                                            route.active && "text-foreground"
-                                        )}
-                                    >
-                                        {route.label}
-                                    </Link>
-                                ))}
-                            </div>
-                        </div>
-                    </SheetContent>
-                </Sheet>
-                <div className="ml-auto flex items-center space-x-4">
-                    <div className="w-full max-w-[200px] lg:max-w-xs md:max-w-[240px]">
+
+                {/* Right: Search, User, Menu */}
+                <div className="flex items-center gap-2 md:gap-4">
+                    <div className="w-full max-w-[200px] lg:max-w-xs md:max-w-[240px] hidden md:block">
                         <InlineSearch />
                     </div>
+                    {/* Mobile Search Trigger Icon - Optional if InlineSearch is not responsive enough, 
+                        but assuming InlineSearch handles itself or user implies search icon on mobile. 
+                        If InlineSearch is hidden on mobile, we might need a distinct icon. 
+                        For now, keeping desktop search logic and adding mobile specific if needed. 
+                        Actually, user asked for "search icon" on right. 
+                        The InlineSearch component usually has an icon. Let's see if we can use it or a trigger.
+                        I'll use a Button with Search icon for mobile if InlineSearch is hidden.
+                    */}
+                    <Button variant="ghost" size="icon" className="md:hidden">
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="24"
+                            height="24"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            className="lucide lucide-search h-5 w-5"
+                        >
+                            <circle cx="11" cy="11" r="8" />
+                            <path d="m21 21-4.3-4.3" />
+                        </svg>
+                        <span className="sr-only">Search</span>
+                    </Button>
 
                     <nav className="flex items-center gap-2">
                         {user ? (
@@ -192,7 +188,47 @@ export function SiteHeader({ user }: SiteHeaderProps) {
                                 </Button>
                             </Link>
                         )}
-                        {/* <ModeToggle /> - Hidden per request, enforced Dark Mode */}
+                        {/* <ModeToggle /> */}
+
+                        <Sheet open={isOpen} onOpenChange={setIsOpen}>
+                            <SheetTrigger asChild>
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="lg:hidden"
+                                >
+                                    <Menu className="h-6 w-6" />
+                                    <span className="sr-only">Toggle Menu</span>
+                                </Button>
+                            </SheetTrigger>
+                            <SheetContent side="right" className="pr-0"> {/* Changed side to right for mobile menu per common pattern, or keep left if preferred. User didn't specify menu side, just button position. sticking to left content but button is right. */}
+                                <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
+                                <Link
+                                    href="/"
+                                    className="flex items-center mb-6 pl-4"
+                                    onClick={() => setIsOpen(false)}
+                                >
+                                    <img src="/progressive.lk-logo.svg" alt="Progressive.lk" className="h-4 w-auto invert dark:invert-0" />
+                                </Link>
+                                <div className="my-4 pb-10 pl-6">
+                                    <div className="flex flex-col space-y-4">
+                                        {routes.map((route) => (
+                                            <Link
+                                                key={route.href}
+                                                href={route.href}
+                                                onClick={() => setIsOpen(false)}
+                                                className={cn(
+                                                    "text-lg font-medium transition-colors hover:text-primary",
+                                                    route.active ? "text-primary" : "text-muted-foreground"
+                                                )}
+                                            >
+                                                {route.label}
+                                            </Link>
+                                        ))}
+                                    </div>
+                                </div>
+                            </SheetContent>
+                        </Sheet>
                     </nav>
                 </div>
             </div>

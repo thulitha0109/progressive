@@ -12,11 +12,10 @@ export function SiteFooter() {
                     {/* Branding Section */}
                     <div className="space-y-4">
                         <Link href="/" className="flex items-center space-x-2">
-                            <img src="/SVG-03.svg" alt="Progressive.lk" className="h-8 w-auto invert dark:invert-0" />
+                            <img src="/progressive.lk-icon.svg" alt="Progressive.lk" className="h-12 w-auto invert dark:invert-0" />
                         </Link>
                         <p className="text-sm text-muted-foreground">
-                            The future of sound. Discover exclusive tracks, upcoming releases, and the artists
-                            behind the progressive sound of Sri Lanka.
+                            The ‘All in One’ void for the past, present, and future of Sri Lankan underground EDM culture.
                         </p>
                     </div>
 

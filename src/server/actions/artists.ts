@@ -42,16 +42,53 @@ async function ensureUniqueSlug(baseSlug: string, excludeId?: string): Promise<s
     }
 }
 
-export async function getArtists(page: number = 1, pageSize: number = 10) {
+export async function getArtists(
+    page: number = 1,
+    pageSize: number = 12, // Increased page size
+    search?: string,
+    sort: 'a-z' | 'z-a' | 'popular' | 'newest' = 'newest'
+) {
     const skip = (page - 1) * pageSize
+
+    const where: any = {}
+    if (search) {
+        where.OR = [
+            { name: { contains: search, mode: 'insensitive' } },
+            { bio: { contains: search, mode: 'insensitive' } },
+        ]
+    }
+
+    let orderBy: any = {}
+    switch (sort) {
+        case 'a-z':
+            orderBy = { name: 'asc' }
+            break
+        case 'z-a':
+            orderBy = { name: 'desc' }
+            break
+        case 'popular':
+            orderBy = { followers: { _count: 'desc' } }
+            break
+        case 'newest':
+            orderBy = { createdAt: 'desc' }
+            break
+        default:
+            orderBy = { createdAt: 'desc' }
+    }
 
     const [artists, totalCount] = await Promise.all([
         prisma.artist.findMany({
-            orderBy: { createdAt: "desc" },
+            where,
+            orderBy,
             skip,
             take: pageSize,
+            include: {
+                _count: {
+                    select: { followers: true }
+                }
+            }
         }),
-        prisma.artist.count(),
+        prisma.artist.count({ where }),
     ])
 
     const totalPages = Math.ceil(totalCount / pageSize)
@@ -146,7 +183,16 @@ export async function getArtistById(id: string) {
         isReleased: new Date(track.scheduledFor) <= now,
     }))
 
-    return { ...artist, tracks }
+    const isFollowing = userId ? (await prisma.user.count({
+        where: {
+            id: userId,
+            followedArtists: {
+                some: { id: artist.id }
+            }
+        }
+    })) > 0 : false
+
+    return { ...artist, tracks, isFollowing }
 }
 
 export async function getArtistBySlug(slug: string) {
@@ -184,7 +230,16 @@ export async function getArtistBySlug(slug: string) {
         isLiked: likedTrackIds.has(track.id),
     }))
 
-    return { ...artist, tracks }
+    const isFollowing = userId ? (await prisma.user.count({
+        where: {
+            id: userId,
+            followedArtists: {
+                some: { id: artist.id }
+            }
+        }
+    })) > 0 : false
+
+    return { ...artist, tracks, isFollowing }
 }
 
 export async function updateArtist(id: string, formData: FormData) {
