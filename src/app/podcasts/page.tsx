@@ -37,6 +37,7 @@ export default async function PodcastsPage() {
                                             imageUrl: podcast.artist?.imageUrl
                                         },
                                         type: podcast.type || null,
+                                        genre: podcast.genre?.name || null, // Fix: Override spread genre object with string
                                         genreRel: podcast.genre ? {
                                             name: podcast.genre.name
                                         } : null,
