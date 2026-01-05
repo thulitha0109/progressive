@@ -28,7 +28,7 @@ interface Track {
     id: string
     title: string
     artistId: string
-    type?: string
+    type?: string | null
     scheduledFor: Date
     genreId?: string | null
     imageUrl?: string | null
