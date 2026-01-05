@@ -96,6 +96,7 @@ export async function createPodcast(formData: FormData) {
     const description = formData.get("description") as string
     const artistId = formData.get("artistId") as string // Changed from host
     const genreId = formData.get("genreId") as string
+    const type = (formData.get("type") as string) || "Warm"
     const sequence = parseInt(formData.get("sequence") as string || "0")
     // Checkbox returns "on" if checked, but explicit passing "true" works too.
     // Our form might send "on" or nothing if using standard form submit, or we might manipulate it.
@@ -170,6 +171,7 @@ export async function createPodcast(formData: FormData) {
                 description,
                 artistId,
                 genreId: genreId || null,
+                type,
                 sequence,
                 isFeatured,
                 audioUrl,
@@ -220,6 +222,7 @@ export async function updatePodcast(id: string, formData: FormData) {
     const description = formData.get("description") as string
     const artistId = formData.get("artistId") as string
     const genreId = formData.get("genreId") as string
+    const type = (formData.get("type") as string) || "Warm"
     const sequence = parseInt(formData.get("sequence") as string || "0")
     const isFeaturedRaw = formData.get("isFeatured")
     const isFeatured = isFeaturedRaw === "true" || isFeaturedRaw === "on"
@@ -238,6 +241,7 @@ export async function updatePodcast(id: string, formData: FormData) {
         description,
         artistId,
         genreId: genreId || null,
+        type,
         sequence,
         isFeatured,
         ...(scheduledFor && { scheduledFor }),

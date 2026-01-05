@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button"
 import { Plus, Play, Edit, Trash } from "lucide-react"
 import { FeatureButton } from "./_components/feature-button"
 import { Pagination } from "@/components/ui/pagination"
+import { cn } from "@/lib/utils"
 
 interface TracksPageProps {
     searchParams: Promise<{ page?: string; status?: 'published' | 'upcoming' | 'all' }>
@@ -52,9 +53,10 @@ export default async function TracksPage({ searchParams }: TracksPageProps) {
             <div className="rounded-md border">
                 <div className="grid grid-cols-12 gap-4 p-4 border-b bg-muted/50 font-medium text-sm">
                     <div className="col-span-4">Title</div>
+                    <div className="col-span-2">Type</div>
                     <div className="col-span-3">Artist</div>
-                    <div className="col-span-3">Scheduled For</div>
-                    <div className="col-span-2 text-right">Actions</div>
+                    <div className="col-span-2">Scheduled For</div>
+                    <div className="col-span-1 text-right">Actions</div>
                 </div>
                 <div className="divide-y">
                     {tracks.map((track) => (
@@ -65,11 +67,27 @@ export default async function TracksPage({ searchParams }: TracksPageProps) {
                                 </div>
                                 {track.title}
                             </div>
-                            <div className="col-span-3 text-muted-foreground">{track.artist.name}</div>
-                            <div className="col-span-3 text-muted-foreground">
-                                {new Date(track.scheduledFor).toLocaleString()}
+                            <div className="col-span-2">
+                                {track.type && (
+                                    <span className={cn(
+                                        "text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md border",
+                                        track.type === "Warm" && "bg-yellow-500/10 text-yellow-500 border-yellow-500/20",
+                                        track.type === "Drive" && "bg-orange-500/10 text-orange-500 border-orange-500/20",
+                                        track.type === "Peak" && "bg-red-500/10 text-red-500 border-red-500/20",
+                                        !["Warm", "Drive", "Peak"].includes(track.type) && "bg-primary/10 text-primary border-primary/20"
+                                    )}>
+                                        {track.type}
+                                    </span>
+                                )}
+                                {!track.type && (
+                                    <span className="text-xs text-muted-foreground">-</span>
+                                )}
                             </div>
-                            <div className="col-span-2 text-right flex justify-end gap-2">
+                            <div className="col-span-3 text-muted-foreground">{track.artist.name}</div>
+                            <div className="col-span-2 text-muted-foreground">
+                                {new Date(track.scheduledFor).toLocaleDateString()}
+                            </div>
+                            <div className="col-span-1 text-right flex justify-end gap-1">
                                 <FeatureButton trackId={track.id} isFeatured={track.isFeatured} />
                                 <Button variant="ghost" size="icon" asChild>
                                     <Link href={`/admin/tracks/${track.id}/edit`}>
@@ -90,15 +108,15 @@ export default async function TracksPage({ searchParams }: TracksPageProps) {
                         </div>
                     )}
                 </div>
-            </div>
 
-            <Pagination
-                currentPage={currentPage}
-                totalPages={totalPages}
-                basePath="/admin/tracks"
-                totalItems={totalCount}
-                itemsPerPage={10}
-            />
+                <Pagination
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    basePath="/admin/tracks"
+                    totalItems={totalCount}
+                    itemsPerPage={10}
+                />
+            </div>
         </div>
     )
 }

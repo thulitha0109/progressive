@@ -260,6 +260,20 @@ export default function TrackForm({ artists, genres }: { artists: Artist[], genr
                         </div>
 
                         <div className="space-y-2">
+                            <Label htmlFor="type">Type</Label>
+                            <Select name="type" defaultValue="none" disabled={isPending}>
+                                <SelectTrigger id="type">
+                                    <SelectValue placeholder="Select type" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="Remix">Remix</SelectItem>
+                                    <SelectItem value="Bootleg">Bootleg</SelectItem>
+                                    <SelectItem value="Mashup">Mashup</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+
+                        <div className="space-y-2">
                             <Label htmlFor="audioFile">Audio File</Label>
                             <Input
                                 id="audioFile"
@@ -288,23 +302,7 @@ export default function TrackForm({ artists, genres }: { artists: Artist[], genr
                             </p>
                         </div>
 
-                        <div className="space-y-2">
-                            <Label htmlFor="sequence">Sequence No</Label>
-                            <Input
-                                id="sequence"
-                                name="sequence"
-                                type="text"
-                                inputMode="numeric"
-                                pattern="[0-9]*"
-                                placeholder="001"
-                                required
-                                disabled={isPending}
-                                className="font-mono"
-                            />
-                            <p className="text-xs text-muted-foreground">
-                                Order in lists (e.g. 001, 002).
-                            </p>
-                        </div>
+
 
                         <div className="space-y-2">
                             <Label htmlFor="scheduledFor">Schedule Publication</Label>

@@ -61,7 +61,11 @@ export async function getHomeData() {
         where: { isFeatured: true, deletedAt: null },
         include: {
             artist: true,
-            genre: true,
+            genre: {
+                include: {
+                    parent: true
+                }
+            },
         },
     })
 
@@ -140,6 +144,8 @@ export async function getHomeData() {
         featuredItem = {
             ...featuredPodcastRaw,
             type: "PODCAST" as const,
+            genreRel: (featuredPodcastRaw as any).genre,
+            genre: (featuredPodcastRaw as any).genre?.name,
             // Podcasts don't have likes yet
             likesCount: 0,
             isLiked: false,

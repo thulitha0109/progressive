@@ -125,7 +125,7 @@ async function seedArtistsAndTracks() {
                     genreId: progressive?.id,
                     // genre: progressive?.name || "Unknown", // Deprecated field
                     scheduledFor: new Date(),
-                    sequence: i
+                    type: ["Remix", "Bootleg", "Mashup"][Math.floor(Math.random() * 3)]
                 }
             })
         }

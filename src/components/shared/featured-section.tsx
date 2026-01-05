@@ -14,6 +14,27 @@ import { cn } from "@/lib/utils"
 import { WaveformBar } from "@/components/shared/waveform-bar"
 import { LiquidBackground } from "@/components/shared/liquid-background"
 
+const GENRE_BORDERS: Record<string, string> = {
+    "Progressive": "border-blue-500/50 text-blue-500",
+    "Melodic": "border-cyan-500/50 text-cyan-500",
+    "Techno": "border-purple-500/50 text-purple-500",
+    "Peak Time": "border-fuchsia-500/50 text-fuchsia-500",
+    "House": "border-orange-500/50 text-orange-500",
+    "Deep House": "border-amber-500/50 text-amber-500",
+    "Trance": "border-pink-500/50 text-pink-500",
+    "Electronica": "border-emerald-500/50 text-emerald-500",
+    "Organic": "border-green-500/50 text-green-500",
+    "Drum & Bass": "border-yellow-500/50 text-yellow-500",
+    "Liquid": "border-lime-500/50 text-lime-500",
+    "Ambient": "border-teal-500/50 text-teal-500",
+    "Chillout": "border-indigo-500/50 text-indigo-500",
+}
+
+function getGenreBorderColor(genre: string) {
+    const key = Object.keys(GENRE_BORDERS).find(k => genre.includes(k))
+    return key ? GENRE_BORDERS[key] : "border-[#487cff] text-[#487cff]"
+}
+
 interface FeaturedItem {
     id: string
     title: string
@@ -29,6 +50,13 @@ interface FeaturedItem {
     } | null
     assignedSequence?: number | null
     type?: 'TRACK' | 'PODCAST'
+    genre?: string | null
+    genreRel?: {
+        name: string
+        parent?: {
+            name: string
+        }
+    } | null
 }
 
 export function FeaturedSection({ item }: { item: FeaturedItem }) {
@@ -63,6 +91,11 @@ export function FeaturedSection({ item }: { item: FeaturedItem }) {
     const artistImage = item.artist?.imageUrl || null
     const sequence = item.assignedSequence ? String(item.assignedSequence).padStart(3, '0') : "001"
 
+    // Determine Genre Data
+    const genreName = item.genreRel?.name || item.genre
+    const parentGenreName = item.genreRel?.parent?.name
+    const genreColorClass = getGenreBorderColor(parentGenreName || genreName || "")
+
     return (
         <section
             className="relative w-full overflow-hidden min-h-[700px] lg:min-h-screen flex items-end animate-enter-fade-in"
@@ -79,15 +112,15 @@ export function FeaturedSection({ item }: { item: FeaturedItem }) {
                 <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-background/0 dark:from-background dark:via-background/20 dark:to-background/0 pointer-events-none" />
             </div>
 
-            <div className="container px-4 md:px-6 relative z-10 py-12 pointer-events-none">
+            <div className="container px-4 md:px-6 relative z-10 pt-12 pb-24 pointer-events-none">
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-6 items-end">
                     {/* Left Side: Content - Text Data (Order 2 on Mobile, 1 on Desktop) */}
-                    <div className="flex flex-col space-y-6 md:space-y-8 items-center text-center lg:items-end lg:text-right pointer-events-none lg:mb-12 order-2 lg:order-1">
+                    <div className="flex flex-col space-y-6 md:space-y-8 items-start text-left lg:items-end lg:text-right pointer-events-none lg:mb-12 order-2 lg:order-1">
                         {/* Wrapper div for content to allow pointer events on text if needed, but mainly visual */}
-                        <div className="pointer-events-auto w-full flex flex-col items-center lg:items-end space-y-8">
+                        <div className="pointer-events-auto w-full flex flex-col items-start lg:items-end space-y-8">
 
                             {/* Artist Info (Vertical Layout: Image -> Name) */}
-                            <div className="flex flex-col items-center lg:items-end space-y-6">
+                            <div className="flex flex-col items-start lg:items-end space-y-6">
                                 <div className="relative h-24 w-24 md:h-32 md:w-32 overflow-hidden rounded-full border-2 border-white/20 shadow-lg">
                                     {artistImage ? (
                                         <Image
@@ -112,8 +145,8 @@ export function FeaturedSection({ item }: { item: FeaturedItem }) {
                             </div>
 
                             {/* Track Info (NOW ON BOTTOM) */}
-                            <div className="space-y-4 flex flex-col items-center lg:items-end w-full">
-                                <div className="relative inline-block text-center lg:text-right">
+                            <div className="space-y-4 flex flex-col items-start lg:items-end w-full">
+                                <div className="relative inline-block text-left lg:text-right">
                                     <h1
                                         className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tighter text-foreground drop-shadow-2xl relative z-10 leading-[0.9]"
                                     >
@@ -121,9 +154,18 @@ export function FeaturedSection({ item }: { item: FeaturedItem }) {
                                     </h1>
                                 </div>
 
-                                <div className="flex items-center gap-4 justify-center lg:justify-end w-full mt-4">
+                                <div className="flex items-center gap-4 justify-start lg:justify-end w-full mt-4">
+                                    {item.type === 'PODCAST' && (
+                                        <span className={cn(
+                                            "font-medium tracking-widest uppercase text-sm md:text-base px-3 py-1 rounded border",
+                                            "border-orange-500/50",
+                                            "text-white"
+                                        )}>
+                                            {sequence}
+                                        </span>
+                                    )}
                                     <span className="text-primary font-medium tracking-widest uppercase text-sm md:text-base px-3 py-1 rounded border border-[#487cff] text-[#487cff]">
-                                        {sequence} <span className="mx-2 text-muted-foreground/50">|</span> FEATURED {item.type || 'TRACK'}
+                                        FEATURED {item.type || 'TRACK'}
                                     </span>
                                 </div>
                             </div>
@@ -131,7 +173,7 @@ export function FeaturedSection({ item }: { item: FeaturedItem }) {
                     </div>
 
                     {/* Right Side: Player Card - (Order 1 on Mobile, 2 on Desktop) */}
-                    <div className="relative w-full max-w-md mx-auto lg:ml-auto lg:mb-12 cursor-pointer pointer-events-auto order-1 lg:order-2" onClick={handleImageClick}>
+                    <div className="relative w-full max-w-xl mx-auto lg:ml-auto lg:mb-12 cursor-pointer pointer-events-auto order-1 lg:order-2" onClick={handleImageClick}>
                         <div className="relative aspect-square rounded-md overflow-hidden shadow-2xl group border border-white/10 bg-black/50 backdrop-blur-md">
                             {item.imageUrl || (item.artist && item.artist.imageUrl) ? (
                                 <Image

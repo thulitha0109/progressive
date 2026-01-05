@@ -16,7 +16,7 @@ interface Track {
     imageUrl?: string | null
     scheduledFor: Date
     genre?: string | null
-    sequence: number
+    type: string | null
     genreRel?: {
         name: string
         parent?: {
@@ -111,13 +111,16 @@ export function NewReleaseCard({ track }: { track: Track }) {
                 {/* Top Row: Date (Left) and Like (Right) */}
                 <div className="flex justify-between items-start w-full">
                     <div className="flex items-center gap-2">
-                        <div className="flex items-center gap-1 text-[10px] sm:text-xs text-muted-foreground font-medium bg-white/5 px-2 py-0.5 rounded-md">
-                            <Calendar className="h-3 w-3" />
-                            {new Date(track.scheduledFor).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
-                        </div>
-                        {track.sequence > 0 && (
-                            <div className="flex items-center gap-1 text-[10px] sm:text-xs text-muted-foreground font-medium bg-white/5 px-2 py-0.5 rounded-md">
-                                <span>#{track.sequence}</span>
+                        {track.type && (
+                            <div className={cn(
+                                "flex items-center gap-1 text-[10px] sm:text-xs font-bold uppercase tracking-wider px-2 py-0.5 rounded-md border text-background",
+                                track.type === "Warm" && "bg-yellow-500 border-yellow-400",
+                                track.type === "Drive" && "bg-orange-500 border-orange-400",
+                                track.type === "Peak" && "bg-red-500 border-red-400",
+                                // Fallback for Track types (Remix, Bootleg, etc)
+                                !["Warm", "Drive", "Peak"].includes(track.type) && "bg-primary border-primary text-primary-foreground"
+                            )}>
+                                <span>{track.type}</span>
                             </div>
                         )}
                     </div>

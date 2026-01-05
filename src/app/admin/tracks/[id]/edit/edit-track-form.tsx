@@ -28,7 +28,7 @@ interface Track {
     id: string
     title: string
     artistId: string
-    sequence: number
+    type?: string
     scheduledFor: Date
     genreId?: string | null
     imageUrl?: string | null
@@ -275,22 +275,20 @@ export default function EditTrackForm({ track, artists, genres }: { track: Track
                         </div>
 
                         <div className="space-y-2">
-                            <Label htmlFor="sequence">Sequence No</Label>
-                            <Input
-                                id="sequence"
-                                name="sequence"
-                                type="text"
-                                inputMode="numeric"
-                                pattern="[0-9]*"
-                                required
-                                defaultValue={track.sequence.toString().padStart(3, '0')}
-                                className="font-mono"
-                                disabled={isPending}
-                            />
-                            <p className="text-xs text-muted-foreground">
-                                Order in lists (e.g. 001, 002).
-                            </p>
+                            <Label htmlFor="type">Type</Label>
+                            <Select name="type" defaultValue={track.type || "none"} disabled={isPending}>
+                                <SelectTrigger id="type">
+                                    <SelectValue placeholder="Select type" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="Remix">Remix</SelectItem>
+                                    <SelectItem value="Bootleg">Bootleg</SelectItem>
+                                    <SelectItem value="Mashup">Mashup</SelectItem>
+                                </SelectContent>
+                            </Select>
                         </div>
+
+
 
                         <div className="space-y-2">
                             <Label htmlFor="scheduledFor">Schedule Publication</Label>

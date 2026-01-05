@@ -269,6 +269,20 @@ export default function PodcastForm({ artists, genres }: { artists: Artist[], ge
                         </div>
 
                         <div className="space-y-2">
+                            <Label htmlFor="type">Type</Label>
+                            <Select name="type" defaultValue="Warm" disabled={isPending}>
+                                <SelectTrigger id="type">
+                                    <SelectValue placeholder="Select type" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="Warm">Warm</SelectItem>
+                                    <SelectItem value="Drive">Drive</SelectItem>
+                                    <SelectItem value="Peak">Peak</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+
+                        <div className="space-y-2">
                             <Label htmlFor="description">Description</Label>
                             <Textarea
                                 id="description"

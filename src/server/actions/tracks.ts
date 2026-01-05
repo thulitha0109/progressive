@@ -8,7 +8,7 @@ import { saveUploadedFile, UPLOAD_DIRS } from "@/lib/file-upload"
 import { generateWaveformPeaks } from "@/lib/waveform-peaks"
 import path from "path"
 
-export async function getTracks(page: number = 1, pageSize: number = 10, genre?: string, status: 'published' | 'upcoming' | 'all' = 'published') {
+export async function getTracks(page: number = 1, pageSize: number = 10, genre?: string, status: 'published' | 'upcoming' | 'all' = 'published', type?: string) {
     const skip = (page - 1) * pageSize
     const session = await auth()
     const userId = session?.user?.id
@@ -27,6 +27,10 @@ export async function getTracks(page: number = 1, pageSize: number = 10, genre?:
 
     if (genre && genre !== "all") {
         where.genreId = genre
+    }
+
+    if (type && type !== "all") {
+        where.type = type
     }
 
     const [tracksRaw, totalCount] = await Promise.all([
@@ -121,6 +125,7 @@ export async function createTrack(formData: FormData) {
     const title = formData.get("title") as string
     const artistId = formData.get("artistId") as string
     const genreId = (formData.get("genreId") as string) || null
+    const type = (formData.get("type") as string) || null // Default to null (Original)
     const scheduledForStr = formData.get("scheduledFor") as string
     const audioFile = formData.get("audioFile") as File
     const imageFile = formData.get("imageFile") as File
@@ -184,6 +189,7 @@ export async function createTrack(formData: FormData) {
                 audioUrl,
                 imageUrl,
                 genreId: genreId === "none" ? null : genreId,
+                type,
                 scheduledFor,
                 artistId,
             },
@@ -292,6 +298,7 @@ export async function updateTrack(id: string, formData: FormData) {
     const title = formData.get("title") as string
     const artistId = formData.get("artistId") as string
     const genreId = (formData.get("genreId") as string) || null
+    const type = (formData.get("type") as string) || null // Default to null
     const scheduledForStr = formData.get("scheduledFor") as string
     const audioFile = formData.get("audioFile") as File
     const imageFile = formData.get("imageFile") as File
@@ -319,6 +326,7 @@ export async function updateTrack(id: string, formData: FormData) {
         title,
         artistId,
         genreId: genreId === "none" ? null : genreId,
+        type,
         scheduledFor,
     }
 

@@ -16,7 +16,7 @@ interface Track {
     audioUrl: string
     imageUrl?: string | null
     scheduledFor: Date
-    sequence: number
+    type: string | null
     likesCount: number
     isLiked: boolean
     genre?: string | null

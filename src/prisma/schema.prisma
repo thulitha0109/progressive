@@ -102,7 +102,7 @@ model Track {
   artist         Artist    @relation(fields: [artistId], references: [id], onDelete: Cascade)
   likedBy        User[]    @relation("UserLikes")
   isFeatured     Boolean   @default(false)
-  sequence       Int       @default(0)
+  type           String?  // "Remix", "Bootleg", "Mashup". Null = Original/Standard
   waveformPeaks  Json?     // Pre-computed waveform peak data for instant rendering
   deletedAt      DateTime?
   createdAt      DateTime  @default(now())
@@ -128,6 +128,7 @@ model Podcast {
   
   sequence    Int       @default(0)
   isFeatured  Boolean   @default(false)
+  type        String    @default("Warm") // "Warm", "Drive", "Peak"
   waveformPeaks Json?     // Pre-computed waveform peak data
 
   deletedAt    DateTime?

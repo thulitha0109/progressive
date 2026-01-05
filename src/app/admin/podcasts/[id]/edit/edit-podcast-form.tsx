@@ -37,6 +37,7 @@ interface EditPodcastFormProps {
         description: string
         artistId: string | null
         genreId?: string | null
+        type?: string
         sequence: number
         isFeatured: boolean
         scheduledFor: Date
@@ -205,6 +206,20 @@ export default function EditPodcastForm({ podcast, artists, genres }: EditPodcas
                                     {genre.name}
                                 </SelectItem>
                             ))}
+                        </SelectContent>
+                    </Select>
+                </div>
+
+                <div className="space-y-2">
+                    <Label htmlFor="type">Type</Label>
+                    <Select name="type" defaultValue={podcast.type || "Warm"} disabled={isLoading}>
+                        <SelectTrigger id="type">
+                            <SelectValue placeholder="Select type" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="Warm">Warm</SelectItem>
+                            <SelectItem value="Drive">Drive</SelectItem>
+                            <SelectItem value="Peak">Peak</SelectItem>
                         </SelectContent>
                     </Select>
                 </div>
