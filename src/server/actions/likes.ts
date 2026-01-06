@@ -72,3 +72,72 @@ export async function toggleLike(trackId: string) {
         return { error: "Failed to toggle like. Please try again." }
     }
 }
+
+export async function togglePodcastLike(podcastId: string) {
+    const session = await auth()
+
+    const userId = session?.user?.id
+
+    if (!userId) {
+        return { error: "Unauthorized" }
+    }
+
+    try {
+        // Verify podcast exists
+        const podcast = await prisma.podcast.findUnique({
+            where: { id: podcastId }
+        })
+
+        if (!podcast) {
+            return { error: "Podcast not found" }
+        }
+
+        // Verify user exists
+        const user = await prisma.user.findUnique({
+            where: { id: userId },
+            include: {
+                likedPodcasts: {
+                    where: { id: podcastId }
+                }
+            }
+        })
+
+        if (!user) {
+            return { error: "Session expired. Please log out and log back in." }
+        }
+
+        const isLiked = user.likedPodcasts.length > 0
+
+        if (isLiked) {
+            // Unlike
+            await prisma.user.update({
+                where: { id: userId },
+                data: {
+                    likedPodcasts: {
+                        disconnect: { id: podcastId }
+                    }
+                }
+            })
+        } else {
+            // Like
+            await prisma.user.update({
+                where: { id: userId },
+                data: {
+                    likedPodcasts: {
+                        connect: { id: podcastId }
+                    }
+                }
+            })
+        }
+
+        revalidatePath("/")
+        revalidatePath("/podcasts")
+        revalidatePath("/profile")
+        revalidatePath("/tracks") // Just in case
+
+        return { success: true }
+    } catch (error: any) {
+        console.error("Toggle podcast like error:", error)
+        return { error: "Failed to toggle like. Please try again." }
+    }
+}

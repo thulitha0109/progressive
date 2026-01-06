@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { redirect } from "next/navigation"
 import { getLikedTracks } from "@/server/actions/tracks"
+import { getLikedPodcasts } from "@/server/actions/podcasts"
 import { PlayButton } from "@/components/shared/play-button"
 import { Music2 } from "lucide-react"
 import { NewReleaseCard } from "@/components/shared/new-release-card"
@@ -16,6 +17,7 @@ export default async function ProfilePage() {
     }
 
     const likedTracks = await getLikedTracks(session.user.id || "")
+    const likedPodcasts = await getLikedPodcasts(session.user.id || "")
 
     return (
         <div className="container py-10 px-4 md:px-8">
@@ -85,6 +87,40 @@ export default async function ProfilePage() {
                         </div>
                     )
                     }
+                </div>
+
+                <div className="space-y-4">
+                    <h2 className="text-2xl font-semibold tracking-tight">Liked Podcasts</h2>
+                    {likedPodcasts.length > 0 ? (
+                        <div className="grid gap-4 md:grid-cols-1 lg:grid-cols-2 xl:grid-cols-2">
+                            {likedPodcasts.map((podcast) => (
+                                <NewReleaseCard key={podcast.id} podcast={{
+                                    ...podcast,
+                                    artist: {
+                                        id: podcast.artist?.id || "unknown",
+                                        name: podcast.artist?.name || "Unknown Artist",
+                                        imageUrl: podcast.artist?.imageUrl
+                                    },
+                                    type: podcast.type || "PODCAST",
+                                    genre: podcast.genre?.name || null,
+                                    genreRel: podcast.genre ? {
+                                        name: podcast.genre.name
+                                    } : null,
+                                    likesCount: podcast._count.likedBy,
+                                    isLiked: true,
+                                    kind: "PODCAST"
+                                }} />
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="text-center py-20 text-muted-foreground">
+                            <Music2 className="h-12 w-12 mx-auto mb-4" />
+                            <h3 className="text-lg font-medium">No liked podcasts yet</h3>
+                            <p className="text-muted-foreground">
+                                Podcasts you like will appear here.
+                            </p>
+                        </div>
+                    )}
                 </div>
 
                 <div className="space-y-4">

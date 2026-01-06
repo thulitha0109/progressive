@@ -29,23 +29,23 @@ export default async function PodcastsPage() {
                             {podcasts.map((podcast) => (
                                 <NewReleaseCard
                                     key={podcast.id}
-                                    track={{
+                                    podcast={{
                                         ...podcast,
                                         artist: {
                                             id: podcast.artist?.id || "unknown",
                                             name: podcast.artist?.name || "Unknown Artist",
                                             imageUrl: podcast.artist?.imageUrl
                                         },
-                                        type: podcast.type || null,
-                                        genre: podcast.genre?.name || null, // Fix: Override spread genre object with string
+                                        type: podcast.type || "PODCAST",
+                                        genre: podcast.genre?.name || null,
                                         genreRel: podcast.genre ? {
                                             name: podcast.genre.name
                                         } : null,
-                                        // Mock likes as Podcast model doesn't support it yet
-                                        likesCount: 0,
-                                        isLiked: false
+                                        likesCount: podcast.likesCount,
+                                        isLiked: podcast.isLiked,
+                                        kind: "PODCAST"
                                     }}
-                                    hideLikeButton={true}
+                                    hideLikeButton={false}
                                 />
                             ))}
                         </div>

@@ -148,35 +148,6 @@ export default async function ArtistPage({
                             )}
                         </div>
                     </div>
-
-                    {/* Upcoming Tracks */}
-                    {artist.tracks.some((track) => !track.isReleased) && (
-                        <div className="animate-slide-up-fade" style={{ animationDelay: "0.2s" }}>
-                            <h2 className="text-2xl font-bold tracking-tight mb-6">Upcoming Releases</h2>
-                            <div className="space-y-2">
-                                {artist.tracks
-                                    .filter((track) => !track.isReleased)
-                                    .map((track) => (
-                                        <div
-                                            key={track.id}
-                                            className="group flex items-center gap-4 rounded-lg border p-3 bg-muted/30 hover:bg-muted/50 transition-colors overflow-hidden"
-                                        >
-                                            <div className="flex items-center justify-center h-12 w-12 rounded bg-muted text-muted-foreground shrink-0 group-hover:text-primary transition-colors">
-                                                <PlayButton track={track} variant="icon" ignoreReleaseDate={true} />
-                                            </div>
-                                            <div className="flex-1 min-w-0">
-                                                <h3 className="font-medium truncate pr-2 text-lg">{track.title}</h3>
-                                                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                                    <span className="font-semibold text-primary px-1.5 py-0.5 rounded bg-primary/10 text-xs">Pre-Release</span>
-                                                    <span>•</span>
-                                                    {new Date(track.scheduledFor).toLocaleDateString()}
-                                                </div>
-                                            </div>
-                                        </div>
-                                    ))}
-                            </div>
-                        </div>
-                    )}
                 </div>
 
                 {/* Bio */}

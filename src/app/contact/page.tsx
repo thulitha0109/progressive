@@ -30,7 +30,7 @@ export default function ContactPage() {
                         </CardContent>
                     </Card>
 
-                    <Card>
+                    {/* <Card>
                         <CardHeader>
                             <div className="flex items-center gap-4">
                                 <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
@@ -47,9 +47,9 @@ export default function ContactPage() {
                                 +94 11 234 5678
                             </a>
                         </CardContent>
-                    </Card>
+                    </Card> */}
 
-                    <Card className="md:col-span-2">
+                    {/* <Card className="md:col-span-2">
                         <CardHeader>
                             <div className="flex items-center gap-4">
                                 <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
@@ -68,7 +68,7 @@ export default function ContactPage() {
                                 Sri Lanka
                             </p>
                         </CardContent>
-                    </Card>
+                    </Card> */}
                 </div>
 
                 <div className="mt-12 p-6 bg-muted/20 rounded-lg">

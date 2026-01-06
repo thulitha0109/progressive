@@ -65,11 +65,11 @@ export function SiteFooter() {
                                     Terms of Service
                                 </Link>
                             </li>
-                            <li>
+                            {/* <li>
                                 <Link href="/about" className="text-muted-foreground hover:text-primary transition-colors">
                                     About Us
                                 </Link>
-                            </li>
+                            </li> */}
                             <li>
                                 <Link href="/contact" className="text-muted-foreground hover:text-primary transition-colors">
                                     Contact
@@ -83,7 +83,7 @@ export function SiteFooter() {
                         <h3 className="font-semibold text-sm uppercase tracking-wider">Follow Us</h3>
                         <div className="flex space-x-4">
                             <Link
-                                href="https://facebook.com"
+                                href="https://web.facebook.com/progressive.lk"
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="opacity-70 hover:opacity-100 transition-opacity"
@@ -92,7 +92,7 @@ export function SiteFooter() {
                                 <img src="/images/ICONS/fb.svg" alt="Facebook" className="h-6 w-6 invert dark:invert-0" />
                             </Link>
                             <Link
-                                href="https://instagram.com"
+                                href="https://www.instagram.com/progressive.lk/"
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="opacity-70 hover:opacity-100 transition-opacity"
@@ -101,31 +101,13 @@ export function SiteFooter() {
                                 <img src="/images/ICONS/instagram.svg" alt="Instagram" className="h-6 w-6 invert dark:invert-0" />
                             </Link>
                             <Link
-                                href="https://youtube.com"
+                                href="https://www.tiktok.com/@progressive.lk"
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="opacity-70 hover:opacity-100 transition-opacity"
-                                aria-label="YouTube"
+                                aria-label="Tiktok"
                             >
-                                <img src="/images/ICONS/youtube.svg" alt="YouTube" className="h-6 w-6 invert dark:invert-0" />
-                            </Link>
-                            <Link
-                                href="https://soundcloud.com"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="opacity-70 hover:opacity-100 transition-opacity"
-                                aria-label="SoundCloud"
-                            >
-                                <img src="/images/ICONS/soundcloud.svg" alt="SoundCloud" className="h-6 w-6 invert dark:invert-0" />
-                            </Link>
-                            <Link
-                                href="https://mixcloud.com"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="opacity-70 hover:opacity-100 transition-opacity"
-                                aria-label="Mixcloud"
-                            >
-                                <img src="/images/ICONS/mixcloud.svg" alt="Mixcloud" className="h-6 w-6 invert dark:invert-0" />
+                                <img src="/images/ICONS/tiktok.svg" alt="Tiktok" className="h-6 w-6 invert dark:invert-0" />
                             </Link>
                         </div>
                         <p className="text-sm text-muted-foreground mt-4">

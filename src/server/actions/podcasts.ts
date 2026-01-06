@@ -3,6 +3,7 @@
 import { prisma } from "@/lib/prisma"
 import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
+import { auth } from "@/auth"
 import { saveUploadedFile, UPLOAD_DIRS } from "@/lib/file-upload"
 import { generateWaveformPeaks } from "@/lib/waveform-peaks"
 import path from "path"
@@ -47,6 +48,8 @@ async function ensureUniqueSlug(baseSlug: string, excludeId?: string): Promise<s
 
 export async function getPodcasts(page: number = 1, pageSize: number = 10, status: 'published' | 'upcoming' | 'all' = 'published') {
     const skip = (page - 1) * pageSize
+    const session = await auth()
+    const userId = session?.user?.id
     const now = new Date()
     const where: any = { deletedAt: null }
 
@@ -56,19 +59,38 @@ export async function getPodcasts(page: number = 1, pageSize: number = 10, statu
         where.scheduledFor = { gt: now }
     }
 
-    const [podcasts, totalCount] = await Promise.all([
+    const [podcastsRaw, totalCount] = await Promise.all([
         prisma.podcast.findMany({
             where,
             orderBy: { scheduledFor: "desc" },
             include: {
                 artist: true,
                 genre: true,
+                _count: { select: { likedBy: true } },
             },
             skip,
             take: pageSize,
         }),
         prisma.podcast.count({ where }),
     ])
+
+    // Get user's liked podcasts
+    let likedPodcastIds = new Set<string>()
+    if (userId) {
+        const userLikes = await prisma.user.findUnique({
+            where: { id: userId },
+            select: { likedPodcasts: { select: { id: true } } },
+        })
+        if (userLikes) {
+            likedPodcastIds = new Set(userLikes.likedPodcasts.map((p: { id: string }) => p.id))
+        }
+    }
+
+    const podcasts = podcastsRaw.map(podcast => ({
+        ...podcast,
+        likesCount: podcast._count.likedBy,
+        isLiked: likedPodcastIds.has(podcast.id),
+    }))
 
     const totalPages = Math.ceil(totalCount / pageSize)
 
@@ -78,6 +100,28 @@ export async function getPodcasts(page: number = 1, pageSize: number = 10, statu
         totalPages,
         currentPage: page,
     }
+}
+
+export async function getLikedPodcasts(userId: string) {
+    return await prisma.podcast.findMany({
+        where: {
+            likedBy: {
+                some: {
+                    id: userId,
+                },
+            },
+        },
+        include: {
+            artist: true,
+            genre: true,
+            _count: {
+                select: {
+                    likedBy: true
+                }
+            }
+        },
+        orderBy: { createdAt: "desc" },
+    })
 }
 
 export async function getPodcast(id: string) {

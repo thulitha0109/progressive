@@ -222,71 +222,61 @@ export default function EditTrackForm({ track, artists, genres }: { track: Track
                             />
                         </div>
 
-                        <div className="space-y-2">
-                            <Label htmlFor="artistId">Artist</Label>
-                            <Select
-                                value={selectedArtist}
-                                onValueChange={setSelectedArtist}
-                                disabled={isPending}
-                            >
-                                <SelectTrigger id="artistId">
-                                    <SelectValue placeholder="Select an artist" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {artists.map((artist) => (
-                                        <SelectItem key={artist.id} value={artist.id}>
-                                            {artist.name}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                            <input type="hidden" name="artistId" value={selectedArtist} />
-                        </div>
-
-                        <div className="space-y-2">
-                            <Label htmlFor="genreId">Genre</Label>
-                            <Select
-                                name="genreId"
-                                defaultValue={track.genreId || undefined}
-                                disabled={isPending}
-                            >
-                                <SelectTrigger id="genreId">
-                                    <SelectValue placeholder="Select a genre (optional)" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="none">None</SelectItem>
-                                    {genres.filter(g => !g.parentId).map((parent) => (
-                                        <div key={parent.id}>
-                                            <SelectItem value={parent.id} className="font-semibold">
-                                                {parent.name}
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                                <Label htmlFor="artistId">Artist</Label>
+                                <Select
+                                    value={selectedArtist}
+                                    onValueChange={setSelectedArtist}
+                                >
+                                    <SelectTrigger id="artistId">
+                                        <SelectValue placeholder="Select an artist" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {artists.map((artist) => (
+                                            <SelectItem key={artist.id} value={artist.id}>
+                                                {artist.name}
                                             </SelectItem>
-                                            {genres
-                                                .filter(g => g.parentId === parent.id)
-                                                .map(sub => (
-                                                    <SelectItem key={sub.id} value={sub.id} className="pl-6 text-muted-foreground">
-                                                        {sub.name}
-                                                    </SelectItem>
-                                                ))
-                                            }
-                                        </div>
-                                    ))}
-                                </SelectContent>
-                            </Select>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                                <input type="hidden" name="artistId" value={selectedArtist} />
+                            </div>
+
+                            <div className="space-y-2">
+                                <Label htmlFor="genreId">Genre</Label>
+                                <Select
+                                    name="genreId"
+                                    defaultValue={track.genreId || undefined}
+                                >
+                                    <SelectTrigger id="genreId">
+                                        <SelectValue placeholder="Select a genre" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {genres.map((genre) => (
+                                            <SelectItem key={genre.id} value={genre.id}>
+                                                {genre.name}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+
+                            <div className="space-y-2">
+                                <Label htmlFor="type">Type</Label>
+                                <Select name="type" defaultValue={track.type || "Warm"} >
+                                    <SelectTrigger id="type">
+                                        <SelectValue placeholder="Select type" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="Remix">Remix</SelectItem>
+                                        <SelectItem value="Bootleg">Bootleg</SelectItem>
+                                        <SelectItem value="Mashup">Mashup</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
                         </div>
 
-                        <div className="space-y-2">
-                            <Label htmlFor="type">Type</Label>
-                            <Select name="type" defaultValue={track.type || "none"} disabled={isPending}>
-                                <SelectTrigger id="type">
-                                    <SelectValue placeholder="Select type" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="Remix">Remix</SelectItem>
-                                    <SelectItem value="Bootleg">Bootleg</SelectItem>
-                                    <SelectItem value="Mashup">Mashup</SelectItem>
-                                </SelectContent>
-                            </Select>
-                        </div>
 
 
 

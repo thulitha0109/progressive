@@ -9,7 +9,7 @@ import { User, Calendar } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { WaveformBar } from "@/components/shared/waveform-bar"
 
-interface Track {
+export interface ReleaseItem {
     id: string
     title: string
     audioUrl: string
@@ -25,6 +25,7 @@ interface Track {
     } | null
     likesCount: number
     isLiked: boolean
+    kind?: "TRACK" | "PODCAST"
     artist: {
         id: string
         name: string
@@ -53,21 +54,31 @@ function getGenreBorderColor(genre: string) {
     return key ? GENRE_BORDERS[key] : "border-white/10 hover:border-white/30"
 }
 
-export function NewReleaseCard({ track, hideLikeButton = false }: { track: Track, hideLikeButton?: boolean }) {
+export function NewReleaseCard({ track, podcast, hideLikeButton = false }: { track?: ReleaseItem, podcast?: ReleaseItem, hideLikeButton?: boolean }) {
     const { playTrack, currentTrack, isPlaying, togglePlay } = usePlayer()
-    const isCurrentTrack = currentTrack?.id === track.id
+
+    const item = track || podcast
+    if (!item) return null
+
+    const isCurrentTrack = currentTrack?.id === item.id
 
     const handleCardClick = () => {
         if (isCurrentTrack) {
             togglePlay()
         } else {
-            playTrack(track)
+            // Ensure we are passing the podcast kind if it's a podcast
+            if (podcast && !item.kind) {
+                // @ts-ignore - injecting kind for player if missing
+                playTrack({ ...item, kind: 'PODCAST' })
+            } else {
+                playTrack(item)
+            }
         }
     }
 
     // Determine Genre Data
-    const genreName = track.genreRel?.name || track.genre
-    const parentGenreName = track.genreRel?.parent?.name
+    const genreName = item.genreRel?.name || item.genre
+    const parentGenreName = item.genreRel?.parent?.name
 
     return (
         <div
@@ -83,10 +94,10 @@ export function NewReleaseCard({ track, hideLikeButton = false }: { track: Track
             {/* Image Section */}
             <div className="relative w-28 sm:w-40 self-stretch shrink-0 overflow-hidden rounded-md shadow-lg isolate ring-1 ring-white/10 ring-inset">
                 <div className="absolute inset-0 bg-gradient-to-br from-black/20 to-transparent z-10 pointer-events-none" />
-                {track.imageUrl || track.artist.imageUrl ? (
+                {item.imageUrl || item.artist.imageUrl ? (
                     <Image
-                        src={track.imageUrl || track.artist.imageUrl || ""}
-                        alt={track.title}
+                        src={item.imageUrl || item.artist.imageUrl || ""}
+                        alt={item.title}
                         fill
                         className="object-cover object-top transition-transform duration-700 ease-out group-hover:scale-110"
                         sizes="(max-width: 640px) 112px, 160px"
@@ -102,25 +113,25 @@ export function NewReleaseCard({ track, hideLikeButton = false }: { track: Track
                     "absolute inset-0 flex items-center justify-center bg-black/40 z-20 transition-all duration-300 backdrop-blur-[2px]",
                     isCurrentTrack && isPlaying ? "opacity-100 bg-black/60" : "opacity-0 group-hover:opacity-100"
                 )}>
-                    <PlayButton track={track} variant="icon" />
+                    <PlayButton track={item} variant="icon" />
                 </div>
             </div>
 
             {/* Info Section - Right */}
             <div className="flex flex-col justify-between h-full min-w-0 z-10 relative py-3 pr-3 sm:py-4 sm:pr-4">
                 {/* Top Row: Date (Left) and Like (Right) */}
-                <div className="flex justify-between items-start w-full">
+                <div className="flex justify-between items-start w-full pb-1">
                     <div className="flex items-center gap-2">
-                        {track.type && (
+                        {item.type && (
                             <div className={cn(
                                 "flex items-center gap-1 text-[10px] sm:text-xs font-bold uppercase tracking-wider px-2 py-0.5 rounded-md border text-background",
-                                track.type === "Warm" && "bg-yellow-500 border-yellow-400",
-                                track.type === "Drive" && "bg-orange-500 border-orange-400",
-                                track.type === "Peak" && "bg-red-500 border-red-400",
+                                item.type === "Warm" && "bg-yellow-500 border-yellow-400",
+                                item.type === "Drive" && "bg-orange-500 border-orange-400",
+                                item.type === "Peak" && "bg-red-500 border-red-400",
                                 // Fallback for Track types (Remix, Bootleg, etc)
-                                !["Warm", "Drive", "Peak"].includes(track.type) && "bg-primary border-primary text-primary-foreground"
+                                !["Warm", "Drive", "Peak"].includes(item.type) && "bg-primary border-primary text-primary-foreground"
                             )}>
-                                <span>{track.type}</span>
+                                <span>{item.type}</span>
                             </div>
                         )}
                     </div>
@@ -128,9 +139,10 @@ export function NewReleaseCard({ track, hideLikeButton = false }: { track: Track
                     {!hideLikeButton && (
                         <div onClick={(e) => e.stopPropagation()} className="transform transition-transform active:scale-95 text-muted-foreground hover:text-red-500">
                             <LikeButton
-                                trackId={track.id}
-                                initialLikes={track.likesCount}
-                                initialIsLiked={track.isLiked}
+                                trackId={item.id}
+                                initialLikes={item.likesCount}
+                                initialIsLiked={item.isLiked}
+                                type={item.kind === "PODCAST" || podcast ? "PODCAST" : "TRACK"}
                             />
                         </div>
                     )}
@@ -141,13 +153,13 @@ export function NewReleaseCard({ track, hideLikeButton = false }: { track: Track
                     "font-bold text-lg sm:text-2xl md:text-3xl truncate leading-tight transition-colors tracking-tight pr-4 py-1",
                     isCurrentTrack ? "text-primary" : "text-foreground group-hover:text-primary"
                 )}>
-                    {track.title}
+                    {item.title}
                 </h3>
 
                 {/* Artist & Genres */}
                 <div className="flex flex-col gap-1.5">
                     <p className="text-sm sm:text-base text-muted-foreground font-medium truncate flex items-center gap-2">
-                        {track.artist.name}
+                        {item.artist.name}
                         {isCurrentTrack && isPlaying && (
                             <span className="flex h-2 w-2 relative">
                                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>

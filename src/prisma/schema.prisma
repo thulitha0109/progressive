@@ -18,6 +18,7 @@ model User {
   accounts      Account[]
   sessions      Session[]
   likes         Track[]   @relation("UserLikes")
+  likedPodcasts Podcast[] @relation("UserPodcastLikes")
   followedArtists Artist[] @relation("UserFollows")
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
@@ -130,6 +131,8 @@ model Podcast {
   isFeatured  Boolean   @default(false)
   type        String    @default("Warm") // "Warm", "Drive", "Peak"
   waveformPeaks Json?     // Pre-computed waveform peak data
+  
+  likedBy     User[]    @relation("UserPodcastLikes")
 
   deletedAt    DateTime?
   createdAt   DateTime  @default(now())

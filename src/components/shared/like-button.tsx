@@ -1,6 +1,6 @@
 "use client"
 
-import { toggleLike } from "@/server/actions/likes"
+import { toggleLike, togglePodcastLike } from "@/server/actions/likes"
 import { Button } from "@/components/ui/button"
 import { Heart } from "lucide-react"
 import { useOptimistic, startTransition, useState } from "react"
@@ -8,11 +8,15 @@ import { cn } from "@/lib/utils"
 import { useRouter } from "next/navigation"
 
 export function LikeButton({
-    trackId,
+    trackId, // Rename to itemId conceptually, but keep trackId for compat or alias it
+    itemId = trackId,
+    type = "TRACK",
     initialLikes,
     initialIsLiked,
 }: {
-    trackId: string
+    trackId?: string
+    itemId?: string
+    type?: "TRACK" | "PODCAST"
     initialLikes: number
     initialIsLiked: boolean
 }) {
@@ -30,6 +34,8 @@ export function LikeButton({
         e.preventDefault()
         e.stopPropagation()
 
+        if (!itemId) return
+
         setError("")
         const newState = !optimisticState.isLiked
 
@@ -38,7 +44,10 @@ export function LikeButton({
         })
 
         try {
-            const result = await toggleLike(trackId)
+            const result = type === "PODCAST"
+                ? await togglePodcastLike(itemId)
+                : await toggleLike(itemId)
+
             if (result?.error) {
                 // Revert optimistic update on error
                 startTransition(() => {
