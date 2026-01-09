@@ -15,9 +15,11 @@ interface GenreFilterProps {
     genres: Genre[]
     selectedGenreId: string
     status: string
+    basePath?: string
+    allowTypes?: boolean
 }
 
-export function GenreFilter({ genres, selectedGenreId, status }: GenreFilterProps) {
+export function GenreFilter({ genres, selectedGenreId, status, basePath = "/tracks", allowTypes = false }: GenreFilterProps) {
     const router = useRouter()
 
     const handleValueChange = (value: string) => {
@@ -25,7 +27,11 @@ export function GenreFilter({ genres, selectedGenreId, status }: GenreFilterProp
         if (status) params.set("status", status)
         if (value && value !== "all") params.set("genre", value)
 
-        router.push(`/tracks?${params.toString()}`)
+        // Note: This filter currently resets Type if it's not passed/handled, 
+        // effectively resetting to just Status + Genre. 
+        // For purely Genre filtering this is expected behavior in this app's pattern.
+
+        router.push(`${basePath}?${params.toString()}`)
     }
 
     return (

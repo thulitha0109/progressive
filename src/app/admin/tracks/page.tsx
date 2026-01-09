@@ -5,6 +5,7 @@ import { Plus, Play, Edit, Trash } from "lucide-react"
 import { FeatureButton } from "./_components/feature-button"
 import { Pagination } from "@/components/ui/pagination"
 import { cn } from "@/lib/utils"
+import { ClientDate } from "@/components/shared/client-date"
 
 interface TracksPageProps {
     searchParams: Promise<{ page?: string; status?: 'published' | 'upcoming' | 'all' }>
@@ -85,7 +86,7 @@ export default async function TracksPage({ searchParams }: TracksPageProps) {
                             </div>
                             <div className="col-span-3 text-muted-foreground">{track.artist.name}</div>
                             <div className="col-span-2 text-muted-foreground">
-                                {new Date(track.scheduledFor).toLocaleDateString()}
+                                <ClientDate date={track.scheduledFor} />
                             </div>
                             <div className="col-span-1 text-right flex justify-end gap-1">
                                 <FeatureButton trackId={track.id} isFeatured={track.isFeatured} />

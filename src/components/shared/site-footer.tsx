@@ -44,8 +44,8 @@ export function SiteFooter() {
                                 </Link>
                             </li>
                             <li>
-                                <Link href="/tracks/upcoming" className="text-muted-foreground hover:text-primary transition-colors">
-                                    Upcoming Releases
+                                <Link href="/tracks/podcasts" className="text-muted-foreground hover:text-primary transition-colors">
+                                    Podcasts
                                 </Link>
                             </li>
                         </ul>
@@ -120,7 +120,7 @@ export function SiteFooter() {
                 <div className="mt-12 pt-8 border-t">
                     <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
                         <p className="text-sm text-muted-foreground">
-                            © {currentYear} Progressive.lk. All rights reserved.
+                            © {currentYear} Progressive.lk PVT LTD. All rights reserved.
                         </p>
                         <p className="text-sm text-muted-foreground">
                             Made with ❤️ for the music

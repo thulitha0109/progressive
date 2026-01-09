@@ -5,9 +5,10 @@ import Image from "next/image"
 import { usePlayer } from "@/components/shared/player-context"
 import { LikeButton } from "@/components/shared/like-button"
 import { PlayButton } from "@/components/shared/play-button"
-import { User, Calendar } from "lucide-react"
+import { User, Calendar, Share2 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { WaveformBar } from "@/components/shared/waveform-bar"
+import { toast } from "sonner"
 
 export interface ReleaseItem {
     id: string
@@ -62,7 +63,11 @@ export function NewReleaseCard({ track, podcast, hideLikeButton = false }: { tra
 
     const isCurrentTrack = currentTrack?.id === item.id
 
+    const isUpcoming = new Date(item.scheduledFor) > new Date()
+
     const handleCardClick = () => {
+        if (isUpcoming) return
+
         if (isCurrentTrack) {
             togglePlay()
         } else {
@@ -109,12 +114,23 @@ export function NewReleaseCard({ track, podcast, hideLikeButton = false }: { tra
                 )}
 
                 {/* Overlay Play Button */}
-                <div className={cn(
-                    "absolute inset-0 flex items-center justify-center bg-black/40 z-20 transition-all duration-300 backdrop-blur-[2px]",
-                    isCurrentTrack && isPlaying ? "opacity-100 bg-black/60" : "opacity-0 group-hover:opacity-100"
-                )}>
-                    <PlayButton track={item} variant="icon" />
-                </div>
+                {!isUpcoming && (
+                    <div className={cn(
+                        "absolute inset-0 flex items-center justify-center bg-black/40 z-20 transition-all duration-300 backdrop-blur-[2px]",
+                        isCurrentTrack && isPlaying ? "opacity-100 bg-black/60" : "opacity-0 group-hover:opacity-100"
+                    )}>
+                        <PlayButton track={item} variant="icon" />
+                    </div>
+                )}
+                {isUpcoming && (
+                    <div className={cn(
+                        "absolute inset-0 flex items-center justify-center bg-black/40 z-20 transition-all duration-300 backdrop-blur-[2px] opacity-0 group-hover:opacity-100",
+                    )}>
+                        <span className="text-xs font-bold uppercase tracking-wider text-white border border-white/50 px-2 py-1 rounded-md">
+                            Coming Soon
+                        </span>
+                    </div>
+                )}
             </div>
 
             {/* Info Section - Right */}
@@ -137,13 +153,51 @@ export function NewReleaseCard({ track, podcast, hideLikeButton = false }: { tra
                     </div>
 
                     {!hideLikeButton && (
-                        <div onClick={(e) => e.stopPropagation()} className="transform transition-transform active:scale-95 text-muted-foreground hover:text-red-500">
-                            <LikeButton
-                                trackId={item.id}
-                                initialLikes={item.likesCount}
-                                initialIsLiked={item.isLiked}
-                                type={item.kind === "PODCAST" || podcast ? "PODCAST" : "TRACK"}
-                            />
+                        <div className="flex items-center gap-2">
+                            {(item.kind === "PODCAST" || podcast) && (
+                                <div
+                                    onClick={(e) => {
+                                        e.stopPropagation()
+                                        const url = `${window.location.origin}/podcasts/${item.id}` // Assuming individual podcast page exists? Or just share site?
+                                        // Wait, do we have /podcasts/[id] pages? Implementation plan didn't create them.
+                                        // But `getPodcasts` exists.
+                                        // If no individual page, maybe share `/podcasts`?
+                                        // Let's assume generic share for now or `/`.
+                                        // Actually better to share the main link if no deep link.
+                                        // But usually share implies deep link.
+                                        // I'll assume /podcasts exists or will exist, or share abstractly.
+                                        // Let's check if [id] page exists. I recalled seeing `admin`, `podcasts/page.tsx`.
+                                        // `src/app/podcasts/[id]/page.tsx`? I haven't seen it in search.
+                                        // If it doesn't exist, I should probably just share the title/artist.
+                                        // Let's stick to copying a title/artist string if no URL?
+                                        // Or simply share the site URL.
+                                        // "Add a working social share button".
+                                        // I'll implement `navigator.share` with title and text.
+                                        const shareData = {
+                                            title: item.title,
+                                            text: `Check out ${item.title} by ${item.artist.name} on Progressive.lk`,
+                                            url: window.location.href // Fallback to current page
+                                        }
+                                        if (navigator.share) {
+                                            navigator.share(shareData).catch(console.error)
+                                        } else {
+                                            navigator.clipboard.writeText(`${shareData.text} ${shareData.url}`)
+                                            toast.success("Link copied to clipboard")
+                                        }
+                                    }}
+                                    className="transform transition-transform active:scale-95 text-muted-foreground hover:text-primary cursor-pointer p-1"
+                                >
+                                    <Share2 className="h-4 w-4" />
+                                </div>
+                            )}
+                            <div onClick={(e) => e.stopPropagation()} className="transform transition-transform active:scale-95 text-muted-foreground hover:text-red-500">
+                                <LikeButton
+                                    trackId={item.id}
+                                    initialLikes={item.likesCount}
+                                    initialIsLiked={item.isLiked}
+                                    type={item.kind === "PODCAST" || podcast ? "PODCAST" : "TRACK"}
+                                />
+                            </div>
                         </div>
                     )}
                 </div>

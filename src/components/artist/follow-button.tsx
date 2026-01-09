@@ -59,7 +59,7 @@ export function FollowButton({ artistId, className, showText = true, initialIsFo
             ) : (
                 <UserPlus className={cn("h-4 w-4", "text-muted-foreground group-hover:text-primary")} />
             )}
-            {showText && (isFollowing ? "Following" : "Follow")}
+            {showText && <span className="ml-2">{isFollowing ? "Following" : "Follow"}</span>}
         </Button>
     )
 }

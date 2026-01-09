@@ -61,6 +61,32 @@ export function Player() {
         }
     }
 
+    useEffect(() => {
+        if (typeof navigator !== 'undefined' && "mediaSession" in navigator && currentTrack) {
+            navigator.mediaSession.metadata = new MediaMetadata({
+                title: currentTrack.title,
+                artist: currentTrack.artist?.name || "Progressive.lk",
+                album: "Progressive.lk",
+                artwork: [
+                    { src: currentTrack.imageUrl || currentTrack.artist?.imageUrl || "/site-icon.jpg", sizes: "512x512", type: "image/jpeg" },
+                ]
+            });
+
+            navigator.mediaSession.setActionHandler('play', () => {
+                setIsPlaying(true)
+            });
+            navigator.mediaSession.setActionHandler('pause', () => {
+                setIsPlaying(false)
+            });
+            navigator.mediaSession.setActionHandler('previoustrack', () => {
+                if (playlist.length > 1) playPrevious()
+            });
+            navigator.mediaSession.setActionHandler('nexttrack', () => {
+                if (playlist.length > 1) playNext()
+            });
+        }
+    }, [currentTrack, setIsPlaying, playPrevious, playNext, playlist.length])
+
     if (!currentTrack) return null
 
     const hasPlaylist = playlist.length > 1
@@ -93,7 +119,7 @@ export function Player() {
                 <div className="max-w-[1400px] w-full mx-auto px-4 flex items-center justify-between gap-4 h-full">
 
                     {/* Left: Controls */}
-                    <div className="flex items-center gap-4 min-w-[140px]">
+                    <div className="flex items-center gap-2 sm:gap-4 min-w-fit sm:min-w-[140px]">
                         <Button
                             size="icon"
                             variant="ghost"
@@ -152,15 +178,19 @@ export function Player() {
                     </div>
 
                     {/* Right: Actions & Volume */}
-                    <div className="flex items-center gap-4 min-w-[200px] justify-end">
-                        {/* Follow Button (Icon Only context) */}
+                    <div className="flex items-center gap-2 sm:gap-4 min-w-fit sm:min-w-[200px] justify-end">
+                        {/* Follow Button (Icon Only on mobile) */}
                         {currentTrack.artist && currentTrack.artist.id && (
                             <div className="transform scale-90">
-                                <FollowButton artistId={currentTrack.artist.id} showText={true} />
+                                <FollowButton
+                                    artistId={currentTrack.artist.id}
+                                    showText={true}
+                                    className="w-8 h-8 px-0 sm:w-auto sm:px-3 [&>span]:hidden sm:[&>span]:inline"
+                                />
                             </div>
                         )}
 
-                        <div className="flex items-center gap-2 group">
+                        <div className="hidden sm:flex items-center gap-2 group">
                             <Volume2 className="h-4 w-4 text-gray-400 group-hover:text-white" />
                             <div className="w-20">
                                 <Slider

@@ -11,6 +11,7 @@ import {
     TableRow,
 } from "@/components/ui/table"
 import { Pagination } from "@/components/ui/pagination"
+import { ClientDate } from "@/components/shared/client-date"
 import { FeatureButton } from "./_components/feature-button"
 
 interface PodcastsPageProps {
@@ -74,10 +75,10 @@ export default async function AdminPodcastsPage({ searchParams }: PodcastsPagePr
                                 <TableCell className="font-medium">{podcast.title}</TableCell>
                                 <TableCell>{podcast.artist?.name || "-"}</TableCell>
                                 <TableCell>
-                                    {new Date(podcast.scheduledFor).toLocaleString()}
+                                    <ClientDate date={podcast.scheduledFor} />
                                 </TableCell>
                                 <TableCell>
-                                    {new Date(podcast.createdAt).toLocaleDateString()}
+                                    <ClientDate date={podcast.createdAt} />
                                 </TableCell>
                                 <TableCell className="text-right">
                                     <div className="flex justify-end gap-2 items-center">

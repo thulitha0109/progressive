@@ -14,18 +14,18 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://progressive.lk"),
   title: {
-    default: "Progressive.lk | Ceylon EDM Culture",
+    default: "Progressive.lk | Ceylon Underground Void",
     template: "%s | Progressive.lk",
   },
-  description: "Enter the void that offers more than just fun: the history, the present and the future of the Sri Lankan EDM industry!",
+  description: "The void beyond entertainment.Past, present and future of Ceylon underground music culture.",
   keywords: ["progressive house", "techno", "electronic music", "sri lanka", "underground music"],
   authors: [{ name: "Progressive.lk" }],
   openGraph: {
     type: "website",
     locale: "en_US",
     url: "/",
-    title: "Progressive.lk | Ceylon EDM Culture",
-    description: "Enter the void that offers more than just fun: the history, the present and the future of the Sri Lankan EDM industry!",
+    title: "Progressive.lk | Ceylon Underground Void",
+    description: "The void beyond entertainment.Past, present and future of Ceylon underground music culture.",
     siteName: "Progressive.lk",
     images: [
       {
@@ -38,8 +38,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Progressive.lk | Ceylon EDM Culture",
-    description: "Enter the void that offers more than just fun: the history, the present and the future of the Sri Lankan EDM industry!",
+    title: "Progressive.lk | Ceylon Underground Void",
+    description: "The void beyond entertainment.Past, present and future of Ceylon underground music culture.",
     images: ["/socialicon.png"],
   },
   robots: {
@@ -47,7 +47,9 @@ export const metadata: Metadata = {
     follow: true,
   },
   icons: {
-    icon: '/PFavicon.png',
+    icon: '/favicon.ico',
+    shortcut: '/favicon.ico',
+    apple: '/site-icon.jpg',
   },
 };
 

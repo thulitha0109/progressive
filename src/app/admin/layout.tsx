@@ -17,7 +17,7 @@ export default function AdminLayout({
             <aside className="hidden w-64 flex-col border-r bg-background p-6 md:flex">
                 <div className="mb-8 flex items-center justify-start">
                     <Link href="/" className="flex items-center">
-                        <img src="/progressive.lk-logo.svg" alt="Progressive.lk" className="h-6 w-auto invert dark:invert-0" />
+                        {/* <img src="/progressive.lk-logo.svg" alt="Progressive.lk" className="h-6 w-auto invert dark:invert-0" /> */}
                     </Link>
                 </div>
                 <nav className="flex flex-col gap-2">

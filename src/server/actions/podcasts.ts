@@ -46,7 +46,13 @@ async function ensureUniqueSlug(baseSlug: string, excludeId?: string): Promise<s
     }
 }
 
-export async function getPodcasts(page: number = 1, pageSize: number = 10, status: 'published' | 'upcoming' | 'all' = 'published') {
+export async function getPodcasts(
+    page: number = 1,
+    pageSize: number = 10,
+    status: 'published' | 'upcoming' | 'all' = 'published',
+    genreId?: string,
+    type?: string
+) {
     const skip = (page - 1) * pageSize
     const session = await auth()
     const userId = session?.user?.id
@@ -57,6 +63,14 @@ export async function getPodcasts(page: number = 1, pageSize: number = 10, statu
         where.scheduledFor = { lte: now }
     } else if (status === 'upcoming') {
         where.scheduledFor = { gt: now }
+    }
+
+    if (genreId) {
+        where.genreId = genreId
+    }
+
+    if (type) {
+        where.type = type
     }
 
     const [podcastsRaw, totalCount] = await Promise.all([

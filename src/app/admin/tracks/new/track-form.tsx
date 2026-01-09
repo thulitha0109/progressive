@@ -217,7 +217,7 @@ export default function TrackForm({ artists, genres }: { artists: Artist[], genr
                                 <SelectTrigger id="artistId">
                                     <SelectValue placeholder="Select an artist" />
                                 </SelectTrigger>
-                                <SelectContent className="max-h-[300px]">
+                                <SelectContent>
                                     {artists.map((artist) => (
                                         <SelectItem key={artist.id} value={artist.id}>
                                             {artist.name}

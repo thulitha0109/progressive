@@ -197,6 +197,7 @@ export async function getHomeData() {
             genre: (featuredPodcastRaw as any).genre?.name,
             likesCount: (featuredPodcastRaw as any)._count.likedBy,
             isLiked: likedPodcastIds.has(featuredPodcastRaw.id),
+            assignedSequence: (featuredPodcastRaw as any).sequence,
         }
     }
 

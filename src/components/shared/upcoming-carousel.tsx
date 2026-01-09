@@ -10,6 +10,7 @@ import Link from "next/link"
 import { Badge } from "@/components/ui/badge"
 import { Calendar, User } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { ClientDate } from "@/components/shared/client-date"
 
 interface Item {
     id: string
@@ -115,7 +116,7 @@ export function UpcomingCarousel({ tracks }: { tracks: Item[] }) {
                                     <div className="flex items-center gap-2 mb-2">
                                         <span className="text-xs text-white/70 font-medium flex items-center gap-1">
                                             <Calendar className="h-3 w-3" />
-                                            {new Date(item.scheduledFor).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                                            <ClientDate date={item.scheduledFor} options={{ month: 'short', day: 'numeric' }} />
                                         </span>
                                     </div>
                                     <h3 className="text-xl font-bold text-white line-clamp-1 leading-tight">{item.title}</h3>

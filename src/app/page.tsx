@@ -103,9 +103,9 @@ export default async function HomePage() {
             ))}
           </div>
           <div className="flex justify-center mt-8">
-            <Button variant="outline" asChild>
+            {/* <Button variant="outline" asChild>
               <Link href="/artists">View All Artists</Link>
-            </Button>
+            </Button> */}
           </div>
         </section>
 
