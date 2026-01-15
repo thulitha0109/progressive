@@ -266,6 +266,7 @@ export default function TrackForm({ artists, genres }: { artists: Artist[], genr
                                     <SelectValue placeholder="Select type" />
                                 </SelectTrigger>
                                 <SelectContent>
+                                    <SelectItem value="Original">Original</SelectItem>
                                     <SelectItem value="Remix">Remix</SelectItem>
                                     <SelectItem value="Bootleg">Bootleg</SelectItem>
                                     <SelectItem value="Mashup">Mashup</SelectItem>

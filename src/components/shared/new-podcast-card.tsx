@@ -1,7 +1,6 @@
 "use client"
 
 import Image from "next/image"
-
 import { usePlayer } from "@/components/shared/player-context"
 import { LikeButton } from "@/components/shared/like-button"
 import { PlayButton } from "@/components/shared/play-button"
@@ -10,8 +9,7 @@ import { User, Share2 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { WaveformBar } from "@/components/shared/waveform-bar"
 
-
-export interface ReleaseItem {
+export interface PodcastItem {
     id: string
     title: string
     slug?: string
@@ -28,8 +26,8 @@ export interface ReleaseItem {
     } | null
     likesCount: number
     isLiked: boolean
-    kind?: "TRACK" // Restricted to TRACK
-    artist: {
+    kind?: "TRACK" | "PODCAST" // Optional but helpful for types
+    artist?: {
         id: string
         name: string
         imageUrl?: string | null
@@ -57,14 +55,13 @@ function getGenreBorderColor(genre: string) {
     return key ? GENRE_BORDERS[key] : "border-white/10 hover:border-white/30"
 }
 
-export function NewReleaseCard({ track, hideLikeButton = false }: { track: ReleaseItem, hideLikeButton?: boolean }) {
+export function NewPodcastCard({ podcast, hideLikeButton = false }: { podcast: PodcastItem, hideLikeButton?: boolean }) {
     const { playTrack, currentTrack, isPlaying, togglePlay } = usePlayer()
 
-    if (!track) return null
+    if (!podcast) return null
 
-    const isCurrentTrack = currentTrack?.id === track.id
-
-    const isUpcoming = new Date(track.scheduledFor) > new Date()
+    const isCurrentTrack = currentTrack?.id === podcast.id
+    const isUpcoming = new Date(podcast.scheduledFor) > new Date()
 
     const handleCardClick = () => {
         if (isUpcoming) return
@@ -72,13 +69,15 @@ export function NewReleaseCard({ track, hideLikeButton = false }: { track: Relea
         if (isCurrentTrack) {
             togglePlay()
         } else {
-            playTrack(track)
+            // Force kind to PODCAST if missing
+            // @ts-ignore
+            playTrack({ ...podcast, kind: 'PODCAST' })
         }
     }
 
     // Determine Genre Data
-    const genreName = track.genreRel?.name || track.genre
-    const parentGenreName = track.genreRel?.parent?.name
+    const genreName = podcast.genreRel?.name || podcast.genre
+    const parentGenreName = podcast.genreRel?.parent?.name
 
     return (
         <div
@@ -94,10 +93,10 @@ export function NewReleaseCard({ track, hideLikeButton = false }: { track: Relea
             {/* Image Section */}
             <div className="relative w-28 sm:w-40 self-stretch shrink-0 overflow-hidden rounded-md shadow-lg isolate ring-1 ring-white/10 ring-inset">
                 <div className="absolute inset-0 bg-gradient-to-br from-black/20 to-transparent z-10 pointer-events-none" />
-                {track.imageUrl || track.artist?.imageUrl ? (
+                {podcast.imageUrl || podcast.artist?.imageUrl ? (
                     <Image
-                        src={track.imageUrl || track.artist?.imageUrl || ""}
-                        alt={track.title}
+                        src={podcast.imageUrl || podcast.artist?.imageUrl || ""}
+                        alt={podcast.title}
                         fill
                         className="object-cover object-top transition-transform duration-700 ease-out group-hover:scale-110"
                         sizes="(max-width: 640px) 112px, 160px"
@@ -114,7 +113,8 @@ export function NewReleaseCard({ track, hideLikeButton = false }: { track: Relea
                         "absolute inset-0 flex items-center justify-center bg-black/40 z-20 transition-all duration-300 backdrop-blur-[2px]",
                         isCurrentTrack && isPlaying ? "opacity-100 bg-black/60" : "opacity-0 group-hover:opacity-100"
                     )}>
-                        <PlayButton track={track} variant="icon" />
+                        {/* We cast podcast to any or Track for PlayButton compatibility if needed, though PlayButton might accept generic Track-like shape */}
+                        <PlayButton track={podcast as any} variant="icon" />
                     </div>
                 )}
                 {isUpcoming && (
@@ -133,46 +133,58 @@ export function NewReleaseCard({ track, hideLikeButton = false }: { track: Relea
                 {/* Top Row: Date (Left) and Like (Right) */}
                 <div className="flex justify-between items-start w-full pb-1">
                     <div className="flex items-center gap-2">
-                        {track.type && (
+                        {podcast.type && (
                             <div className={cn(
                                 "flex items-center gap-1 text-[10px] sm:text-xs font-bold uppercase tracking-wider px-2 py-0.5 rounded-md border text-background",
-                                track.type === "Warm" && "bg-yellow-500 border-yellow-400",
-                                track.type === "Drive" && "bg-orange-500 border-orange-400",
-                                track.type === "Peak" && "bg-red-500 border-red-400",
-                                // Fallback for Track types (Remix, Bootleg, etc)
-                                !["Warm", "Drive", "Peak"].includes(track.type) && "bg-primary border-primary text-primary-foreground"
+                                podcast.type === "Warm" && "bg-yellow-500 border-yellow-400",
+                                podcast.type === "Drive" && "bg-orange-500 border-orange-400",
+                                podcast.type === "Peak" && "bg-red-500 border-red-400",
+                                // Fallback
+                                !["Warm", "Drive", "Peak"].includes(podcast.type) && "bg-primary border-primary text-primary-foreground"
                             )}>
-                                <span>{track.type}</span>
+                                <span>{podcast.type}</span>
                             </div>
                         )}
                     </div>
 
                     {!hideLikeButton && (
                         <div className="flex items-center gap-2">
+                            <ShareMenu
+                                url={`${process.env.NEXT_PUBLIC_APP_URL || "https://progressive.lk"}/podcasts/${podcast.slug || podcast.id}`}
+                                title={podcast.title}
+                                text={`Check out ${podcast.title} by ${podcast.artist?.name || "Unknown Artist"} on Progressive.lk`}
+                            >
+                                <div
+                                    onClick={(e) => e.stopPropagation()}
+                                    className="transform transition-transform active:scale-95 text-muted-foreground hover:text-primary cursor-pointer p-1"
+                                >
+                                    <Share2 className="h-4 w-4" />
+                                </div>
+                            </ShareMenu>
                             <div onClick={(e) => e.stopPropagation()} className="transform transition-transform active:scale-95 text-muted-foreground hover:text-red-500">
                                 <LikeButton
-                                    trackId={track.id}
-                                    initialLikes={track.likesCount}
-                                    initialIsLiked={track.isLiked}
-                                    type="TRACK"
+                                    trackId={podcast.id}
+                                    initialLikes={podcast.likesCount}
+                                    initialIsLiked={podcast.isLiked}
+                                    type="PODCAST"
                                 />
                             </div>
                         </div>
                     )}
                 </div>
 
-                {/* Track Title */}
+                {/* Podcast Title */}
                 <h3 className={cn(
                     "font-bold text-lg sm:text-2xl md:text-3xl truncate leading-tight transition-colors tracking-tight pr-4 py-1",
                     isCurrentTrack ? "text-primary" : "text-foreground group-hover:text-primary"
                 )}>
-                    {track.title}
+                    {podcast.title}
                 </h3>
 
                 {/* Artist & Genres */}
                 <div className="flex flex-col gap-1.5">
                     <p className="text-sm sm:text-base text-muted-foreground font-medium truncate flex items-center gap-2">
-                        {track.artist?.name || "Unknown Artist"}
+                        {podcast.artist?.name || "Unknown Artist"}
                         {isCurrentTrack && isPlaying && (
                             <span className="flex h-2 w-2 relative">
                                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
@@ -214,4 +226,3 @@ export function NewReleaseCard({ track, hideLikeButton = false }: { track: Relea
         </div>
     )
 }
-

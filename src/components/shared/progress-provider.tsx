@@ -10,8 +10,9 @@ const ProgressProvider = ({ children }: { children: ReactNode }) => {
             <ProgressBar
                 height="4px"
                 color="hsl(var(--primary))"
-                options={{ showSpinner: true }}
+                options={{ showSpinner: false }} // We will control visibility via CSS
                 shallowRouting
+                style="" // Disable default styles if possible, but nprogress usually injects them. We'll override in globals.css
             />
         </>
     )

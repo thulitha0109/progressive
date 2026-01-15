@@ -2,17 +2,17 @@
 
 import React, { useState, useEffect, useRef } from "react"
 import { Swiper, SwiperSlide } from "swiper/react"
-import { FreeMode } from "swiper/modules"
 import "swiper/css"
 import "swiper/css/free-mode"
-import { NewReleaseCard } from "@/components/shared/new-release-card"
+import { NewPodcastCard } from "@/components/shared/new-podcast-card"
 import { cn } from "@/lib/utils"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import type { Swiper as SwiperType } from "swiper"
 
-interface Track {
+interface Podcast {
     id: string
     title: string
+    slug: string // Added slug
     audioUrl: string
     imageUrl?: string | null
     scheduledFor: Date
@@ -20,6 +20,7 @@ interface Track {
     likesCount: number
     isLiked: boolean
     genre?: string | null
+    kind?: "TRACK" | "PODCAST"
     artist: {
         id: string
         name: string
@@ -28,22 +29,15 @@ interface Track {
     }
 }
 
-// Analog Wheel Indicator Component
+// Analog Wheel Indicator Component (Reused)
 function AnalogWheelIndicator({ total, current }: { total: number, current: number }) {
-    // We maintain a "visual" index that can go infinite (negative or positive)
-    // to support the visual of an infinite tape.
     const [visualIndex, setVisualIndex] = useState(current)
     const prevRef = useRef(current)
 
-    // Sync visual index with current index, handling the shortest path wrapping
     useEffect(() => {
         if (!total) return
-
-        // Calculate the shortest path difference using modular arithmetic
         const prev = prevRef.current
         let diff = (current - prev) % total
-
-        // Adjust for JavaScript's negative modulo behavior and centering
         if (diff < -total / 2) diff += total
         if (diff > total / 2) diff -= total
 
@@ -54,9 +48,8 @@ function AnalogWheelIndicator({ total, current }: { total: number, current: numb
     }, [current, total])
 
     const tickWidth = 20
-    const visibleTicks = 50 // Reduced to 50 for better performance and DOM size
+    const visibleTicks = 50
 
-    // Memoize the visible ticks window to avoid unnecessary recalculations
     const ticks = React.useMemo(() => {
         const startTick = Math.floor(visualIndex) - Math.floor(visibleTicks / 2)
         const endTick = startTick + visibleTicks
@@ -71,67 +64,45 @@ function AnalogWheelIndicator({ total, current }: { total: number, current: numb
 
     return (
         <div className="relative h-8 w-full overflow-hidden bg-transparent rounded-full mb-8 select-none">
-            {/* Static Needle / Highlight - Always center */}
             <div className="absolute left-1/2 top-1/2 -translate-y-1/2 h-[3px] w-0.5 bg-red-500 z-20 -translate-x-1/2 shadow-[0_0_6px_1px_rgba(255,0,0,0.6)]" />
-
-            {/* Moving Strip */}
             <div
                 className="absolute top-0 bottom-0 left-1/2 h-full will-change-transform transition-transform duration-500 ease-out"
                 style={{
-                    // Shift the whole strip so the tick at 'visualIndex' is at the center (which is 0px relative to left:50%)
                     transform: `translateX(calc(-${visualIndex * tickWidth}px - ${tickWidth / 2}px))`
                 }}
             >
                 {ticks.map((i) => {
-                    // Map absolute index 'i' to actual track index 'realIndex'
                     const realIndex = ((i % total) + total) % total
                     const isCurrent = realIndex === current
-                    // Calculate distance from visual center for opacity
                     const dist = Math.abs(i - visualIndex)
                     const opacity = Math.max(0.05, 1 - dist * 0.25)
-
-                    if (dist > 3.5) return null // Show only 3 on each side + center
-
-                    // Dynamic height based on distance from center
-                    // We want: Center=High, Farther=Lower. Max height 3px to match needle.
-                    // Center (dist=0) -> 3px.
-                    // Neighbors -> reduce.
+                    if (dist > 3.5) return null
                     const heightValue = Math.max(1, 3 - Math.round(dist))
-                    const heightClass = `h-[${heightValue}px]`
-
                     return (
                         <div
                             key={i}
                             className="absolute top-0 bottom-0 flex justify-center items-center"
-                            style={{
-                                width: `${tickWidth}px`,
-                                left: `${i * tickWidth}px`
-                            }}
+                            style={{ width: `${tickWidth}px`, left: `${i * tickWidth}px` }}
                         >
                             <div
                                 className={cn(
                                     "w-0.5 rounded-full transition-all duration-300",
                                     isCurrent ? "bg-foreground shadow-[0_0_8px_rgba(0,0,0,0.2)] dark:shadow-[0_0_8px_rgba(255,255,255,0.5)]" : "bg-neutral-400/80 dark:bg-white/80",
-                                    isCurrent ? "w-[2px]" : "w-[1px]" // Make current slightly thicker for visibility at small size
+                                    isCurrent ? "w-[2px]" : "w-[1px]"
                                 )}
-                                style={{
-                                    opacity,
-                                    height: `${heightValue}px`
-                                }}
+                                style={{ opacity, height: `${heightValue}px` }}
                             />
                         </div>
                     )
                 })}
             </div>
-
-            {/* Side Fades for depth - adapt to theme */}
             <div className="absolute inset-y-0 left-0 w-1/3 bg-gradient-to-r from-background via-background/90 to-transparent z-10 pointer-events-none" />
             <div className="absolute inset-y-0 right-0 w-1/3 bg-gradient-to-l from-background via-background/90 to-transparent z-10 pointer-events-none" />
         </div>
     )
 }
 
-export function NewReleasesCarousel({ tracks }: { tracks: Track[] }) {
+export function NewPodcastsCarousel({ podcasts }: { podcasts: Podcast[] }) {
     const [currentIndex, setCurrentIndex] = useState(0)
     const [isBeginning, setIsBeginning] = useState(true)
     const [isEnd, setIsEnd] = useState(false)
@@ -139,10 +110,9 @@ export function NewReleasesCarousel({ tracks }: { tracks: Track[] }) {
 
     return (
         <div className="space-y-6 w-full">
-            <AnalogWheelIndicator key={tracks.length} total={tracks.length} current={currentIndex} />
+            <AnalogWheelIndicator key={podcasts.length} total={podcasts.length} current={currentIndex} />
 
             <div className="relative">
-                {/* Navigation Arrows */}
                 <div className="absolute top-1/2 -translate-y-1/2 -left-12 z-20 hidden md:block">
                     <button
                         onClick={() => swiperRef.current?.slidePrev()}
@@ -162,7 +132,6 @@ export function NewReleasesCarousel({ tracks }: { tracks: Track[] }) {
                     </button>
                 </div>
 
-                {/* Negative margin to breakout on mobile, but keeping padding for shadows */}
                 <div className="relative px-0.5 sm:px-0 overflow-hidden">
                     <Swiper
                         onSwiper={(swiper) => {
@@ -170,7 +139,7 @@ export function NewReleasesCarousel({ tracks }: { tracks: Track[] }) {
                             setIsBeginning(swiper.isBeginning)
                             setIsEnd(swiper.isEnd)
                         }}
-                        slidesPerView={1.1} // Slightly show next slide to encourage swipe
+                        slidesPerView={1.1}
                         spaceBetween={16}
                         centeredSlides={false}
                         loop={false}
@@ -181,20 +150,14 @@ export function NewReleasesCarousel({ tracks }: { tracks: Track[] }) {
                             setIsEnd(swiper.isEnd)
                         }}
                         breakpoints={{
-                            640: {
-                                slidesPerView: 1.5,
-                                spaceBetween: 24,
-                            },
-                            1024: {
-                                slidesPerView: 2.2,
-                                spaceBetween: 32,
-                            }
+                            640: { slidesPerView: 1.5, spaceBetween: 24 },
+                            1024: { slidesPerView: 2.2, spaceBetween: 32 }
                         }}
                     >
-                        {tracks.map((track) => (
-                            <SwiperSlide key={track.id} className="h-full !h-auto">
+                        {podcasts.map((podcast) => (
+                            <SwiperSlide key={podcast.id} className="h-full !h-auto">
                                 <div className="h-full">
-                                    <NewReleaseCard track={{ ...track, kind: "TRACK" }} />
+                                    <NewPodcastCard podcast={podcast} />
                                 </div>
                             </SwiperSlide>
                         ))}

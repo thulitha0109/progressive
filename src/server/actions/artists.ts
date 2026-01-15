@@ -224,10 +224,12 @@ export async function getArtistBySlug(slug: string) {
         }
     }
 
+    const now = new Date()
     const tracks = artist.tracks.map((track: any) => ({
         ...track,
         likesCount: track._count.likedBy,
         isLiked: likedTrackIds.has(track.id),
+        isReleased: new Date(track.scheduledFor) <= now,
     }))
 
     const isFollowing = userId ? (await prisma.user.count({

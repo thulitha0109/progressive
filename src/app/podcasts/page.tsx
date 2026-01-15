@@ -1,6 +1,6 @@
 import { getPodcasts } from "@/server/actions/podcasts"
 import { getGenres } from "@/server/actions/genres"
-import { NewReleaseCard } from "@/components/shared/new-release-card"
+import { NewPodcastCard } from "@/components/shared/new-podcast-card"
 import { Music2 } from "lucide-react"
 import { GenreFilter } from "@/components/tracks/genre-filter"
 import { Pagination } from "@/components/ui/pagination"
@@ -110,7 +110,7 @@ export default async function PodcastsPage({
                     {podcasts.length > 0 ? (
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             {podcasts.map((podcast) => (
-                                <NewReleaseCard
+                                <NewPodcastCard
                                     key={podcast.id}
                                     podcast={{
                                         ...podcast,

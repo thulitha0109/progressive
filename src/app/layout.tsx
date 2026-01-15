@@ -64,6 +64,7 @@ import "./globals.css";
 import { Toaster } from "@/components/ui/sonner"
 import { Providers } from "@/components/shared/providers"
 import ProgressProvider from "@/components/shared/progress-provider"
+import { NavigationLoader } from "@/components/shared/navigation-loader"
 
 export default async function RootLayout({
   children,
@@ -86,6 +87,7 @@ export default async function RootLayout({
         >
           <Providers session={session}>
             <ProgressProvider>
+              <NavigationLoader />
               <PlayerProvider>
                 <div className="relative flex min-h-screen flex-col mx-auto max-w-[1400px]">
                   <SiteHeader user={session?.user} />

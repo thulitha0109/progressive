@@ -269,6 +269,7 @@ export default function EditTrackForm({ track, artists, genres }: { track: Track
                                         <SelectValue placeholder="Select type" />
                                     </SelectTrigger>
                                     <SelectContent>
+                                        <SelectItem value="Original">Original</SelectItem>
                                         <SelectItem value="Remix">Remix</SelectItem>
                                         <SelectItem value="Bootleg">Bootleg</SelectItem>
                                         <SelectItem value="Mashup">Mashup</SelectItem>

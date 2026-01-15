@@ -3,10 +3,37 @@
 import { prisma } from "@/lib/prisma"
 import { auth } from "@/auth"
 
-export async function getHomeData() {
+export async function getHomeData(sort: 'a-z' | 'z-a' | 'popular' | 'newest' = 'popular') {
     const session = await auth()
     const userId = session?.user?.id
     const now = new Date()
+
+    // ... (keep existing code)
+
+    let artistOrderBy: any = {}
+    switch (sort) {
+        case 'a-z':
+            artistOrderBy = { name: 'asc' }
+            break
+        case 'z-a':
+            artistOrderBy = { name: 'desc' }
+            break
+        case 'popular':
+            artistOrderBy = { followers: { _count: 'desc' } }
+            break
+        case 'newest':
+            artistOrderBy = { createdAt: 'desc' }
+            break
+        default:
+            artistOrderBy = { followers: { _count: 'desc' } }
+    }
+
+    // ...
+
+    const artistsPromise = prisma.artist.findMany({
+        orderBy: artistOrderBy,
+        take: 6,
+    })
 
     const upcomingTracksPromise = prisma.track.findMany({
         where: {
@@ -62,6 +89,24 @@ export async function getHomeData() {
         take: 12,
     })
 
+    const publishedPodcastsPromise = prisma.podcast.findMany({
+        where: {
+            scheduledFor: { lte: now },
+            deletedAt: null
+        },
+        include: {
+            artist: true,
+            genre: {
+                include: {
+                    parent: true
+                }
+            },
+            _count: { select: { likedBy: true } },
+        },
+        orderBy: { scheduledFor: "desc" },
+        take: 12,
+    })
+
     const featuredTrackPromise = prisma.track.findFirst({
         where: { isFeatured: true, deletedAt: null },
         include: {
@@ -88,10 +133,7 @@ export async function getHomeData() {
         },
     })
 
-    const artistsPromise = prisma.artist.findMany({
-        orderBy: { createdAt: "desc" },
-        take: 6,
-    })
+
 
     const blogPostsPromise = prisma.blogPost.findMany({
         where: { publishedAt: { not: null } },
@@ -112,6 +154,7 @@ export async function getHomeData() {
         upcomingTracksRaw,
         upcomingPodcastsRaw,
         publishedTracksRaw,
+        publishedPodcastsRaw,
         featuredTrackRaw,
         featuredPodcastRaw,
         artists,
@@ -120,6 +163,7 @@ export async function getHomeData() {
         upcomingTracksPromise,
         upcomingPodcastsPromise,
         publishedTracksPromise,
+        publishedPodcastsPromise,
         featuredTrackPromise,
         featuredPodcastPromise,
         artistsPromise,
@@ -179,6 +223,17 @@ export async function getHomeData() {
         isLiked: likedTrackIds.has(track.id),
     }))
 
+    const newPodcasts = publishedPodcastsRaw.map((podcast: any) => ({
+        ...podcast,
+        kind: "PODCAST" as const, // For internal distinction
+        type: podcast.type, // Pass actual type (Warm, Drive, Peak)
+        genreRel: podcast.genre,
+        genre: podcast.genre?.name,
+        likesCount: podcast._count.likedBy,
+        isLiked: likedPodcastIds.has(podcast.id),
+        sequence: podcast.sequence,
+    }))
+
     // Determine featured item (Track or Podcast)
     let featuredItem = null
 
@@ -201,5 +256,5 @@ export async function getHomeData() {
         }
     }
 
-    return { upcomingTracks: allUpcoming, publishedTracks, featuredItem, artists, blogPosts }
+    return { upcomingTracks: allUpcoming, publishedTracks, newPodcasts, featuredItem, artists, blogPosts }
 }

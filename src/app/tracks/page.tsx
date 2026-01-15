@@ -2,6 +2,7 @@ import { getTracks } from "@/server/actions/tracks"
 import { getGenres } from "@/server/actions/genres"
 import { NewReleaseCard } from "@/components/shared/new-release-card"
 import { GenreFilter } from "@/components/tracks/genre-filter"
+import { TypeFilter } from "@/components/tracks/type-filter"
 import { Pagination } from "@/components/ui/pagination"
 import Link from "next/link"
 import { cn } from "@/lib/utils"
@@ -77,21 +78,12 @@ export default async function TracksPage({
                                 ))}
                             </div>
 
-                            <div className="flex items-center p-1 bg-muted/40 rounded-lg border border-border/50 self-start sm:self-auto w-full sm:w-auto overflow-x-auto">
-                                {typeFilters.map((filter) => (
-                                    <Link
-                                        key={filter.value}
-                                        href={`/tracks?status=${statusParam}&genre=${selectedGenreId}&type=${filter.value}`}
-                                        className={cn(
-                                            "px-4 py-2 text-sm font-medium rounded-md whitespace-nowrap transition-all",
-                                            selectedType === filter.value
-                                                ? "bg-background text-foreground shadow-sm"
-                                                : "text-muted-foreground hover:text-foreground hover:bg-muted/60"
-                                        )}
-                                    >
-                                        {filter.label}
-                                    </Link>
-                                ))}
+                            <div className="w-full sm:w-auto">
+                                <TypeFilter
+                                    selectedType={selectedType}
+                                    status={statusParam}
+                                    genre={selectedGenreId}
+                                />
                             </div>
 
                             <div className="w-full sm:w-[240px]">

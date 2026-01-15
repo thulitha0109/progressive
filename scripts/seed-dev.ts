@@ -18,6 +18,15 @@ const ARTISTS = [
     { name: "Solar Flare", bio: "High energy beats.", imageUrl: "https://images.unsplash.com/photo-1527980965255-d3b416303d12?w=400&h=400&fit=crop" },
 ]
 
+// Generate more artists for testing scrolling
+for (let i = 1; i <= 50; i++) {
+    ARTISTS.push({
+        name: `Artist ${i}`,
+        bio: `Bio for Artist ${i}`,
+        imageUrl: `https://i.pravatar.cc/150?u=${i}`
+    })
+}
+
 const EVENTS = [
     {
         title: "Atmosphere 2025",

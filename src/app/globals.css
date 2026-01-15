@@ -45,10 +45,12 @@
   --animate-music-bar: music-bar 1s ease-in-out infinite;
 
   @keyframes music-bar {
+
     0%,
     100% {
       transform: scaleY(0.1);
     }
+
     50% {
       transform: scaleY(1);
     }
@@ -310,5 +312,52 @@
   .artist-carousel-desktop .swiper-button-prev::after {
     font-size: 16px;
     font-weight: bold;
+  }
+}
+
+/* Navigation Loading States */
+
+/* Default: Hide NProgress bar and spinner (we customize) */
+#nprogress .bar,
+#nprogress .spinner,
+#nprogress .peg {
+  display: none !important;
+}
+
+/* Desktop: Cursor Wait */
+@media (min-width: 768px) {
+
+  html.nprogress-busy,
+  html.nprogress-busy body {
+    cursor: wait !important;
+  }
+
+  html.nprogress-busy * {
+    pointer-events: none !important;
+    /* Optional: prevent clicks while loading */
+    cursor: wait !important;
+  }
+}
+
+/* Mobile: Custom Navigation Loader Control */
+@media (max-width: 767px) {
+
+  /* Show our custom loader when nprogress thinks it is busy */
+  html.nprogress-busy #nav-loader {
+    display: flex !important;
+  }
+
+  /* Semi-transparent overlay on mobile when loading */
+  html.nprogress-busy::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(2px);
+    z-index: 1030;
+    animation: enter-fade-in 0.3s ease-out;
   }
 }

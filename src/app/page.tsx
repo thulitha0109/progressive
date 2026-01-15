@@ -11,9 +11,18 @@ import { NewReleaseCard } from "@/components/shared/new-release-card"
 import { ArtistCarousel } from "@/components/shared/artist-carousel"
 import { UpcomingCarousel } from "@/components/shared/upcoming-carousel"
 import { NewReleasesCarousel } from "@/components/home/new-releases-carousel"
+import { NewPodcastsCarousel } from "@/components/home/new-podcasts-carousel"
 
-export default async function HomePage() {
-  const { upcomingTracks, publishedTracks, featuredItem, artists, blogPosts } = await getHomeData()
+import { ArtistSort } from "@/components/artist/artist-sort"
+
+export default async function HomePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ sort?: string }>
+}) {
+  const params = await searchParams
+  const sort = (params.sort as any) || "popular"
+  const { upcomingTracks, publishedTracks, newPodcasts, featuredItem, artists, blogPosts } = await getHomeData(sort)
 
   // Fallback to latest published track if no featured item
   const displayItem = featuredItem || (publishedTracks.length > 0 ? { ...publishedTracks[0], type: "TRACK" as const } : null)
@@ -70,13 +79,32 @@ export default async function HomePage() {
           )}
         </section>
 
-        {/* Artists */}
+        {/* Published Podcasts (New Podcasts) */}
         <section>
           <div className="flex items-center justify-between mb-8">
-            <h2 className="text-2xl font-bold tracking-tight">Popular Artists</h2>
-            <Link href="/artists" className="text-sm text-primary hover:underline">
+            <h2 className="text-2xl font-bold tracking-tight">New Podcasts</h2>
+            <Link href="/podcasts" className="text-sm text-primary hover:underline">
               View All
             </Link>
+          </div>
+
+          {newPodcasts && newPodcasts.length > 0 ? (
+            <NewPodcastsCarousel podcasts={newPodcasts} />
+          ) : (
+            <p className="text-muted-foreground">No podcasts published yet.</p>
+          )}
+        </section>
+
+        {/* Artists */}
+        <section>
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+            <h2 className="text-2xl font-bold tracking-tight">Popular Artists</h2>
+            <div className="flex items-center gap-4">
+              <ArtistSort />
+              <Link href="/artists" className="text-sm text-primary hover:underline whitespace-nowrap">
+                View All
+              </Link>
+            </div>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
             {artists.slice(0, 6).map((artist) => (

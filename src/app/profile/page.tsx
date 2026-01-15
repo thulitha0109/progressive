@@ -8,6 +8,7 @@ import { getLikedPodcasts } from "@/server/actions/podcasts"
 import { PlayButton } from "@/components/shared/play-button"
 import { Music2 } from "lucide-react"
 import { NewReleaseCard } from "@/components/shared/new-release-card"
+import { NewPodcastCard } from "@/components/shared/new-podcast-card"
 
 export default async function ProfilePage() {
     const session = await auth()
@@ -56,13 +57,6 @@ export default async function ProfilePage() {
                     <h2 className="text-2xl font-semibold tracking-tight">Liked Tracks</h2>
                     {likedTracks.length > 0 ? (
                         <div className="grid gap-4 md:grid-cols-1 lg:grid-cols-2 xl:grid-cols-2">
-                            {/* @ts-ignore - Track type mismatch with NewReleaseCard props, needs alignment or cast. Assuming mapped for now or will fix type def. */}
-                            {/* Actually, NewReleaseCard expects specific props. likedTracks return type matches mostly but check `isLiked` and `likesCount`.
-                                 getLikedTracks returns Track & { artist, genreRel }.
-                                 NewReleaseCard needs `isLiked` and `likesCount`.
-                                 Prisma result from `getLikedTracks` usually has those if included or calculated.
-                                 Let's verify `getLikedTracks` return type.
-                                 For now, fixing the syntax error of nested curly braces. */}
                             {likedTracks.map((track) => (
                                 <NewReleaseCard key={track.id} track={{
                                     ...track,
@@ -71,9 +65,10 @@ export default async function ProfilePage() {
                                         name: track.genreRel.name,
                                         parent: track.genreRel.parent ? { name: track.genreRel.parent.name } : undefined
                                     } : null,
-                                    // @ts-ignore - Prisma returns _count
+                                    // @ts-ignore - Prisma returns _count which we map to likesCount
                                     likesCount: track._count.likedBy,
-                                    isLiked: true
+                                    isLiked: true,
+                                    kind: "TRACK"
                                 }} />
                             ))}
                         </div>
@@ -85,8 +80,7 @@ export default async function ProfilePage() {
                                 Tracks you like will appear here.
                             </p>
                         </div>
-                    )
-                    }
+                    )}
                 </div>
 
                 <div className="space-y-4">
@@ -94,7 +88,7 @@ export default async function ProfilePage() {
                     {likedPodcasts.length > 0 ? (
                         <div className="grid gap-4 md:grid-cols-1 lg:grid-cols-2 xl:grid-cols-2">
                             {likedPodcasts.map((podcast) => (
-                                <NewReleaseCard key={podcast.id} podcast={{
+                                <NewPodcastCard key={podcast.id} podcast={{
                                     ...podcast,
                                     artist: {
                                         id: podcast.artist?.id || "unknown",
@@ -106,6 +100,7 @@ export default async function ProfilePage() {
                                     genreRel: podcast.genre ? {
                                         name: podcast.genre.name
                                     } : null,
+                                    // @ts-ignore - Prisma returns _count
                                     likesCount: podcast._count.likedBy,
                                     isLiked: true,
                                     kind: "PODCAST"

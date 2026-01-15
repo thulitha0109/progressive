@@ -4,7 +4,7 @@ import PodcastForm from "./podcast-form"
 
 export default async function NewPodcastPage() {
     const [artistsData, genres] = await Promise.all([
-        getArtists(),
+        getArtists(1, 1000, undefined, 'a-z'),
         getGenres()
     ])
 

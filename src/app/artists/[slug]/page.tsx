@@ -35,7 +35,7 @@ export default async function ArtistPage({
                 )}
             </div>
 
-            <div className="container px-4 md:px-6 relative z-10 -mt-32 md:-mt-40 mb-10">
+            <div className="px-4 md:px-8 relative z-10 -mt-32 md:-mt-40 mb-10">
                 <div className="flex flex-col md:flex-row md:items-end gap-6 md:gap-8">
                     <div className="h-40 w-40 md:h-52 md:w-52 overflow-hidden rounded-full border-4 border-background bg-muted flex items-center justify-center shadow-2xl shrink-0">
                         {artist.imageUrl ? (
@@ -107,9 +107,50 @@ export default async function ArtistPage({
                 </div>
             </div>
 
-            <div className="container px-4 md:px-6 py-8 grid gap-12 lg:grid-cols-[2fr_1fr]">
+            <div className="px-4 md:px-8 py-8 grid gap-12 lg:grid-cols-[2fr_1fr]">
                 {/* Tracks */}
                 <div className="space-y-12">
+                    {/* Upcoming Tracks */}
+                    {artist.tracks.some(track => !track.isReleased) && (
+                        <div className="animate-slide-up-fade" style={{ animationDelay: "0.05s" }}>
+                            <div className="flex items-center justify-between mb-6">
+                                <h2 className="text-2xl font-bold tracking-tight">Upcoming Releases</h2>
+                                <span className="text-sm text-muted-foreground">{artist.tracks.filter((track) => !track.isReleased).length} tracks</span>
+                            </div>
+                            <div className="space-y-2">
+                                {artist.tracks
+                                    .filter((track) => !track.isReleased)
+                                    .map((track) => (
+                                        <div
+                                            key={track.id}
+                                            className="group flex items-center gap-4 rounded-lg border p-3 hover:bg-accent transition-colors overflow-hidden opacity-80"
+                                        >
+                                            <div className="flex items-center justify-center h-12 w-12 rounded bg-muted text-muted-foreground shrink-0 border border-dashed">
+                                                <Calendar className="h-5 w-5" />
+                                            </div>
+                                            <div className="flex-1 min-w-0">
+                                                <h3 className="font-medium truncate pr-2 text-lg">{track.title}</h3>
+                                                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                                    <Calendar className="h-3 w-3" />
+                                                    {new Date(track.scheduledFor).toLocaleDateString(undefined, {
+                                                        weekday: 'short',
+                                                        year: 'numeric',
+                                                        month: 'short',
+                                                        day: 'numeric'
+                                                    })}
+                                                </div>
+                                            </div>
+                                            <div className="shrink-0">
+                                                <span className="text-xs font-bold uppercase tracking-wider border px-2 py-1 rounded-md text-muted-foreground">
+                                                    Upcoming
+                                                </span>
+                                            </div>
+                                        </div>
+                                    ))}
+                            </div>
+                        </div>
+                    )}
+
                     {/* Released Tracks */}
                     <div className="animate-slide-up-fade" style={{ animationDelay: "0.1s" }}>
                         <div className="flex items-center justify-between mb-6">

@@ -1,11 +1,12 @@
 "use client"
 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { useRouter, useSearchParams } from "next/navigation"
+import { useRouter, useSearchParams, usePathname } from "next/navigation"
 import { useTransition } from "react"
 
 export function ArtistSort() {
     const searchParams = useSearchParams()
+    const pathname = usePathname()
     const { replace } = useRouter()
     const [isPending, startTransition] = useTransition()
 
@@ -13,8 +14,8 @@ export function ArtistSort() {
         startTransition(() => {
             const params = new URLSearchParams(searchParams)
             params.set("sort", value)
-            params.set("page", "1")
-            replace(`/artists?${params.toString()}`)
+            if (params.get("page")) params.set("page", "1") // Reset page if it exists
+            replace(`${pathname}?${params.toString()}`, { scroll: false })
         })
     }
 

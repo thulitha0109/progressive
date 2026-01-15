@@ -12,7 +12,7 @@ export default async function EditPodcastPage({
     const { id } = await params
     const [podcast, artistsData, genres] = await Promise.all([
         getPodcast(id),
-        getArtists(1, 1000), // Fetch all artists (or enough to cover list)
+        getArtists(1, 1000, undefined, 'a-z'), // Fetch all artists (or enough to cover list)
         getGenres()
     ])
 

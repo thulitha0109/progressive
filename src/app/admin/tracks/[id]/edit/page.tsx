@@ -8,7 +8,7 @@ export default async function EditTrackPage({ params }: { params: Promise<{ id: 
     const { id } = await params
     const [track, artistsData, genres] = await Promise.all([
         getTrack(id),
-        getArtists(),
+        getArtists(1, 1000, undefined, 'a-z'),
         getGenres()
     ])
 

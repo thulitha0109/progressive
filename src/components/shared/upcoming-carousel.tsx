@@ -57,10 +57,10 @@ export function UpcomingCarousel({ tracks }: { tracks: Item[] }) {
         >
             {tracks.map((item) => (
                 <SwiperSlide key={item.id}>
-                    <Link href={`/artists/${item.artist.slug}`}>
+                    <Link href={item.artist ? `/artists/${item.artist.slug}` : '#'}>
                         <div className="group relative aspect-square overflow-hidden rounded-md bg-muted shadow-lg transition-all hover:shadow-xl isolate ring-1 ring-white/10 ring-inset">
                             {/* Full Image Background */}
-                            {item.artist.imageUrl ? (
+                            {item.artist?.imageUrl ? (
                                 <Image
                                     src={item.artist.imageUrl}
                                     alt={item.artist.name}
@@ -120,7 +120,7 @@ export function UpcomingCarousel({ tracks }: { tracks: Item[] }) {
                                         </span>
                                     </div>
                                     <h3 className="text-xl font-bold text-white line-clamp-1 leading-tight">{item.title}</h3>
-                                    <p className="text-sm text-gray-300 font-medium">{item.artist.name}</p>
+                                    <p className="text-sm text-gray-300 font-medium">{item.artist?.name || "Unknown Artist"}</p>
                                 </div>
                             </div>
                         </div>

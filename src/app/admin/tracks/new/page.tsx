@@ -4,7 +4,7 @@ import TrackForm from "./track-form"
 
 export default async function NewTrackPage() {
     const [artistsData, genres] = await Promise.all([
-        getArtists(),
+        getArtists(1, 1000, undefined, 'a-z'),
         getGenres()
     ])
 
