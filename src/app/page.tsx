@@ -28,7 +28,7 @@ export default async function HomePage({
   const displayItem = featuredItem || (publishedTracks.length > 0 ? { ...publishedTracks[0], type: "TRACK" as const } : null)
 
   return (
-    <div className="min-h-screen bg-background pb-24">
+    <div className="min-h-screen bg-background pb-24 overflow-x-hidden">
       {/* Featured Section (Replaces Hero) */}
       {displayItem ? (
         <FeaturedSection item={displayItem} />
@@ -99,7 +99,7 @@ export default async function HomePage({
         <section>
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
             <h2 className="text-2xl font-bold tracking-tight">Popular Artists</h2>
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-4 w-full md:w-auto justify-between md:justify-start">
               <ArtistSort />
               <Link href="/artists" className="text-sm text-primary hover:underline whitespace-nowrap">
                 View All

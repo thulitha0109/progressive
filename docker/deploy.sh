@@ -5,10 +5,7 @@ set -e
 
 echo "🚀 Starting deployment..."
 
-# 1. Pull latest changes (uncomment if using git on server)
-# git pull origin main
-
-# Load .env file if it exists
+# 1. Load .env file if it exists
 if [ -f .env ]; then
   echo "📄 Loading environment variables from .env..."
   set -a  # automatically export all variables
@@ -28,7 +25,6 @@ echo "📂 Setting up upload directory..."
 mkdir -p public/uploads
 chmod -R 777 public/uploads
 
-# 2. Build and start containers
 echo "📦 Building and starting containers..."
 docker compose up -d --build
 

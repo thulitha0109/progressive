@@ -46,7 +46,7 @@ export default function PodcastForm({ artists, genres }: { artists: Artist[], ge
         return new Promise(async (resolve, reject) => {
             try {
                 // 1. Get Presigned URL
-                const { signedUrl, publicUrl } = await getPresignedUrl(file.name, file.type)
+                const { signedUrl, publicUrl } = await getPresignedUrl(file.name, file.type, "podcasts")
 
                 // 2. Upload to S3 directly (using the signed URL)
                 const xhr = new XMLHttpRequest()
@@ -353,6 +353,8 @@ export default function PodcastForm({ artists, genres }: { artists: Artist[], ge
                                 Leave blank to publish immediately.
                             </p>
                         </div>
+
+                        <input type="hidden" name="timeZone" value={Intl.DateTimeFormat().resolvedOptions().timeZone} />
 
                         {/* Show progress if manually uploading OR transition is pending */}
                         {(isUploading || isPending) && (

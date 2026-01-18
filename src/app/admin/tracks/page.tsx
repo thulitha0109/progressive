@@ -53,20 +53,24 @@ export default async function TracksPage({ searchParams }: TracksPageProps) {
 
             <div className="rounded-md border">
                 <div className="grid grid-cols-12 gap-4 p-4 border-b bg-muted/50 font-medium text-sm">
-                    <div className="col-span-4">Title</div>
+                    <div className="col-span-3">Title</div>
+                    <div className="col-span-2">Label</div>
                     <div className="col-span-2">Type</div>
-                    <div className="col-span-3">Artist</div>
+                    <div className="col-span-2">Artist</div>
                     <div className="col-span-2">Scheduled For</div>
                     <div className="col-span-1 text-right">Actions</div>
                 </div>
                 <div className="divide-y">
                     {tracks.map((track) => (
                         <div key={track.id} className="grid grid-cols-12 gap-4 p-4 items-center text-sm">
-                            <div className="col-span-4 font-medium flex items-center gap-2">
+                            <div className="col-span-3 font-medium flex items-center gap-2">
                                 <div className="h-8 w-8 rounded bg-primary/10 flex items-center justify-center text-primary">
                                     <Play className="h-4 w-4" />
                                 </div>
-                                {track.title}
+                                <span className="truncate">{track.title}</span>
+                            </div>
+                            <div className="col-span-2 text-muted-foreground truncate">
+                                {(track as any).label || "-"}
                             </div>
                             <div className="col-span-2">
                                 {track.type && (
@@ -84,7 +88,7 @@ export default async function TracksPage({ searchParams }: TracksPageProps) {
                                     <span className="text-xs text-muted-foreground">-</span>
                                 )}
                             </div>
-                            <div className="col-span-3 text-muted-foreground">{track.artist.name}</div>
+                            <div className="col-span-2 text-muted-foreground truncate">{track.artist.name}</div>
                             <div className="col-span-2 text-muted-foreground">
                                 <ClientDate date={track.scheduledFor} />
                             </div>

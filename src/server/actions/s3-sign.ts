@@ -36,9 +36,20 @@ export async function getPresignedUrl(
     const uniqueFilename = `${Date.now()}-${sanitized}`
     const key = `${folder}/${uniqueFilename}`
 
-    // Dynamically determine the host from the request headers to support LAN/Remote access
+    // Dynamically determine the host from the request headers
     const headersList = await headers()
-    const host = headersList.get("host") || "localhost:3000"
+    let host = headersList.get("host")
+
+    // If host is internal (localhost:3000) or missing, prefer AUTH_URL
+    // This fixes issues where internal docker networking makes the host appear as 3000
+    if (!host || host.includes("localhost:3000")) {
+        try {
+            const authUrl = new URL(process.env.AUTH_URL || "http://localhost:3000")
+            host = authUrl.host
+        } catch (e) {
+            host = "localhost:3000"
+        }
+    }
 
     // Strip port if present to get hostname for protocol check
     const hostname = host.split(":")[0]

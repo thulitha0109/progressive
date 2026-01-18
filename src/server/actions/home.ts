@@ -2,6 +2,7 @@
 
 import { prisma } from "@/lib/prisma"
 import { auth } from "@/auth"
+import { unstable_cache } from "next/cache"
 
 export async function getHomeData(sort: 'a-z' | 'z-a' | 'popular' | 'newest' = 'popular') {
     const session = await auth()
@@ -30,125 +31,113 @@ export async function getHomeData(sort: 'a-z' | 'z-a' | 'popular' | 'newest' = '
 
     // ...
 
-    const artistsPromise = prisma.artist.findMany({
-        orderBy: artistOrderBy,
-        take: 6,
-    })
+    const getCachedArtists = unstable_cache(
+        async (orderBy: any) => prisma.artist.findMany({ orderBy, take: 6 }),
+        ['home-artists'],
+        { tags: ['artists'], revalidate: 3600 }
+    )
 
-    const upcomingTracksPromise = prisma.track.findMany({
-        where: {
-            scheduledFor: { gt: now },
-            deletedAt: null
-        },
-        include: {
-            artist: true,
-            genreRel: {
-                include: {
-                    parent: true
-                }
+    const getCachedUpcomingTracks = unstable_cache(
+        async () => prisma.track.findMany({
+            where: { scheduledFor: { gt: new Date() }, deletedAt: null },
+            select: {
+                id: true, title: true, scheduledFor: true, timeZone: true, label: true, type: true,
+                artist: { select: { name: true, slug: true, imageUrl: true } },
+                genreRel: { select: { name: true } },
+                _count: { select: { likedBy: true } },
             },
-            _count: { select: { likedBy: true } },
-        },
-        orderBy: { scheduledFor: "asc" },
-        take: 5,
-    })
+            orderBy: { scheduledFor: "asc" },
+            take: 5,
+        }),
+        ['home-upcoming-tracks'],
+        { tags: ['tracks'], revalidate: 60 }
+    )
 
-    const upcomingPodcastsPromise = prisma.podcast.findMany({
-        where: {
-            scheduledFor: { gt: now },
-            deletedAt: null
-        },
-        include: {
-            artist: true,
-            genre: {
-                include: {
-                    parent: true
-                }
+    const getCachedUpcomingPodcasts = unstable_cache(
+        async () => prisma.podcast.findMany({
+            where: { scheduledFor: { gt: new Date() }, deletedAt: null },
+            select: {
+                id: true, title: true, scheduledFor: true, timeZone: true, type: true, sequence: true, imageUrl: true,
+                artist: { select: { name: true, slug: true, imageUrl: true } },
+                genre: { select: { name: true } },
+                _count: { select: { likedBy: true } },
             },
-            _count: { select: { likedBy: true } },
-        },
-        orderBy: { scheduledFor: "asc" },
-        take: 5,
-    })
+            orderBy: { scheduledFor: "asc" },
+            take: 5,
+        }),
+        ['home-upcoming-podcasts'],
+        { tags: ['podcasts'], revalidate: 60 }
+    )
 
-    const publishedTracksPromise = prisma.track.findMany({
-        where: {
-            scheduledFor: { lte: now },
-            deletedAt: null
-        },
-        include: {
-            artist: true,
-            genreRel: {
-                include: {
-                    parent: true
-                }
+    const getCachedPublishedTracks = unstable_cache(
+        async () => prisma.track.findMany({
+            where: { scheduledFor: { lte: new Date() }, deletedAt: null },
+            include: {
+                artist: true,
+                genreRel: { include: { parent: true } },
+                _count: { select: { likedBy: true } },
             },
-            _count: { select: { likedBy: true } },
-        },
-        orderBy: { scheduledFor: "desc" },
-        take: 12,
-    })
+            orderBy: { scheduledFor: "desc" },
+            take: 12,
+        }),
+        ['home-published-tracks'],
+        { tags: ['tracks'], revalidate: 60 }
+    )
 
-    const publishedPodcastsPromise = prisma.podcast.findMany({
-        where: {
-            scheduledFor: { lte: now },
-            deletedAt: null
-        },
-        include: {
-            artist: true,
-            genre: {
-                include: {
-                    parent: true
-                }
+    const getCachedPublishedPodcasts = unstable_cache(
+        async () => prisma.podcast.findMany({
+            where: { scheduledFor: { lte: new Date() }, deletedAt: null },
+            include: {
+                artist: true,
+                genre: { include: { parent: true } },
+                _count: { select: { likedBy: true } },
             },
-            _count: { select: { likedBy: true } },
-        },
-        orderBy: { scheduledFor: "desc" },
-        take: 12,
-    })
+            orderBy: { scheduledFor: "desc" },
+            take: 12,
+        }),
+        ['home-published-podcasts'],
+        { tags: ['podcasts'], revalidate: 60 }
+    )
 
-    const featuredTrackPromise = prisma.track.findFirst({
-        where: { isFeatured: true, deletedAt: null },
-        include: {
-            artist: true,
-            genreRel: {
-                include: {
-                    parent: true
-                }
+    const getCachedFeaturedTrack = unstable_cache(
+        async () => prisma.track.findFirst({
+            where: { isFeatured: true, deletedAt: null },
+            include: {
+                artist: true,
+                genreRel: { include: { parent: true } },
+                _count: { select: { likedBy: true } },
             },
-            _count: { select: { likedBy: true } },
-        },
-    })
+        }),
+        ['home-featured-track'],
+        { tags: ['tracks'], revalidate: 60 }
+    )
 
-    const featuredPodcastPromise = prisma.podcast.findFirst({
-        where: { isFeatured: true, deletedAt: null },
-        include: {
-            artist: true,
-            genre: {
-                include: {
-                    parent: true
-                }
+    const getCachedFeaturedPodcast = unstable_cache(
+        async () => prisma.podcast.findFirst({
+            where: { isFeatured: true, deletedAt: null },
+            include: {
+                artist: true,
+                genre: { include: { parent: true } },
+                _count: { select: { likedBy: true } },
             },
-            _count: { select: { likedBy: true } },
-        },
-    })
+        }),
+        ['home-featured-podcast'],
+        { tags: ['podcasts'], revalidate: 60 }
+    )
 
-
-
-    const blogPostsPromise = prisma.blogPost.findMany({
-        where: { publishedAt: { not: null } },
-        orderBy: { publishedAt: "desc" },
-        take: 3,
-        select: {
-            id: true,
-            title: true,
-            slug: true,
-            excerpt: true,
-            content: true,
-            coverImage: true,
-            publishedAt: true,
-        }
-    })
+    const getCachedBlogPosts = unstable_cache(
+        async () => prisma.blogPost.findMany({
+            where: { publishedAt: { not: null } },
+            orderBy: { publishedAt: "desc" },
+            take: 3,
+            select: {
+                id: true, title: true, slug: true, excerpt: true, content: true,
+                coverImage: true, publishedAt: true,
+            }
+        }),
+        ['home-blog-posts'],
+        { tags: ['blog'], revalidate: 3600 }
+    )
 
     const [
         upcomingTracksRaw,
@@ -160,14 +149,14 @@ export async function getHomeData(sort: 'a-z' | 'z-a' | 'popular' | 'newest' = '
         artists,
         blogPosts,
     ] = await Promise.all([
-        upcomingTracksPromise,
-        upcomingPodcastsPromise,
-        publishedTracksPromise,
-        publishedPodcastsPromise,
-        featuredTrackPromise,
-        featuredPodcastPromise,
-        artistsPromise,
-        blogPostsPromise,
+        getCachedUpcomingTracks(),
+        getCachedUpcomingPodcasts(),
+        getCachedPublishedTracks(),
+        getCachedPublishedPodcasts(),
+        getCachedFeaturedTrack(),
+        getCachedFeaturedPodcast(),
+        getCachedArtists(artistOrderBy),
+        getCachedBlogPosts(),
     ])
 
     let likedTrackIds = new Set<string>()

@@ -1,0 +1,36 @@
+version: '3.8'
+services:
+  postgres:
+    ports:
+      - "5433:5432"
+
+  app:
+    image: progressive-app-dev
+    ports:
+      - "3004:3000"
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.dev
+    environment:
+      # Update AUTH_URL for dev environment
+      AUTH_URL: http://localhost:3004
+      # Override DATABASE_URL to ensure it uses the container service name, not localhost from .env
+      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-password}@postgres:5432/${POSTGRES_DB:-progressive}
+      # Set NODE_ENV to development for hot reloading
+      NODE_ENV: development
+    command: npm run dev
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - /app/.next
+
+  init-storage:
+    image: progressive-app-dev
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.dev
+
+  minio:
+    ports:
+      - "9002:9000"
+      - "9003:9001"

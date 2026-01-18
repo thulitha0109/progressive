@@ -3,7 +3,7 @@
 import { prisma } from "@/lib/prisma"
 
 export type SearchResult = {
-    type: 'track' | 'artist' | 'blog' | 'event' | 'shop' | 'product'
+    type: 'track' | 'artist' | 'blog' | 'event' | 'shop' | 'product' | 'podcast'
     id: string
     title: string
     slug?: string
@@ -13,39 +13,44 @@ export type SearchResult = {
     audioUrl?: string
 }
 
-export async function globalSearch(query: string): Promise<SearchResult[]> {
+export async function globalSearch(query: string, limit: number = 3): Promise<SearchResult[]> {
     if (!query || query.length < 2) return []
 
-    const [tracks, artists, blogs, events, shops, products] = await Promise.all([
+    const [tracks, artists, blogs, events, shops, products, podcasts] = await Promise.all([
         prisma.track.findMany({
             where: { title: { contains: query, mode: 'insensitive' } },
-            take: 3,
+            take: limit,
             select: { id: true, title: true, imageUrl: true, audioUrl: true, artist: { select: { name: true } } }
         }),
         prisma.artist.findMany({
             where: { name: { contains: query, mode: 'insensitive' } },
-            take: 3,
+            take: limit,
             select: { id: true, name: true, slug: true, imageUrl: true }
         }),
         prisma.blogPost.findMany({
             where: { title: { contains: query, mode: 'insensitive' }, publishedAt: { not: null } },
-            take: 3,
+            take: limit,
             select: { id: true, title: true, slug: true, coverImage: true }
         }),
         prisma.event.findMany({
             where: { title: { contains: query, mode: 'insensitive' } },
-            take: 3,
+            take: limit,
             select: { id: true, title: true, slug: true, coverImage: true, date: true }
         }),
         prisma.shop.findMany({
             where: { name: { contains: query, mode: 'insensitive' } },
-            take: 3,
+            take: limit,
             select: { id: true, name: true, slug: true, imageUrl: true }
         }),
         prisma.product.findMany({
             where: { name: { contains: query, mode: 'insensitive' } },
-            take: 3,
+            take: limit,
             select: { id: true, name: true, slug: true, images: true, price: true }
+        }),
+        prisma.podcast.findMany({
+            where: { title: { contains: query, mode: 'insensitive' } },
+            take: limit,
+            select: { id: true, title: true, slug: true, imageUrl: true, audioUrl: true, artist: { select: { name: true } } }
         })
     ])
 
@@ -65,8 +70,18 @@ export async function globalSearch(query: string): Promise<SearchResult[]> {
             title: t.title,
             image: t.imageUrl,
             subtitle: t.artist.name,
-            url: `/tracks/${t.id}`,
+            url: `/tracks/${t.id}`, // Note: Tracks usually play from list, but if they have a page: /tracks/[id]
             audioUrl: t.audioUrl
+        })),
+        ...podcasts.map(p => ({
+            type: 'podcast' as const,
+            id: p.id,
+            title: p.title,
+            slug: p.slug,
+            image: p.imageUrl,
+            subtitle: p.artist?.name || "Unknown Artist",
+            url: `/podcasts/${p.slug}`,
+            audioUrl: p.audioUrl
         })),
         ...events.map(e => ({
             type: 'event' as const,

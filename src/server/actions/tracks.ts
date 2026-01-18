@@ -7,6 +7,7 @@ import { redirect } from "next/navigation"
 import { saveUploadedFile, UPLOAD_DIRS } from "@/lib/file-upload"
 import { generateWaveformPeaks } from "@/lib/waveform-peaks"
 import path from "path"
+import { fromZonedTime } from "date-fns-tz"
 
 export async function getTracks(page: number = 1, pageSize: number = 10, genre?: string, status: 'published' | 'upcoming' | 'all' = 'published', type?: string) {
     const skip = (page - 1) * pageSize
@@ -134,7 +135,9 @@ export async function createTrack(formData: FormData) {
     const title = formData.get("title") as string
     const artistId = formData.get("artistId") as string
     const genreId = (formData.get("genreId") as string) || null
-    const type = (formData.get("type") as string) || null // Default to null (Original)
+    const type = (formData.get("type") as string) || null
+    const label = (formData.get("label") as string) || null
+    const timeZone = (formData.get("timeZone") as string) || "Asia/Colombo"
     const scheduledForStr = formData.get("scheduledFor") as string
     const audioFile = formData.get("audioFile") as File
     const imageFile = formData.get("imageFile") as File
@@ -189,8 +192,9 @@ export async function createTrack(formData: FormData) {
             console.log("Image uploaded successfully:", imageUrl)
         }
 
-        // Parse scheduledFor with Colombo timezone (+05:30) if not present
-        const scheduledFor = new Date(scheduledForStr.includes('+') ? scheduledForStr : `${scheduledForStr}+05:30`)
+        // Parse scheduledFor using the provided timezone
+        // scheduledForStr is likely "YYYY-MM-DDTHH:mm"
+        const scheduledFor = fromZonedTime(scheduledForStr, timeZone)
 
         const track = await prisma.track.create({
             data: {
@@ -199,7 +203,9 @@ export async function createTrack(formData: FormData) {
                 imageUrl,
                 genreId: genreId === "none" ? null : genreId,
                 type,
+                label,
                 scheduledFor,
+                timeZone,
                 artistId,
             },
         })
@@ -307,7 +313,9 @@ export async function updateTrack(id: string, formData: FormData) {
     const title = formData.get("title") as string
     const artistId = formData.get("artistId") as string
     const genreId = (formData.get("genreId") as string) || null
-    const type = (formData.get("type") as string) || null // Default to null
+    const type = (formData.get("type") as string) || null
+    const label = (formData.get("label") as string) || null
+    const timeZone = (formData.get("timeZone") as string) || "Asia/Colombo"
     const scheduledForStr = formData.get("scheduledFor") as string
     const audioFile = formData.get("audioFile") as File
     const imageFile = formData.get("imageFile") as File
@@ -328,15 +336,17 @@ export async function updateTrack(id: string, formData: FormData) {
         throw new Error(`Image file is too large. Maximum size is 10MB. Your file is ${(imageFile.size / 1024 / 1024).toFixed(2)}MB`)
     }
 
-    // Parse scheduledFor with Colombo timezone (+05:30) if not present
-    const scheduledFor = new Date(scheduledForStr.includes('+') ? scheduledForStr : `${scheduledForStr}+05:30`)
+    // Parse scheduledFor using the provided timezone
+    const scheduledFor = fromZonedTime(scheduledForStr, timeZone)
 
     const data: any = {
         title,
         artistId,
         genreId: genreId === "none" ? null : genreId,
         type,
+        label,
         scheduledFor,
+        timeZone,
     }
 
     try {

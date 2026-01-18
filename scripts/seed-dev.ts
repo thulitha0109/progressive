@@ -134,6 +134,8 @@ async function seedArtistsAndTracks() {
                     genreId: progressive?.id,
                     // genre: progressive?.name || "Unknown", // Deprecated field
                     scheduledFor: new Date(),
+                    timeZone: "Asia/Colombo",
+                    label: "Progressive Records",
                     type: ["Remix", "Bootleg", "Mashup"][Math.floor(Math.random() * 3)]
                 }
             })
@@ -162,8 +164,9 @@ async function seedPodcasts(artists: any[], genres: any[]) {
                 slug: generateSlug(p.title),
                 description: p.description,
                 audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3",
-                imageUrl: "https://images.unsplash.com/photo-1478737270239-2f02b77ac6d5?w=400&h=400&fit=crop",
+                imageUrl: "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=400&h=400&fit=crop",
                 scheduledFor: new Date(),
+                timeZone: "Asia/Colombo",
                 artistId: artist.id,
                 genreId: progressive?.id,
                 sequence: index + 1

@@ -2,7 +2,6 @@ version: '3.8'
 services:
   postgres:
     image: postgres:15-alpine
-    container_name: progressive-postgres
     restart: always
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
@@ -19,7 +18,7 @@ services:
       retries: 5
 
   app:
-    container_name: progressive-app
+    image: progressive-app
     build:
       context: .
       dockerfile: docker/Dockerfile.prod
@@ -47,7 +46,6 @@ services:
 
   minio:
     image: minio/minio:latest
-    container_name: progressive-minio
     command: server /data --console-address ":9001"
     ports:
       - "9000:9000"
@@ -66,6 +64,9 @@ services:
 
   init-storage:
     image: progressive-app
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.prod
     depends_on:
       minio:
         condition: service_healthy

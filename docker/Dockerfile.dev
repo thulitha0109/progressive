@@ -1,0 +1,54 @@
+
+FROM node:22-alpine AS base
+
+# Install dependencies
+FROM base AS deps
+RUN apk add --no-cache libc6-compat openssl
+WORKDIR /app
+
+COPY package.json yarn.lock* package-lock.json* pnpm-lock.yaml* ./
+COPY src/prisma ./src/prisma
+
+# Install ALL dependencies (including devDeps) for development
+RUN \
+    if [ -f yarn.lock ]; then yarn --frozen-lockfile; \
+    elif [ -f package-lock.json ]; then npm ci; \
+    elif [ -f pnpm-lock.yaml ]; then corepack enable pnpm && pnpm i --frozen-lockfile; \
+    else echo "Lockfile not found." && exit 1; \
+    fi
+
+# Rebuild the source code only when needed
+# (Skipped for dev, but we compile scripts for init-storage compat)
+FROM base AS builder
+WORKDIR /app
+COPY --from=deps /app/node_modules ./node_modules
+COPY . .
+# Compile scripts for init-storage
+RUN npx tsc scripts/seed-prod.ts scripts/seed-dev.ts scripts/init-storage.ts --outDir scripts/dist --module commonjs --esModuleInterop --skipLibCheck --target es2015
+
+# Builder for audiowaveform
+FROM realies/audiowaveform:latest AS audiowaveform-builder
+
+# Runner
+FROM base AS runner
+WORKDIR /app
+
+ENV NODE_ENV development
+
+RUN apk add --no-cache openssl ffmpeg
+
+# Copy audiowaveform
+COPY --from=audiowaveform-builder /usr/local/bin/audiowaveform /usr/local/bin/audiowaveform
+
+# Copy node_modules (with dev deps)
+COPY --from=deps /app/node_modules ./node_modules
+
+# Copy source code (will be overlaid by volume in dev, but good fallback)
+COPY . .
+
+# Copy compiled scripts from builder (for init-storage)
+COPY --from=builder /app/scripts/dist ./scripts/dist
+
+EXPOSE 3000
+
+CMD ["npm", "run", "dev"]

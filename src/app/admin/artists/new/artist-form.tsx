@@ -21,7 +21,7 @@ export default function NewArtistForm() {
 
     async function uploadImage(file: File): Promise<string> {
         try {
-            const { signedUrl, publicUrl } = await getPresignedUrl(file.name, file.type)
+            const { signedUrl, publicUrl } = await getPresignedUrl(file.name, file.type, "artists")
             const uploadResponse = await fetch(signedUrl, {
                 method: "PUT",
                 body: file,

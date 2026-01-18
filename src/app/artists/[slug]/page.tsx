@@ -20,7 +20,7 @@ export default async function ArtistPage({
     }
 
     return (
-        <div className="min-h-screen bg-background pb-24">
+        <div className="min-h-screen bg-background pb-24 overflow-x-hidden">
             {/* Hero / Header */}
             <div className="relative h-[300px] md:h-[350px] w-full overflow-hidden bg-muted">
                 {artist.imageUrl && (

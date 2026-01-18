@@ -148,6 +148,21 @@ export async function getPodcast(id: string) {
     })
 }
 
+export async function getPodcastBySlug(slug: string) {
+    return await prisma.podcast.findUnique({
+        where: { slug },
+        include: {
+            artist: true,
+            genre: true,
+            _count: { select: { likedBy: true } },
+        },
+    })
+}
+
+import { fromZonedTime } from "date-fns-tz"
+
+// ... imports
+
 export async function createPodcast(formData: FormData) {
 
     const title = formData.get("title") as string
@@ -164,7 +179,7 @@ export async function createPodcast(formData: FormData) {
     // In CreateForm (New), we used <Switch name="isFeatured">.
     const isFeaturedRaw = formData.get("isFeatured")
     const isFeatured = isFeaturedRaw === "true" || isFeaturedRaw === "on"
-
+    const timeZone = (formData.get("timeZone") as string) || "Asia/Colombo"
     const scheduledForStr = formData.get("scheduledFor") as string
 
     // Check for pre-uploaded URLs
@@ -220,7 +235,7 @@ export async function createPodcast(formData: FormData) {
             imageUrl = await saveUploadedFile(imageFile, UPLOAD_DIRS.PODCASTS, artist.slug)
         }
 
-        const scheduledFor = scheduledForStr ? new Date(scheduledForStr) : new Date()
+        const scheduledFor = scheduledForStr ? fromZonedTime(scheduledForStr, timeZone) : new Date()
 
         const podcast = await prisma.podcast.create({
             data: {
@@ -235,6 +250,7 @@ export async function createPodcast(formData: FormData) {
                 audioUrl,
                 imageUrl,
                 scheduledFor,
+                timeZone,
             },
         })
 
@@ -276,49 +292,55 @@ export async function createPodcast(formData: FormData) {
 }
 
 export async function updatePodcast(id: string, formData: FormData) {
-    const title = formData.get("title") as string
-    const description = formData.get("description") as string
-    const artistId = formData.get("artistId") as string
-    const genreId = formData.get("genreId") as string
-    const type = (formData.get("type") as string) || "Warm"
-    const sequence = parseInt(formData.get("sequence") as string || "0")
-    const isFeaturedRaw = formData.get("isFeatured")
-    const isFeatured = isFeaturedRaw === "true" || isFeaturedRaw === "on"
-    const scheduledForStr = formData.get("scheduledFor") as string
-    const audioFile = formData.get("audioFile") as File
-    const imageFile = formData.get("imageFile") as File
-
-    if (!title || !description || !artistId) {
-        throw new Error("Title, Description, and Artist are required")
-    }
-
-    const scheduledFor = scheduledForStr ? new Date(scheduledForStr) : undefined
-
-    const data: any = {
-        title,
-        description,
-        artistId,
-        genreId: genreId || null,
-        type,
-        sequence,
-        isFeatured,
-        ...(scheduledFor && { scheduledFor }),
-    }
-
     try {
+        const title = formData.get("title") as string
+        const description = formData.get("description") as string
+        const artistId = formData.get("artistId") as string
+        const genreId = formData.get("genreId") as string
+        const type = (formData.get("type") as string) || "Warm"
+        const sequence = parseInt(formData.get("sequence") as string || "0")
+        const isFeaturedRaw = formData.get("isFeatured")
+        const isFeatured = isFeaturedRaw === "true" || isFeaturedRaw === "on"
+        const timeZone = (formData.get("timeZone") as string) || "Asia/Colombo"
+        const scheduledForStr = formData.get("scheduledFor") as string
+        const audioFile = formData.get("audioFile") as File
+        const imageFile = formData.get("imageFile") as File
+
+        // Pre-existing audio/image URLs from form (if client-side upload was used)
+        const audioUrlFromForm = formData.get("audioUrl") as string
+        const imageUrlFromForm = formData.get("imageUrl") as string
+
+        if (!title || !description || !artistId) {
+            return { success: false, message: "Title, Description, and Artist are required" }
+        }
+
+        const scheduledFor = scheduledForStr ? fromZonedTime(scheduledForStr, timeZone) : undefined
+
+        const data: any = {
+            title,
+            description,
+            artistId,
+            genreId: genreId || null,
+            type,
+            sequence,
+            isFeatured,
+            timeZone,
+            ...(scheduledFor && { scheduledFor }),
+        }
+
         const artist = await prisma.artist.findUnique({
             where: { id: artistId },
             select: { slug: true }
         })
 
         if (!artist) {
-            throw new Error("Invalid artist selected")
+            return { success: false, message: "Invalid artist selected" }
         }
 
         // Get current podcast to check if title changed
         const currentPodcast = await prisma.podcast.findUnique({
             where: { id },
-            select: { title: true }
+            select: { title: true, audioUrl: true } // Also get audioUrl to pass to waveform generation if not updated
         })
 
         // Regenerate slug if title changed
@@ -331,18 +353,28 @@ export async function updatePodcast(id: string, formData: FormData) {
         if (audioFile && audioFile.size > 0) {
             const MAX_AUDIO_SIZE = 150 * 1024 * 1024
             if (audioFile.size > MAX_AUDIO_SIZE) {
-                throw new Error(`Audio file is too large. Maximum size is 150MB.`)
+                return { success: false, message: `Audio file is too large. Maximum size is 150MB.` }
             }
             data.audioUrl = await saveUploadedFile(audioFile, UPLOAD_DIRS.PODCASTS, artist.slug)
+        } else if (audioUrlFromForm) {
+            // If no new file, but a URL was passed (e.g., from client-side upload)
+            data.audioUrl = audioUrlFromForm
+        } else {
+            // If no new file and no URL from form, retain existing audioUrl
+            // This is important if the user didn't touch the audio file input
+            data.audioUrl = currentPodcast?.audioUrl || null;
         }
+
 
         // Handle Image Upload
         if (imageFile && imageFile.size > 0) {
             const MAX_IMAGE_SIZE = 10 * 1024 * 1024
             if (imageFile.size > MAX_IMAGE_SIZE) {
-                throw new Error(`Image file is too large. Maximum size is 10MB.`)
+                return { success: false, message: `Image file is too large. Maximum size is 10MB.` }
             }
             data.imageUrl = await saveUploadedFile(imageFile, UPLOAD_DIRS.PODCASTS, artist.slug)
+        } else if (imageUrlFromForm) {
+            data.imageUrl = imageUrlFromForm
         }
 
         await prisma.podcast.update({
@@ -376,13 +408,11 @@ export async function updatePodcast(id: string, formData: FormData) {
         }
 
         revalidatePath("/admin/podcasts")
+        return { success: true }
     } catch (error) {
         console.error("Failed to update podcast:", error)
-        throw new Error(`Failed to update podcast: ${error}`)
+        return { success: false, message: `Failed to update podcast: ${error instanceof Error ? error.message : "Unknown error"}` }
     }
-
-    // Redirect outside try-catch
-    redirect("/admin/podcasts")
 }
 
 export async function deletePodcast(id: string) {

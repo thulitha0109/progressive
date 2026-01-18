@@ -49,7 +49,7 @@ export const metadata: Metadata = {
   icons: {
     icon: '/favicon.ico',
     shortcut: '/favicon.ico',
-    apple: '/site-icon.jpg',
+    apple: '/PFavicon.png',
   },
 };
 

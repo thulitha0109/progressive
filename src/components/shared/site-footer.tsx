@@ -120,7 +120,7 @@ export function SiteFooter() {
                 <div className="mt-12 pt-8 border-t">
                     <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
                         <p className="text-sm text-muted-foreground">
-                            © {currentYear} Progressive.lk PVT LTD. All rights reserved.
+                            © {currentYear} Progressive.lk. All rights reserved.
                         </p>
                         <p className="text-sm text-muted-foreground">
                             Made with ❤️ for the music

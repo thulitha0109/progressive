@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { useRouter } from "next/navigation"
-import { Calculator, Calendar, CreditCard, Settings, Smile, User, Search, Loader2 } from "lucide-react"
+import { Calculator, Calendar, CreditCard, Settings, Smile, User, Search, Loader2, X } from "lucide-react"
 import { globalSearch, SearchResult } from "@/server/actions/search"
 import { usePlayer } from "@/components/shared/player-context"
 
@@ -54,12 +54,25 @@ export function InlineSearch() {
         }
     }
 
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === "Enter" && query.trim()) {
+            setOpen(false)
+            router.push(`/search?q=${encodeURIComponent(query)}`)
+        }
+    }
+
+    const handleClear = () => {
+        setQuery("")
+        setResults([])
+        setOpen(false)
+    }
+
     return (
         <div className="relative w-full max-w-sm">
             <div className="relative">
                 <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
                 <Input
-                    placeholder=""
+                    placeholder="Search..."
                     value={query}
                     onChange={(e) => {
                         setQuery(e.target.value)
@@ -68,10 +81,22 @@ export function InlineSearch() {
                     onFocus={() => {
                         if (query.length > 0) setOpen(true)
                     }}
-                    className="pl-8 bg-transparent border-0 border-b border-transparent focus:border-primary rounded-none focus-visible:ring-0 focus-visible:ring-offset-0 shadow-none h-9 w-[200px] lg:w-[300px] transition-all"
+                    onKeyDown={handleKeyDown}
+                    className="pl-8 pr-8 bg-transparent border-0 border-b border-transparent focus:border-primary rounded-none focus-visible:ring-0 focus-visible:ring-offset-0 shadow-none h-9 w-full transition-all placeholder:text-muted-foreground/50"
                 />
+
+                {query.length > 0 && (
+                    <button
+                        onClick={handleClear}
+                        className="absolute right-2 top-2.5 text-muted-foreground hover:text-foreground focus:outline-none"
+                    >
+                        <X className="h-4 w-4" />
+                        <span className="sr-only">Clear</span>
+                    </button>
+                )}
+
                 {isPending && (
-                    <div className="absolute right-2 top-2.5">
+                    <div className={`absolute top-2.5 ${query.length > 0 ? "right-8" : "right-2"}`}>
                         <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
                     </div>
                 )}

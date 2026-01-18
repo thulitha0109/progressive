@@ -163,7 +163,7 @@ export function NewReleaseCard({ track, hideLikeButton = false }: { track: Relea
 
                 {/* Track Title */}
                 <h3 className={cn(
-                    "font-bold text-lg sm:text-2xl md:text-3xl truncate leading-tight transition-colors tracking-tight pr-4 py-1",
+                    "font-bold text-base sm:text-2xl md:text-3xl truncate leading-tight transition-colors tracking-tight pr-4 py-1",
                     isCurrentTrack ? "text-primary" : "text-foreground group-hover:text-primary"
                 )}>
                     {track.title}
@@ -171,7 +171,7 @@ export function NewReleaseCard({ track, hideLikeButton = false }: { track: Relea
 
                 {/* Artist & Genres */}
                 <div className="flex flex-col gap-1.5">
-                    <p className="text-sm sm:text-base text-muted-foreground font-medium truncate flex items-center gap-2">
+                    <p className="text-xs sm:text-base text-muted-foreground font-medium truncate flex items-center gap-2">
                         {track.artist?.name || "Unknown Artist"}
                         {isCurrentTrack && isPlaying && (
                             <span className="flex h-2 w-2 relative">

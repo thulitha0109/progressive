@@ -275,6 +275,18 @@ export default function TrackForm({ artists, genres }: { artists: Artist[], genr
                         </div>
 
                         <div className="space-y-2">
+                            <Label htmlFor="label">Label (Optional)</Label>
+                            <Input
+                                id="label"
+                                name="label"
+                                placeholder="Record Label Name"
+                                disabled={isPending}
+                            />
+                        </div>
+
+                        <input type="hidden" name="timeZone" value={Intl.DateTimeFormat().resolvedOptions().timeZone} />
+
+                        <div className="space-y-2">
                             <Label htmlFor="audioFile">Audio File</Label>
                             <Input
                                 id="audioFile"

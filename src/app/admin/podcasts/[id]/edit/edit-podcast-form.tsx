@@ -17,6 +17,7 @@ import imageCompression from "browser-image-compression"
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { Loader2 } from "lucide-react"
+import { toast } from "sonner"
 
 interface Artist {
     id: string
@@ -64,7 +65,7 @@ export default function EditPodcastForm({ podcast, artists, genres }: EditPodcas
     async function uploadFile(file: File): Promise<string> {
         return new Promise(async (resolve, reject) => {
             try {
-                const { signedUrl, publicUrl } = await getPresignedUrl(file.name, file.type)
+                const { signedUrl, publicUrl } = await getPresignedUrl(file.name, file.type, "podcasts")
                 const xhr = new XMLHttpRequest()
                 xhr.open("PUT", signedUrl)
                 xhr.setRequestHeader("Content-Type", file.type)
@@ -97,6 +98,11 @@ export default function EditPodcastForm({ podcast, artists, genres }: EditPodcas
     async function onSubmit(formData: FormData) {
         setIsLoading(true)
         try {
+            // Ensure required fields are set from state
+            if (selectedArtist) {
+                formData.set("artistId", selectedArtist)
+            }
+
             // Handle checkbox boolean
             const isFeatured = (document.getElementById('isFeatured') as HTMLInputElement).checked
             formData.set("isFeatured", isFeatured ? "true" : "false")
@@ -129,17 +135,17 @@ export default function EditPodcastForm({ podcast, artists, genres }: EditPodcas
             }
 
             setUploadStatus("Saving changes...")
-            await updatePodcast(podcast.id, formData)
-            // Redirect is handled in server action, but refreshes help client state
-            // router.push("/admin/podcasts") 
-            router.refresh()
-        } catch (error) {
-            // Checks for Next.js redirect error (which is thrown as an error)
-            if (error instanceof Error && (error.message === "NEXT_REDIRECT" || error.message.includes("NEXT_REDIRECT"))) {
-                return
+            const result = await updatePodcast(podcast.id, formData)
+
+            if (result && result.success) {
+                toast.success("Podcast updated successfully")
+                router.refresh()
+            } else {
+                toast.error(result?.message || "Failed to update podcast")
             }
+        } catch (error) {
             console.error(error)
-            alert("Failed to update podcast")
+            toast.error("An unexpected error occurred")
         } finally {
             setIsLoading(false)
         }

@@ -173,7 +173,7 @@ export function NewReleasesCarousel({ tracks }: { tracks: Track[] }) {
                         slidesPerView={1.1} // Slightly show next slide to encourage swipe
                         spaceBetween={16}
                         centeredSlides={false}
-                        loop={false}
+                        loop={true}
                         className="w-full py-4"
                         onSlideChange={(swiper) => {
                             setCurrentIndex(swiper.realIndex)

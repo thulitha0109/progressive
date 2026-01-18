@@ -33,6 +33,8 @@ interface Track {
     genreId?: string | null
     imageUrl?: string | null
     audioUrl?: string | null
+    label?: string | null
+    timeZone?: string
 }
 
 interface Genre {
@@ -59,7 +61,7 @@ export default function EditTrackForm({ track, artists, genres }: { track: Track
     async function uploadFile(file: File): Promise<string> {
         return new Promise(async (resolve, reject) => {
             try {
-                const { signedUrl, publicUrl } = await getPresignedUrl(file.name, file.type)
+                const { signedUrl, publicUrl } = await getPresignedUrl(file.name, file.type, "tracks")
                 const xhr = new XMLHttpRequest()
                 xhr.open("PUT", signedUrl)
                 xhr.setRequestHeader("Content-Type", file.type)
@@ -264,7 +266,7 @@ export default function EditTrackForm({ track, artists, genres }: { track: Track
 
                             <div className="space-y-2">
                                 <Label htmlFor="type">Type</Label>
-                                <Select name="type" defaultValue={track.type || "Warm"} >
+                                <Select name="type" defaultValue={track.type || "Warm"}>
                                     <SelectTrigger id="type">
                                         <SelectValue placeholder="Select type" />
                                     </SelectTrigger>
@@ -276,10 +278,20 @@ export default function EditTrackForm({ track, artists, genres }: { track: Track
                                     </SelectContent>
                                 </Select>
                             </div>
+
+                            <div className="space-y-2">
+                                <Label htmlFor="label">Label (Optional)</Label>
+                                <Input
+                                    id="label"
+                                    name="label"
+                                    defaultValue={track.label || ""}
+                                    placeholder="Record Label Name"
+                                    disabled={isPending}
+                                />
+                            </div>
                         </div>
 
-
-
+                        <input type="hidden" name="timeZone" value={Intl.DateTimeFormat().resolvedOptions().timeZone} />
 
                         <div className="space-y-2">
                             <Label htmlFor="scheduledFor">Schedule Publication</Label>

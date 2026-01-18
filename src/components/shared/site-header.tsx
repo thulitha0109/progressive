@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { ModeToggle } from "@/components/shared/mode-toggle"
-import { Menu, Music2, User } from "lucide-react"
+import { Menu, Music2, User, Search } from "lucide-react"
 import {
     Sheet,
     SheetContent,
@@ -125,23 +125,11 @@ export function SiteHeader({ user: initialUser }: SiteHeaderProps) {
                         The InlineSearch component usually has an icon. Let's see if we can use it or a trigger.
                         I'll use a Button with Search icon for mobile if InlineSearch is hidden.
                     */}
-                    <Button variant="ghost" size="icon" className="md:hidden">
-                        <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="24"
-                            height="24"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            className="lucide lucide-search h-5 w-5"
-                        >
-                            <circle cx="11" cy="11" r="8" />
-                            <path d="m21 21-4.3-4.3" />
-                        </svg>
-                        <span className="sr-only">Search</span>
+                    <Button variant="ghost" size="icon" className="md:hidden" asChild>
+                        <Link href="/search">
+                            <Search className="h-5 w-5" />
+                            <span className="sr-only">Search</span>
+                        </Link>
                     </Button>
 
                     <nav className="flex items-center gap-2">

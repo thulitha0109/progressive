@@ -104,6 +104,8 @@ model Track {
   likedBy        User[]    @relation("UserLikes")
   isFeatured     Boolean   @default(false)
   type           String?  // "Remix", "Bootleg", "Mashup". Null = Original/Standard
+  label          String?  // Record Label
+  timeZone       String    @default("Asia/Colombo") // Publisher's timezone
   waveformPeaks  Json?     // Pre-computed waveform peak data for instant rendering
   deletedAt      DateTime?
   createdAt      DateTime  @default(now())
@@ -120,7 +122,8 @@ model Podcast {
   // host     String? // Removed
   duration    String?
   scheduledFor DateTime @default(now())
-
+  timeZone    String    @default("Asia/Colombo") // Publisher's timezone
+  
   artistId    String?
   artist      Artist?   @relation(fields: [artistId], references: [id])
   
