@@ -19,8 +19,10 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
         }
     }
 
+    const artistName = podcast.artist?.name || "Unknown Artist"
+
     return {
-        title: `${podcast.title} by ${podcast.artist.name}`,
+        title: `${podcast.title} by ${artistName}`,
         description: podcast.description || `Listen to ${podcast.title} on Progressive.lk`,
         openGraph: {
             images: podcast.imageUrl ? [podcast.imageUrl] : [],
