@@ -107,9 +107,11 @@ export default async function SearchPage({
                                                     id: track.id,
                                                     title: track.title,
                                                     audioUrl: track.audioUrl || "",
-                                                    imageUrl: track.image,
-                                                    artist: { id: "unknown", name: track.subtitle || "" },
-                                                    kind: "TRACK"
+                                                    artist: {
+                                                        id: "unknown",
+                                                        name: track.subtitle || "",
+                                                        imageUrl: track.image
+                                                    }
                                                 }}
                                                 variant="icon"
                                             />
