@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { Facebook, Twitter, Instagram, Youtube, Music2 } from "lucide-react"
+import { Facebook, Twitter, Instagram, Youtube, Music2, Heart } from "lucide-react"
 
 export function SiteFooter() {
     const currentYear = new Date().getFullYear()
@@ -122,8 +122,8 @@ export function SiteFooter() {
                         <p className="text-sm text-muted-foreground">
                             © {currentYear} Progressive.lk. All rights reserved.
                         </p>
-                        <p className="text-sm text-muted-foreground">
-                            Made with ♡ for the music
+                        <p className="text-sm text-muted-foreground flex items-center gap-1">
+                            Made with <Heart className="h-3 w-3 fill-white" /> for the music
                         </p>
                     </div>
                 </div>
