@@ -91,7 +91,7 @@ export function NewPodcastCard({ podcast, hideLikeButton = false }: { podcast: P
             <div className="absolute inset-0 bg-gradient-to-r from-primary/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
 
             {/* Image Section */}
-            <div className="relative w-28 sm:w-40 self-stretch shrink-0 overflow-hidden rounded-md shadow-lg isolate ring-1 ring-white/10 ring-inset">
+            <div className="relative h-full w-auto aspect-square shrink-0 overflow-hidden rounded-md shadow-lg isolate ring-1 ring-white/10 ring-inset">
                 <div className="absolute inset-0 bg-gradient-to-br from-black/20 to-transparent z-10 pointer-events-none" />
                 {podcast.imageUrl || podcast.artist?.imageUrl ? (
                     <Image
@@ -99,7 +99,7 @@ export function NewPodcastCard({ podcast, hideLikeButton = false }: { podcast: P
                         alt={podcast.title}
                         fill
                         className="object-cover object-top transition-transform duration-700 ease-out group-hover:scale-110"
-                        sizes="(max-width: 640px) 112px, 160px"
+                        sizes="(max-height: 160px) 160px, 112px"
                     />
                 ) : (
                     <div className="h-full w-full bg-secondary flex items-center justify-center">
@@ -131,7 +131,7 @@ export function NewPodcastCard({ podcast, hideLikeButton = false }: { podcast: P
             {/* Info Section - Right */}
             <div className="flex flex-col justify-between h-full min-w-0 z-10 relative py-3 pr-3 sm:py-4 sm:pr-4">
                 {/* Top Row: Date (Left) and Like (Right) */}
-                <div className="flex justify-between items-start w-full pb-1">
+                <div className="flex justify-between items-center w-full pb-1">
                     <div className="flex items-center gap-2">
                         {podcast.type && (
                             <div className={cn(
@@ -198,7 +198,7 @@ export function NewPodcastCard({ podcast, hideLikeButton = false }: { podcast: P
                         <div className="flex flex-wrap gap-1.5">
                             {parentGenreName && (
                                 <span className={cn(
-                                    "inline-block px-2 py-0.5 bg-background/50 dark:bg-black/40 backdrop-blur-md rounded-md text-[10px] sm:text-xs font-bold uppercase tracking-wider border text-muted-foreground hover:text-foreground transition-colors",
+                                    "inline-block px-2 py-0.5 bg-secondary/50 backdrop-blur-md rounded-md text-[10px] sm:text-xs font-bold uppercase tracking-wider border text-muted-foreground hover:text-foreground transition-colors",
                                     getGenreBorderColor(parentGenreName)
                                 )}>
                                     {parentGenreName}
@@ -206,7 +206,7 @@ export function NewPodcastCard({ podcast, hideLikeButton = false }: { podcast: P
                             )}
                             {genreName && (
                                 <span className={cn(
-                                    "inline-block px-2 py-0.5 bg-background/50 dark:bg-black/40 backdrop-blur-md rounded-md text-[10px] sm:text-xs font-bold uppercase tracking-wider border text-muted-foreground hover:text-foreground transition-colors",
+                                    "inline-block px-2 py-0.5 bg-secondary/50 backdrop-blur-md rounded-md text-[10px] sm:text-xs font-bold uppercase tracking-wider border text-muted-foreground hover:text-foreground transition-colors",
                                     getGenreBorderColor(genreName)
                                 )}>
                                     {genreName}

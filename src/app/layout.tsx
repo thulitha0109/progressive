@@ -51,6 +51,7 @@ export const metadata: Metadata = {
     shortcut: '/favicon.ico',
     apple: '/PFavicon.png',
   },
+  manifest: '/manifest.json',
 };
 
 
