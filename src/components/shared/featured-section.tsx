@@ -4,6 +4,7 @@ import Image from "next/image"
 
 import { PlayButton } from "@/components/shared/play-button"
 import { LikeButton } from "@/components/shared/like-button"
+import { FollowButton } from "@/components/artist/follow-button"
 import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Calendar } from "lucide-react"
@@ -139,9 +140,18 @@ export function FeaturedSection({ item }: { item: FeaturedItem }) {
                                     )}
                                 </div>
 
-                                <h3 className="text-2xl md:text-3xl font-light text-foreground/80 tracking-wide">
-                                    {artistName}
-                                </h3>
+                                <div className="flex items-center gap-3">
+                                    <h3 className="text-2xl md:text-3xl font-light text-foreground/80 tracking-wide">
+                                        {artistName}
+                                    </h3>
+                                    {item.artist && (
+                                        <FollowButton
+                                            artistId={item.artist.id}
+                                            showText={false}
+                                            className="text-white bg-white/10 hover:bg-white/20 hover:text-white cursor-pointer"
+                                        />
+                                    )}
+                                </div>
                             </div>
 
                             {/* Track Info (NOW ON BOTTOM) */}

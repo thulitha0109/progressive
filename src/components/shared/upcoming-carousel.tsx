@@ -80,26 +80,32 @@ export function UpcomingCarousel({ tracks }: { tracks: Item[] }) {
                                     </div>
                                 )}
 
-                                {/* Top Left Badges: Type Only (Sequence Removed) */}
-                                <div className="absolute top-2 left-2 z-20 flex flex-row items-center gap-2">
-                                    {/* Type Badge */}
-                                    {item.type && (
-                                        <div
-                                            className={cn(
-                                                "flex items-center gap-1 text-[10px] sm:text-xs font-bold uppercase tracking-wider px-2 py-0.5 rounded-md border text-black shadow-sm",
-                                                !["Warm", "Drive", "Peak"].includes(item.type) && "bg-primary border-primary"
-                                            )}
-                                            style={{
-                                                backgroundColor: item.type === "Warm" ? "#F9D829" :
-                                                    item.type === "Drive" ? "#F9A01C" :
-                                                        item.type === "Peak" ? "#E7250C" : undefined,
-                                                borderColor: item.type === "Warm" ? "#F9D829" :
-                                                    item.type === "Drive" ? "#F9A01C" :
-                                                        item.type === "Peak" ? "#E7250C" : undefined,
-                                                color: item.type === "Warm" ? "#000" : undefined
-                                            }}
-                                        >
-                                            <span>{item.type}</span>
+                                {/* Top Left Badge: Rotating Type/Kind Pill */}
+                                <div className="absolute top-2 left-2 z-20 perspective-[1000px]">
+                                    {(item.type || item.kind) && (
+                                        <div className="grid transition-all duration-500 [transform-style:preserve-3d] group-hover:[transform:rotateX(180deg)]">
+
+                                            {/* Front Face: Type (Default) */}
+                                            <div className={cn(
+                                                "col-start-1 row-start-1 flex items-center justify-center gap-1 text-[9px] sm:text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-md border text-background shadow-sm [backface-visibility:hidden]",
+                                                item.type === "Warm" && "bg-yellow-500 border-yellow-400",
+                                                item.type === "Drive" && "bg-orange-500 border-orange-400",
+                                                item.type === "Peak" && "bg-red-500 border-red-400",
+                                                // Fallback for others (Original, Remix, etc.)
+                                                !["Warm", "Drive", "Peak"].includes(item.type || "") && "bg-primary border-primary text-primary-foreground"
+                                            )}>
+                                                <span>{item.type || item.kind}</span>
+                                            </div>
+
+                                            {/* Back Face: Kind (Hover) */}
+                                            <div className={cn(
+                                                "col-start-1 row-start-1 flex items-center justify-center gap-1 text-[9px] sm:text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-md border shadow-sm [backface-visibility:hidden] [transform:rotateX(180deg)]",
+                                                (item.kind === "TRACK" || !item.kind)
+                                                    ? "bg-primary border-primary text-primary-foreground"
+                                                    : "bg-purple-600 border-purple-600 text-white"
+                                            )}>
+                                                <span>{item.kind || item.type}</span>
+                                            </div>
                                         </div>
                                     )}
                                 </div>

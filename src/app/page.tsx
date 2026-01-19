@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { PlayButton } from "@/components/shared/play-button"
 import { LikeButton } from "@/components/shared/like-button"
-import { Calendar, User } from "lucide-react"
+import { Calendar, User, UserPlus } from "lucide-react"
 import { FeaturedSection } from "@/components/shared/featured-section"
 import { NewReleaseCard } from "@/components/shared/new-release-card"
 import { ArtistCarousel } from "@/components/shared/artist-carousel"
@@ -51,8 +51,8 @@ export default async function HomePage({
         <section>
           <div className="flex items-center justify-between mb-8">
             <h2 className="text-2xl font-bold tracking-tight">Upcoming Releases</h2>
-            <Link href="/tracks/upcoming" className="text-sm text-primary hover:underline">
-              View All
+            <Link href="/tracks/upcoming" className="text-xl text-primary hover:scale-110 transition-transform px-2">
+              ►
             </Link>
           </div>
           <div className="block">
@@ -67,8 +67,8 @@ export default async function HomePage({
         <section>
           <div className="flex items-center justify-between mb-8">
             <h2 className="text-2xl font-bold tracking-tight">New Releases</h2>
-            <Link href="/tracks" className="text-sm text-primary hover:underline">
-              View All
+            <Link href="/tracks" className="text-xl text-primary hover:scale-110 transition-transform px-2">
+              ►
             </Link>
           </div>
 
@@ -83,8 +83,8 @@ export default async function HomePage({
         <section>
           <div className="flex items-center justify-between mb-8">
             <h2 className="text-2xl font-bold tracking-tight">New Podcasts</h2>
-            <Link href="/podcasts" className="text-sm text-primary hover:underline">
-              View All
+            <Link href="/podcasts" className="text-xl text-primary hover:scale-110 transition-transform px-2">
+              ►
             </Link>
           </div>
 
@@ -101,8 +101,8 @@ export default async function HomePage({
             <h2 className="text-2xl font-bold tracking-tight">Popular Artists</h2>
             <div className="flex items-center gap-4 w-full md:w-auto justify-between md:justify-start">
               <ArtistSort />
-              <Link href="/artists" className="text-sm text-primary hover:underline whitespace-nowrap">
-                View All
+              <Link href="/artists" className="text-xl text-primary hover:scale-110 transition-transform px-2 whitespace-nowrap">
+                ►
               </Link>
             </div>
           </div>
@@ -122,6 +122,11 @@ export default async function HomePage({
                     ) : (
                       <User className="h-12 w-12 text-muted-foreground" />
                     )}
+
+                    {/* Hover Overlay: Follow Icon */}
+                    <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-full">
+                      <UserPlus className="h-8 w-8 text-white drop-shadow-md" />
+                    </div>
                   </div>
                   <div className="text-center">
                     <h3 className="font-medium truncate max-w-[120px]">{artist.name}</h3>
@@ -142,8 +147,8 @@ export default async function HomePage({
           <section>
             <div className="flex items-center justify-between mb-8">
               <h2 className="text-2xl font-bold tracking-tight">Latest from the Blog</h2>
-              <Link href="/blog" className="text-sm text-primary hover:underline">
-                View All
+              <Link href="/blog" className="text-xl text-primary hover:scale-110 transition-transform px-2">
+                ►
               </Link>
             </div>
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">

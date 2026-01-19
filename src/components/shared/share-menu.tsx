@@ -18,20 +18,28 @@ interface ShareMenuProps {
 }
 
 export function ShareMenu({ url, title, text, children }: ShareMenuProps) {
-    const handleCopyLink = () => {
+    const handleCopyLink = (e: React.MouseEvent) => {
+        e.preventDefault()
+        e.stopPropagation()
         navigator.clipboard.writeText(url)
         toast.success("Link copied to clipboard")
     }
 
-    const handleShareTwitter = () => {
+    const handleShareTwitter = (e: React.MouseEvent) => {
+        e.preventDefault()
+        e.stopPropagation()
         window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`, '_blank')
     }
 
-    const handleShareFacebook = () => {
+    const handleShareFacebook = (e: React.MouseEvent) => {
+        e.preventDefault()
+        e.stopPropagation()
         window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`, '_blank')
     }
 
-    const handleShareWhatsApp = () => {
+    const handleShareWhatsApp = (e: React.MouseEvent) => {
+        e.preventDefault()
+        e.stopPropagation()
         window.open(`https://wa.me/?text=${encodeURIComponent(text + ' ' + url)}`, '_blank')
     }
 
@@ -47,22 +55,22 @@ export function ShareMenu({ url, title, text, children }: ShareMenuProps) {
                     </button>
                 )}
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-[200px]">
-                <DropdownMenuItem onClick={handleCopyLink} className="cursor-pointer">
-                    <Link2 className="mr-2 h-4 w-4" />
-                    <span>Copy Link</span>
+            <DropdownMenuContent
+                align="end"
+                side="left"
+                className="w-auto min-w-0 flex flex-row items-center gap-1 p-1 animate-in zoom-in-90 slide-in-from-right-5 duration-300"
+            >
+                <DropdownMenuItem onClick={handleCopyLink} className="cursor-pointer p-2 rounded-full focus:bg-accent" title="Copy Link">
+                    <Link2 className="h-4 w-4" />
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={handleShareTwitter} className="cursor-pointer">
-                    <Twitter className="mr-2 h-4 w-4" />
-                    <span>Twitter</span>
+                <DropdownMenuItem onClick={handleShareTwitter} className="cursor-pointer p-2 rounded-full focus:bg-accent" title="Share on Twitter">
+                    <Twitter className="h-4 w-4" />
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={handleShareFacebook} className="cursor-pointer">
-                    <Facebook className="mr-2 h-4 w-4" />
-                    <span>Facebook</span>
+                <DropdownMenuItem onClick={handleShareFacebook} className="cursor-pointer p-2 rounded-full focus:bg-accent" title="Share on Facebook">
+                    <Facebook className="h-4 w-4" />
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={handleShareWhatsApp} className="cursor-pointer">
-                    <MessageCircle className="mr-2 h-4 w-4" />
-                    <span>WhatsApp</span>
+                <DropdownMenuItem onClick={handleShareWhatsApp} className="cursor-pointer p-2 rounded-full focus:bg-accent" title="Share on WhatsApp">
+                    <MessageCircle className="h-4 w-4" />
                 </DropdownMenuItem>
             </DropdownMenuContent>
         </DropdownMenu>
