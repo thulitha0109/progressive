@@ -44,7 +44,7 @@ export function SiteFooter() {
                                 </Link>
                             </li>
                             <li>
-                                <Link href="/tracks/podcasts" className="text-muted-foreground hover:text-primary transition-colors">
+                                <Link href="/podcasts" className="text-muted-foreground hover:text-primary transition-colors">
                                     Podcasts
                                 </Link>
                             </li>
