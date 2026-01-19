@@ -123,7 +123,7 @@ export function SiteFooter() {
                             © {currentYear} Progressive.lk. All rights reserved.
                         </p>
                         <p className="text-sm text-muted-foreground">
-                            Made with ❤️ for the music
+                            Made with ♡ for the music
                         </p>
                     </div>
                 </div>
