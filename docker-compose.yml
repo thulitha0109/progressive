@@ -62,21 +62,24 @@ services:
       timeout: 20s
       retries: 3
 
-  init-storage:
+  init-job:
     image: progressive-app
     build:
       context: .
       dockerfile: docker/Dockerfile.prod
     depends_on:
+      postgres:
+        condition: service_healthy
       minio:
         condition: service_healthy
     environment:
+      - DATABASE_URL=${DATABASE_URL:-postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-password}@postgres:5432/${POSTGRES_DB:-progressive}}
       - S3_ENDPOINT=http://minio:9000
       - S3_ACCESS_KEY=${S3_ACCESS_KEY:-minioadmin}
       - S3_SECRET_KEY=${S3_SECRET_KEY:-minioadminpassword}
       - S3_BUCKET_NAME=${S3_BUCKET_NAME:-progressive-uploads}
     command: >
-      sh -c "node scripts/dist/init-storage.js"
+      sh -c "npx prisma migrate deploy --schema=./src/prisma/schema.prisma && node scripts/dist/seed-prod.js && node scripts/dist/init-storage.js"
 
 volumes:
   postgres_data:

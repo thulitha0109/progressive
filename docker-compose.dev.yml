@@ -7,13 +7,13 @@ services:
   app:
     image: progressive-app-dev
     ports:
-      - "3004:3000"
+      - "3003:3000"
     build:
       context: .
       dockerfile: docker/Dockerfile.dev
     environment:
       # Update AUTH_URL for dev environment
-      AUTH_URL: http://localhost:3004
+      AUTH_URL: http://localhost:3003
       # Override DATABASE_URL to ensure it uses the container service name, not localhost from .env
       DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-password}@postgres:5432/${POSTGRES_DB:-progressive}
       # Set NODE_ENV to development for hot reloading
@@ -24,11 +24,25 @@ services:
       - /app/node_modules
       - /app/.next
 
-  init-storage:
+  init-job:
     image: progressive-app-dev
     build:
       context: .
       dockerfile: docker/Dockerfile.dev
+    depends_on:
+      postgres:
+        condition: service_started
+      minio:
+        condition: service_started
+    environment:
+      # Use same DB URL as app
+      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-password}@postgres:5432/${POSTGRES_DB:-progressive}
+      S3_ENDPOINT: http://minio:9000
+      S3_ACCESS_KEY: ${S3_ACCESS_KEY:-minioadmin}
+      S3_SECRET_KEY: ${S3_SECRET_KEY:-minioadminpassword}
+      S3_BUCKET_NAME: ${S3_BUCKET_NAME:-progressive-uploads}
+    command: >
+      sh -c "npx prisma migrate deploy --schema=./src/prisma/schema.prisma && tsx scripts/seed-dev.ts && tsx scripts/init-storage.ts"
 
   minio:
     ports:
