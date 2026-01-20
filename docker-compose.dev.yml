@@ -25,10 +25,11 @@ services:
       # Set NODE_ENV to development for hot reloading
       NODE_ENV: development
     command: npm run dev
-    volumes:
-      - .:/app
-      - /app/node_modules
-      - /app/.next
+    # Volumes removed for Portainer/Staging deployment
+    # volumes:
+    #   - .:/app
+    #   - /app/node_modules
+    #   - /app/.next
 
   init-job:
     image: progressive-app-dev
