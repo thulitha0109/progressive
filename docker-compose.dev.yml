@@ -45,6 +45,8 @@ services:
       sh -c "npx prisma migrate deploy --schema=./src/prisma/schema.prisma && tsx scripts/seed-dev.ts && tsx scripts/init-storage.ts"
 
   minio:
+    image: minio/minio:latest
+    command: server /data --console-address ":9001"
     ports:
       - "9002:9000"
       - "9003:9001"
