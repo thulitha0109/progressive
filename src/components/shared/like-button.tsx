@@ -13,12 +13,14 @@ export function LikeButton({
     type = "TRACK",
     initialLikes,
     initialIsLiked,
+    onToggle,
 }: {
     trackId?: string
     itemId?: string
     type?: "TRACK" | "PODCAST"
     initialLikes: number
     initialIsLiked: boolean
+    onToggle?: (isLiked: boolean, likesCount: number) => void
 }) {
     const router = useRouter()
     const [error, setError] = useState("")
@@ -38,9 +40,11 @@ export function LikeButton({
 
         setError("")
         const newState = !optimisticState.isLiked
+        const newLikes = optimisticState.likes + (newState ? 1 : -1)
 
         startTransition(() => {
             addOptimistic(newState)
+            onToggle?.(newState, newLikes)
         })
 
         try {
@@ -52,6 +56,7 @@ export function LikeButton({
                 // Revert optimistic update on error
                 startTransition(() => {
                     addOptimistic(!newState)
+                    onToggle?.(!newState, optimisticState.likes)
                 })
 
                 // If unauthorized, redirect to login
@@ -65,6 +70,7 @@ export function LikeButton({
             // Revert optimistic update on error
             startTransition(() => {
                 addOptimistic(!newState)
+                onToggle?.(!newState, optimisticState.likes)
             })
 
             // Check if it's an authentication error

@@ -54,3 +54,18 @@ export async function toggleFollowArtist(artistId: string) {
 
     return { isFollowing }
 }
+
+export async function getArtistFollowStatus(artistId: string) {
+    const session = await auth()
+    if (!session?.user?.id) return { isFollowing: false }
+
+    const existingFollow = await prisma.user.findFirst({
+        where: {
+            id: session.user.id,
+            followedArtists: { some: { id: artistId } }
+        },
+        select: { id: true }
+    })
+
+    return { isFollowing: !!existingFollow }
+}

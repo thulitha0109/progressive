@@ -3,6 +3,7 @@
 import { usePlayer } from "@/components/shared/player-context"
 import { Button } from "@/components/ui/button"
 import { Play, Pause, Clock } from "lucide-react"
+import { cn } from "@/lib/utils"
 
 interface Track {
     id: string
@@ -16,7 +17,17 @@ interface Track {
     scheduledFor?: Date | string
 }
 
-export function PlayButton({ track, variant = "default", ignoreReleaseDate = false }: { track: Track, variant?: "default" | "ghost" | "icon", ignoreReleaseDate?: boolean }) {
+export function PlayButton({
+    track,
+    variant = "default",
+    ignoreReleaseDate = false,
+    className
+}: {
+    track: Track,
+    variant?: "default" | "ghost" | "icon" | "glass",
+    ignoreReleaseDate?: boolean,
+    className?: string
+}) {
     const { currentTrack, isPlaying, playTrack, togglePlay } = usePlayer()
 
     const isCurrentTrack = currentTrack?.id === track.id
@@ -56,11 +67,32 @@ export function PlayButton({ track, variant = "default", ignoreReleaseDate = fal
         )
     }
 
+    if (variant === "glass") {
+        return (
+            <button
+                onClick={handleClick}
+                disabled={!isReleased && !ignoreReleaseDate}
+                className={cn(
+                    "rounded-full bg-black/30 backdrop-blur-xl border border-white/20 hover:scale-110 transition-transform hover:bg-black/50 group flex items-center justify-center text-white shadow-lg",
+                    "h-12 w-12",
+                    !isReleased && !ignoreReleaseDate && "opacity-50 cursor-not-allowed hover:scale-100 hover:bg-black/30",
+                    className
+                )}
+            >
+                {isCurrentTrack && isPlaying ? (
+                    <Pause className="h-5 w-5 fill-white" />
+                ) : (
+                    <Play className="h-5 w-5 fill-white ml-0.5" />
+                )}
+            </button>
+        )
+    }
+
     if (variant === "icon") {
         return (
             <Button
                 size="icon"
-                className="rounded-full h-10 w-10"
+                className={cn("rounded-full h-10 w-10", className)}
                 onClick={handleClick}
             >
                 {isCurrentTrack && isPlaying ? (

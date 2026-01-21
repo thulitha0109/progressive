@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button"
 import { PlayButton } from "@/components/shared/play-button"
 import { LikeButton } from "@/components/shared/like-button"
 import { FollowButton } from "@/components/artist/follow-button"
-import { Calendar, Play, User } from "lucide-react"
+import { Calendar, Play, User, AudioLines } from "lucide-react"
 import Link from "next/link"
 import { notFound } from "next/navigation"
 
@@ -35,7 +35,7 @@ export default async function ArtistPage({
                 )}
             </div>
 
-            <div className="px-4 md:px-8 relative z-10 -mt-32 md:-mt-40 mb-10">
+            <div className="px-4 md:px-6 relative z-10 -mt-32 md:-mt-40 mb-10">
                 <div className="flex flex-col md:flex-row md:items-end gap-6 md:gap-8">
                     <div className="h-40 w-40 md:h-52 md:w-52 overflow-hidden rounded-full border-4 border-background bg-muted flex items-center justify-center shadow-2xl shrink-0">
                         {artist.imageUrl ? (
@@ -51,8 +51,17 @@ export default async function ArtistPage({
                     <div className="flex-1 mb-2 md:mb-6 space-y-4">
                         <div>
                             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight break-words">{artist.name}</h1>
-                            <div className="flex flex-wrap items-center gap-3 mt-4">
-                                <p className="text-muted-foreground text-lg">Artist</p>
+                            <div className="flex flex-wrap items-center gap-6 mt-4">
+                                <div className="flex items-center gap-4 text-muted-foreground">
+                                    <div className="flex items-center gap-2" title="Followers">
+                                        <User className="h-4 w-4" />
+                                        <span className="text-sm font-bold">{(artist as any)._count?.followers || 0}</span>
+                                    </div>
+                                    <div className="flex items-center gap-2" title="Total Tracks">
+                                        <AudioLines className="h-4 w-4" />
+                                        <span className="text-sm font-bold">{((artist as any)._count?.tracks || 0) + ((artist as any)._count?.podcasts || 0)}</span>
+                                    </div>
+                                </div>
                                 <FollowButton artistId={artist.id} initialIsFollowing={artist.isFollowing} />
                             </div>
                         </div>
@@ -107,7 +116,7 @@ export default async function ArtistPage({
                 </div>
             </div>
 
-            <div className="px-4 md:px-8 py-8 grid gap-12 lg:grid-cols-[2fr_1fr]">
+            <div className="px-4 md:px-6 py-8 grid gap-12 lg:grid-cols-[2fr_1fr]">
                 {/* Tracks */}
                 <div className="space-y-12">
                     {/* Upcoming Tracks */}

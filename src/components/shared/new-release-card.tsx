@@ -1,11 +1,13 @@
 "use client"
 
+import { useState, useEffect } from "react"
 import Image from "next/image"
 
 import { usePlayer } from "@/components/shared/player-context"
 import { LikeButton } from "@/components/shared/like-button"
 import { PlayButton } from "@/components/shared/play-button"
-import { User } from "lucide-react"
+import { ShareMenu } from "@/components/shared/share-menu"
+import { User, Share2 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { WaveformBar } from "@/components/shared/waveform-bar"
 
@@ -27,7 +29,8 @@ export interface ReleaseItem {
     } | null
     likesCount: number
     isLiked: boolean
-    kind?: "TRACK" // Restricted to TRACK
+    kind?: "TRACK" | "PODCAST"
+    sequence?: number | null
     artist: {
         id: string
         name: string
@@ -59,6 +62,17 @@ function getGenreBorderColor(genre: string) {
 
 export function NewReleaseCard({ track, hideLikeButton = false }: { track: ReleaseItem, hideLikeButton?: boolean }) {
     const { playTrack, currentTrack, isPlaying, togglePlay } = usePlayer()
+    const [likesState, setLikesState] = useState({
+        likesCount: track.likesCount,
+        isLiked: track.isLiked
+    })
+
+    useEffect(() => {
+        setLikesState({
+            likesCount: track.likesCount,
+            isLiked: track.isLiked
+        })
+    }, [track.likesCount, track.isLiked])
 
     if (!track) return null
 
@@ -72,7 +86,7 @@ export function NewReleaseCard({ track, hideLikeButton = false }: { track: Relea
         if (isCurrentTrack) {
             togglePlay()
         } else {
-            playTrack(track)
+            playTrack({ ...track, ...likesState })
         }
     }
 
@@ -84,12 +98,13 @@ export function NewReleaseCard({ track, hideLikeButton = false }: { track: Relea
         <div
             onClick={handleCardClick}
             className={cn(
-                "group relative flex flex-row gap-2 sm:gap-6 rounded-md border border-white/5 bg-white/[0.01] hover:bg-white/[0.05] backdrop-blur-sm transition-colors duration-500 cursor-pointer overflow-hidden hover:shadow-2xl h-28 sm:h-40",
-                isCurrentTrack && isPlaying ? "bg-white/[0.08] border-primary/30" : ""
+                "group/card relative flex flex-row gap-2 sm:gap-6 rounded-md border border-white/5 bg-[#121212] hover:bg-[#1a1a1a] transition-colors duration-500 cursor-pointer overflow-hidden hover:shadow-2xl h-28 sm:h-40",
+                isCurrentTrack && isPlaying ? "bg-[#1a1a1a] border-primary/30" : ""
             )}
         >
-            {/* Absolute Glow Background */}
-            <div className="absolute inset-0 bg-gradient-to-r from-primary/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+            {/* Absolute Glow Background / Shade */}
+            <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent pointer-events-none" />
+            <div className="absolute inset-0 bg-gradient-to-r from-primary/10 via-transparent to-transparent opacity-0 group-hover/card:opacity-100 transition-opacity duration-500 pointer-events-none" />
 
             {/* Image Section */}
             <div className="relative w-28 sm:w-40 h-full shrink-0 overflow-hidden rounded-l-md rounded-r-none shadow-lg isolate ring-1 ring-white/10 ring-inset">
@@ -99,7 +114,7 @@ export function NewReleaseCard({ track, hideLikeButton = false }: { track: Relea
                         src={track.imageUrl || track.artist?.imageUrl || ""}
                         alt={track.title}
                         fill
-                        className="object-cover object-top transition-transform duration-700 ease-out group-hover:scale-110"
+                        className="object-cover object-top transition-transform duration-700 ease-out group-hover/card:scale-110"
                         sizes="(max-width: 640px) 112px, 160px"
                     />
                 ) : (
@@ -111,15 +126,15 @@ export function NewReleaseCard({ track, hideLikeButton = false }: { track: Relea
                 {/* Overlay Play Button */}
                 {!isUpcoming && (
                     <div className={cn(
-                        "absolute inset-0 flex items-center justify-center bg-black/40 z-20 transition-all duration-300 backdrop-blur-[2px]",
-                        isCurrentTrack && isPlaying ? "opacity-100 bg-black/60" : "opacity-0 group-hover:opacity-100"
+                        "absolute inset-0 flex items-center justify-center z-20 transition-all duration-300",
+                        isCurrentTrack && isPlaying ? "opacity-100 bg-black/40" : "opacity-0 group-hover/card:opacity-100 bg-black/20"
                     )}>
-                        <PlayButton track={track} variant="icon" />
+                        <PlayButton track={track} variant="glass" className="h-10 w-10 sm:h-12 sm:w-12" />
                     </div>
                 )}
                 {isUpcoming && (
                     <div className={cn(
-                        "absolute inset-0 flex items-center justify-center bg-black/40 z-20 transition-all duration-300 backdrop-blur-[2px] opacity-0 group-hover:opacity-100",
+                        "absolute inset-0 flex items-center justify-center bg-black/40 z-20 transition-all duration-300 backdrop-blur-[2px] opacity-0 group-hover/card:opacity-100",
                     )}>
                         <span className="text-[10px] font-bold uppercase tracking-wider text-white border border-white/50 px-2 py-1 rounded-md">
                             Coming Soon
@@ -149,12 +164,25 @@ export function NewReleaseCard({ track, hideLikeButton = false }: { track: Relea
 
                     {!hideLikeButton && (
                         <div className="flex items-center gap-2 ml-auto">
+                            <ShareMenu
+                                url={`${process.env.NEXT_PUBLIC_APP_URL || "https://progressive.lk"}/tracks/${track.slug || track.id}`}
+                                title={track.title}
+                                text={`Check out ${track.title} by ${track.artist?.name || "Unknown Artist"} on Progressive.lk`}
+                            >
+                                <div
+                                    onClick={(e) => e.stopPropagation()}
+                                    className="swiper-no-swiping transform transition-transform active:scale-95 text-muted-foreground hover:text-primary cursor-pointer p-1"
+                                >
+                                    <Share2 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                                </div>
+                            </ShareMenu>
                             <div onClick={(e) => e.stopPropagation()} className="transform transition-transform active:scale-95 text-muted-foreground hover:text-red-500">
                                 <LikeButton
                                     trackId={track.id}
                                     initialLikes={track.likesCount}
                                     initialIsLiked={track.isLiked}
                                     type="TRACK"
+                                    onToggle={(isLiked, likesCount) => setLikesState({ isLiked, likesCount })}
                                 />
                             </div>
                         </div>
@@ -165,7 +193,7 @@ export function NewReleaseCard({ track, hideLikeButton = false }: { track: Relea
                 <div className="flex-1 flex flex-col justify-center min-h-0 gap-0.5">
                     <h3 className={cn(
                         "font-bold text-sm sm:text-xl truncate leading-tight transition-colors tracking-tight pr-4 w-full",
-                        isCurrentTrack ? "text-primary" : "text-foreground group-hover:text-primary"
+                        isCurrentTrack ? "text-primary" : "text-foreground group-hover/card:text-primary"
                     )}>
                         {track.title}
                     </h3>

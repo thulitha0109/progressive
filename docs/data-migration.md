@@ -1,84 +1,81 @@
 # How to Clone Production to Development (Full Guide)
 
-## ⚠️ Troubleshooting: "Authentication Failed"
+## Overview
+This guide explains how to migrate data from the **Production Server** to the **Development/Staging Environment** running in Portainer.
 
-If you see: `Authentication failed against database server at 'postgres'`
-
-**The Cause:**
-You have an **Old Database Volume** on your Dev server that was created with a different password (possibly by the old "Limited Control" stack).
-Docker **does not** update the database password just because you changed the `docker-compose.yml`. The password is set *only* when the volume is first created.
-
-**The Fix: Reset the Dev Database**
-Since you are migrating data from Prod anyway, you should **Delete the Broken Dev Database** so it can be re-created fresh.
-
-1.  **Stop the Dev Stack**:
-    *   Portainer: Stop the `progressive-dev` stack.
-2.  **Delete the Volume**:
-    *   Go to **Portainer** > **Volumes**.
-    *   Find the volume named `progressive_postgres_data` (or similar).
-    *   Select it and clicking **Remove**.
-    *   *Note: Ensure you are removing the **DEV** volume, not Prod!*
-3.  **Restart the Stack**:
-    *   Start `progressive-dev`.
-    *   Docker will see the missing volume and create a **New, Empty Database** using the correct password from your YAML.
-4.  **Retry Migration**:
-    *   Now run the `pg_dump | psql` command again. It should work because the passwords now match.
+**Prerequisites:**
+1.  **Production Stack** is running.
+2.  **Staging Stack** is deployed and running in Portainer.
+3.  **Portainer Console Access** to Staging containers.
 
 ---
 
-## Step 1: Clone the Stack (The Code)
+## Step 1: Clone the Database (Users, Tracks)
 
-**Goal**: Get the App running on Dev.
+**Goal**: Pipe the database dump directly from Prod to Staging without saving a file.
 
-1.  **Get the Prod YAML**: 
-    *   Since Portainer "Limited Control" might not show the full editor, you might need to view the file on the Prod Server (e.g. `cat docker-compose.yml`) OR copy your local `docker-compose.yml` (since Prod uses the same code).
-2.  **Create Stack on Dev**:
-    *   Open **Dev Portainer**.
-    *   Go to **Stacks** > **Add stack**.
-    *   **Name**: `progressive-release` (or `progressive-dev`).
-    *   **Build Method**: Web editor.
-    *   **Content**: Paste your YAML.
-        *   *Tip*: Ensure `image: progressive-app` is correct. If you don't use a registry, you might need to build the image locally first (`docker build -t progressive-app .`).
-    *   **Deploy**.
-    *   *Result*: App is running. Database is empty.
-
-### Step 2: Clone the Data (The Content)
-
-**Goal**: Overwrite the empty Dev DB with Prod Data.
-
-#### Part A: Database (Users, Tracks)
-1.  **In Dev Portainer**: Click the **Console (>_)** icon on your **Postgres** container.
-2.  **Connect** (User: `postgres` or `root`).
-3.  **Run**:
+1.  **Open Console**: In Portainer, go to the **Staging** stack -> **`postgres`** container -> **Console (>_)**.
+2.  **Run Command**:
+    *(Replace `PROD_IP` and `YOUR_PROD_PASSWORD` with actual values)*
     ```bash
-    # 1. Export PGPASSWORD so it doesn't ask (Prod Password)
-    export PGPASSWORD='marketing_team_knows_this'
+    # 1. Export Production Password (so pg_dump doesn't ask)
+    export PGPASSWORD='YOUR_PROD_PASSWORD'
 
-    # 2. Pipe Dump: PROD -> DEV
-    # Syntax: pg_dump -h <PROD_IP> | psql -U postgres
-    pg_dump -h 192.168.1.50 -U postgres progressive | psql -U postgres -d progressive
+    # 2. Pipe Dump: PROD (Remote) -> STAGING (Localhost)
+    # The second PGPASSWORD is for the Staging DB (likely 'password' or what you set in Env)
+    pg_dump -h PROD_IP -U postgres progressive | PGPASSWORD='YOUR_STAGING_PASSWORD' psql -h localhost -U postgres -d progressive
     ```
+    *If it runs silently or shows only warnings, it worked.*
 
-#### Part B: Files (Images, Audio)
-1.  **In Dev Portainer**: Open Console on a container that has `mc` (or deploy a temp `minio/mc` container).
-2.  **Run**:
+---
+
+## Step 2: Clone the Files (Images, Audio)
+
+**Goal**: Mirror S3 bucket contents from Prod to Staging using MinIO Client (`mc`).
+
+1.  **Open Console**: In Portainer, go to the **Staging** stack -> **`minio`** container -> **Console (>_)**.
+2.  **Verify Creds**: Run `env | grep MINIO` to see your current Staging Username/Password.
+3.  **Run Commands**:
+
     ```bash
-    # 1. Connect to Prod
-    mc alias set prod http://192.168.1.50:9000 minioadmin minioadminpassword
+    # A. Connect to Staging (Self)
+    # Use the User/Pass you found in Step 2.
+    mc alias set staging http://localhost:9000 MINIO_ROOT_USER MINIO_ROOT_PASSWORD
 
-    # 2. Connect to Dev (Internal)
-    mc alias set dev http://minio:9000 minioadmin minioadminpassword
+    # B. Connect to Production (Remote)
+    # Use your REAL Prod MinIO credentials.
+    mc alias set prod http://PROD_IP:9000 minioadmin minioadminpassword
 
-    # 3. Clone Files
-    mc mirror --overwrite prod/progressive-uploads dev/progressive-uploads
+    # C. Create Bucket (Just in case)
+    mc mb staging/progressive-uploads
+
+    # D. Mirror Data (Prod -> Staging)
+    mc mirror --overwrite prod/progressive-uploads staging/progressive-uploads
+
+    # E. Fix Permissions (Make Public)
+    # Critical: Images won't load without this!
+    mc anonymous set download staging/progressive-uploads
     ```
 
 ---
 
-## Summary
-| Feature | Works for "Limited Control" Stacks? | Copies Data? |
-| :--- | :--- | :--- |
-| **Portainer "Duplicate" Button** | ❌ **No** | ❌ **No** |
-| **Manual YAML + Console Copy** | ✅ **Yes** | ✅ **Yes** |
+## ⚠️ Troubleshooting
 
-**Use the Manual Clone method (Step 1 + Step 2 above).**
+**"Authentication Failed" (Postgres)**
+*   **Cause**: Old volume has a different password than your current Config.
+*   **Fix**:
+    1.  Stop Staging Stack.
+    2.  Go to Portainer > **Volumes**.
+    3.  Delete `progressive-dev_postgres_data`.
+    4.  Restart Stack. (It creates a fresh DB with new password).
+
+**"Signature Does Not Match" (MinIO)**
+*   **Cause**: You used the wrong Password/Key in `mc alias set`.
+*   **Fix**: Run `env` in the console to see the *actual* keys the container is using.
+
+**"Bucket does not exist"**
+*   **Fix**: Run `mc mb staging/progressive-uploads`.
+
+**"400 Bad Request" (Images)**
+*   **Cause**: Next.js cannot fetch image because bucket is Private (403).
+*   **Fix**: Run `mc anonymous set download staging/progressive-uploads`.

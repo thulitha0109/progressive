@@ -90,7 +90,7 @@ export default async function RootLayout({
             <ProgressProvider>
               <NavigationLoader />
               <PlayerProvider>
-                <div className="relative flex min-h-screen flex-col mx-auto max-w-[1400px]">
+                <div className="relative flex min-h-screen flex-col mx-auto max-w-[1400px] pb-24 md:pb-28">
                   <SiteHeader user={session?.user} />
                   <main className="flex-1">{children}</main>
                   <SiteFooter />

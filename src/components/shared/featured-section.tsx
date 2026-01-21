@@ -50,7 +50,7 @@ interface FeaturedItem {
         imageUrl?: string | null
     } | null
     assignedSequence?: number | null
-    type?: 'TRACK' | 'PODCAST'
+    type?: string | null
     genre?: string | null
     genreRel?: {
         name: string
@@ -58,6 +58,7 @@ interface FeaturedItem {
             name: string
         }
     } | null
+    label?: string | null
 }
 
 export function FeaturedSection({ item }: { item: FeaturedItem }) {
@@ -165,18 +166,36 @@ export function FeaturedSection({ item }: { item: FeaturedItem }) {
                                 </div>
 
                                 <div className="flex items-center gap-4 justify-start lg:justify-end w-full mt-4">
-                                    {item.type === 'PODCAST' && (
+                                    {item.assignedSequence ? (
                                         <span className={cn(
-                                            "font-medium tracking-widest uppercase text-sm md:text-base px-3 py-1 rounded border",
-                                            "border-orange-500/50",
-                                            "text-white"
+                                            "font-bold text-xs px-3 py-1 rounded-md border bg-white/5",
+                                            genreColorClass,
+                                            "text-white/90"
                                         )}>
                                             {sequence}
                                         </span>
+                                    ) : (
+                                        <span className={cn(
+                                            "font-bold text-xs px-3 py-1 rounded-md border bg-white/5",
+                                            genreColorClass,
+                                            "text-white/90"
+                                        )}>
+                                            {item.label || 'INDEPENDENT'}
+                                        </span>
                                     )}
-                                    <span className="text-primary font-medium tracking-widest uppercase text-sm md:text-base px-3 py-1 rounded border border-[#487cff] text-[#487cff]">
-                                        FEATURED {item.type || 'TRACK'}
+
+                                    <span className="font-bold uppercase tracking-wider text-xs px-3 py-1 rounded-md border border-white/10 bg-white/5 text-white/90">
+                                        FEATURED
                                     </span>
+
+                                    <div className="ml-2">
+                                        <LikeButton
+                                            trackId={item.id}
+                                            type={item.type === 'PODCAST' ? 'PODCAST' : 'TRACK'}
+                                            initialLikes={item.likesCount}
+                                            initialIsLiked={item.isLiked}
+                                        />
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -227,6 +246,6 @@ export function FeaturedSection({ item }: { item: FeaturedItem }) {
                     </div>
                 </div>
             </div>
-        </section>
+        </section >
     )
 }

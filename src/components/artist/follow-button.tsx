@@ -2,27 +2,38 @@
 
 import { Button } from "@/components/ui/button"
 import { useSession } from "next-auth/react"
-import { useState, useTransition } from "react"
+import { useState, useTransition, useEffect } from "react"
 import { UserCheck, UserPlus } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
 import { useRouter } from "next/navigation"
-import { toggleFollowArtist } from "@/server/actions/social"
+import { toggleFollowArtist, getArtistFollowStatus } from "@/server/actions/social"
 
 interface FollowButtonProps {
     artistId: string
     className?: string
     showText?: boolean
     initialIsFollowing?: boolean
+    checkStatus?: boolean
 }
 
-export function FollowButton({ artistId, className, showText = true, initialIsFollowing = false }: FollowButtonProps) {
+export function FollowButton({ artistId, className, showText = true, initialIsFollowing = false, checkStatus = false }: FollowButtonProps) {
     const { data: session } = useSession()
     const [isFollowing, setIsFollowing] = useState(initialIsFollowing)
     const [isPending, startTransition] = useTransition()
     const router = useRouter()
 
-    async function handleToggle() {
+    useEffect(() => {
+        if (checkStatus && session?.user && artistId) {
+            getArtistFollowStatus(artistId).then(data => {
+                if (data) setIsFollowing(data.isFollowing)
+            }).catch(err => console.error(err))
+        }
+    }, [artistId, checkStatus, session?.user])
+
+    async function handleToggle(e: React.MouseEvent) {
+        e.preventDefault()
+        e.stopPropagation()
         if (!session?.user) {
             toast.error("Please login to follow artists")
             router.push(`/auth/login?callbackUrl=${encodeURIComponent(window.location.href)}`)

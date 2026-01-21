@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { ModeToggle } from "@/components/shared/mode-toggle"
-import { Menu, Music2, User, Search, BookOpen, Radio, X, Home } from "lucide-react"
+import { Menu, Music2, User, Search, BookOpen, Radio, X, Home, Heart, ListMusic, UserCheck, LayoutDashboard, LogOut } from "lucide-react"
 
 import {
     DropdownMenu,
@@ -146,26 +146,65 @@ export function SiteHeader({ user: initialUser }: SiteHeaderProps) {
                                         </Avatar>
                                     </Button>
                                 </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end">
-                                    <DropdownMenuLabel>My Account</DropdownMenuLabel>
-                                    <DropdownMenuSeparator />
-                                    <DropdownMenuItem asChild>
-                                        <Link href="/profile">Profile</Link>
+                                <DropdownMenuContent align="end" className="w-56 bg-[#1A1A1A] border-white/10 text-white p-2">
+                                    <DropdownMenuLabel className="font-normal px-2 py-1.5">
+                                        <div className="flex flex-col space-y-1">
+                                            <p className="text-sm font-medium leading-none">{user.name}</p>
+                                            <p className="text-xs leading-none text-muted-foreground">{user.email}</p>
+                                        </div>
+                                    </DropdownMenuLabel>
+                                    <DropdownMenuSeparator className="bg-white/10 my-1" />
+
+                                    <DropdownMenuItem asChild className="cursor-pointer focus:bg-white/5 focus:text-white rounded-md px-2 py-2">
+                                        <Link href="/profile" className="flex items-center gap-3">
+                                            <User className="h-4 w-4 text-muted-foreground" />
+                                            <span>Profile</span>
+                                        </Link>
                                     </DropdownMenuItem>
+
+                                    <DropdownMenuItem asChild className="cursor-pointer focus:bg-white/5 focus:text-white rounded-md px-2 py-2">
+                                        <Link href="/library/likes" className="flex items-center gap-3">
+                                            <Heart className="h-4 w-4 text-muted-foreground" />
+                                            <span>Likes</span>
+                                        </Link>
+                                    </DropdownMenuItem>
+
+                                    <DropdownMenuItem asChild className="cursor-pointer focus:bg-white/5 focus:text-white rounded-md px-2 py-2">
+                                        <Link href="/library/playlists" className="flex items-center gap-3">
+                                            <ListMusic className="h-4 w-4 text-muted-foreground" />
+                                            <span>Playlists</span>
+                                        </Link>
+                                    </DropdownMenuItem>
+
+                                    <DropdownMenuItem asChild className="cursor-pointer focus:bg-white/5 focus:text-white rounded-md px-2 py-2">
+                                        <Link href="/library/artists" className="flex items-center gap-3">
+                                            <UserCheck className="h-4 w-4 text-muted-foreground" />
+                                            <span>Following</span>
+                                        </Link>
+                                    </DropdownMenuItem>
+
                                     {user.role === "ADMIN" && (
-                                        <DropdownMenuItem asChild>
-                                            <Link href="/admin/tracks">Dashboard</Link>
-                                        </DropdownMenuItem>
+                                        <>
+                                            <DropdownMenuSeparator className="bg-white/10 my-1" />
+                                            <DropdownMenuItem asChild className="cursor-pointer focus:bg-white/5 focus:text-white rounded-md px-2 py-2">
+                                                <Link href="/admin/tracks" className="flex items-center gap-3">
+                                                    <LayoutDashboard className="h-4 w-4 text-primary" />
+                                                    <span>Dashboard</span>
+                                                </Link>
+                                            </DropdownMenuItem>
+                                        </>
                                     )}
-                                    <DropdownMenuSeparator />
+
+                                    <DropdownMenuSeparator className="bg-white/10 my-1" />
                                     <DropdownMenuItem
-                                        className="text-destructive focus:text-destructive cursor-pointer"
+                                        className="text-red-500 focus:text-red-500 focus:bg-red-500/10 cursor-pointer flex items-center gap-3 rounded-md px-2 py-2"
                                         onClick={async () => {
                                             await logout()
                                             window.location.href = "/"
                                         }}
                                     >
-                                        Log out
+                                        <LogOut className="h-4 w-4" />
+                                        <span>Log out</span>
                                     </DropdownMenuItem>
                                 </DropdownMenuContent>
                             </DropdownMenu>

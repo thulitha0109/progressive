@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { PlayButton } from "@/components/shared/play-button"
 import { LikeButton } from "@/components/shared/like-button"
-import { Calendar, User, UserPlus } from "lucide-react"
+import { Calendar, User, UserPlus, ArrowRight, AudioLines } from "lucide-react"
 import { FeaturedSection } from "@/components/shared/featured-section"
 import { NewReleaseCard } from "@/components/shared/new-release-card"
 import { ArtistCarousel } from "@/components/shared/artist-carousel"
@@ -25,7 +25,7 @@ export default async function HomePage({
   const { upcomingTracks, publishedTracks, newPodcasts, featuredItem, artists, blogPosts } = await getHomeData(sort)
 
   // Fallback to latest published track if no featured item
-  const displayItem = featuredItem || (publishedTracks.length > 0 ? { ...publishedTracks[0], type: "TRACK" as const } : null)
+  const displayItem = featuredItem || (publishedTracks.length > 0 ? { ...publishedTracks[0], type: publishedTracks[0].type || "TRACK" } : null)
 
   return (
     <div className="min-h-screen bg-background pb-24 overflow-x-hidden">
@@ -52,7 +52,7 @@ export default async function HomePage({
           <div className="flex items-center justify-between mb-8">
             <h2 className="text-2xl font-bold tracking-tight">Upcoming Releases</h2>
             <Link href="/tracks/upcoming" className="text-xl text-primary hover:scale-110 transition-transform px-2">
-              ►
+              <ArrowRight className="w-6 h-6" />
             </Link>
           </div>
           <div className="block">
@@ -68,7 +68,7 @@ export default async function HomePage({
           <div className="flex items-center justify-between mb-8">
             <h2 className="text-2xl font-bold tracking-tight">New Releases</h2>
             <Link href="/tracks" className="text-xl text-primary hover:scale-110 transition-transform px-2">
-              ►
+              <ArrowRight className="w-6 h-6" />
             </Link>
           </div>
 
@@ -84,7 +84,7 @@ export default async function HomePage({
           <div className="flex items-center justify-between mb-8">
             <h2 className="text-2xl font-bold tracking-tight">New Podcasts</h2>
             <Link href="/podcasts" className="text-xl text-primary hover:scale-110 transition-transform px-2">
-              ►
+              <ArrowRight className="w-6 h-6" />
             </Link>
           </div>
 
@@ -102,7 +102,7 @@ export default async function HomePage({
             <div className="flex items-center gap-4 w-full md:w-auto justify-between md:justify-start">
               <ArtistSort />
               <Link href="/artists" className="text-xl text-primary hover:scale-110 transition-transform px-2 whitespace-nowrap">
-                ►
+                <ArrowRight className="w-6 h-6" />
               </Link>
             </div>
           </div>
@@ -123,13 +123,20 @@ export default async function HomePage({
                       <User className="h-12 w-12 text-muted-foreground" />
                     )}
 
-                    {/* Hover Overlay: Follow Icon */}
-                    <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-full">
+                    {/* Hover Overlay: Follow Icon & Count */}
+                    <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-full backdrop-blur-[2px]">
                       <UserPlus className="h-8 w-8 text-white drop-shadow-md" />
+                      <span className="text-white text-xs font-bold drop-shadow-md">
+                        {(artist as any)._count?.followers || 0}
+                      </span>
                     </div>
                   </div>
                   <div className="text-center">
                     <h3 className="font-medium truncate max-w-[120px]">{artist.name}</h3>
+                    <div className="flex items-center justify-center gap-1 mt-1 text-xs text-muted-foreground font-medium">
+                      <AudioLines className="w-3 h-3" />
+                      <span>{((artist as any)._count?.tracks || 0) + ((artist as any)._count?.podcasts || 0)} Tracks</span>
+                    </div>
                   </div>
                 </div>
               </Link>
@@ -148,7 +155,7 @@ export default async function HomePage({
             <div className="flex items-center justify-between mb-8">
               <h2 className="text-2xl font-bold tracking-tight">Latest from the Blog</h2>
               <Link href="/blog" className="text-xl text-primary hover:scale-110 transition-transform px-2">
-                ►
+                <ArrowRight className="w-6 h-6" />
               </Link>
             </div>
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">

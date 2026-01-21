@@ -1,11 +1,12 @@
 import Image from "next/image"
 import Link from "next/link"
-import { getArtists } from "@/server/actions/artists"
-import { User } from "lucide-react"
+import { getArtists, getFollowedArtists } from "@/server/actions/artists"
+import { User, AudioLines } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
 import { ArtistSearch } from "@/components/artist/artist-search"
 import { ArtistSort } from "@/components/artist/artist-sort"
 import { Pagination } from "@/components/shared/pagination"
+import { FollowButton } from "@/components/artist/follow-button"
 
 export default async function ArtistsPage({
     searchParams,
@@ -18,9 +19,11 @@ export default async function ArtistsPage({
     const sort = (params.sort as any) || "newest"
 
     const { artists, totalPages, currentPage } = await getArtists(page, 12, search, sort)
+    const followedArtists = await getFollowedArtists()
+    const followedIds = new Set(followedArtists.map(a => a.id))
 
     return (
-        <div className="container py-10 px-4 md:px-8 animate-enter-fade-in">
+        <div className="container py-10 px-4 md:px-6 animate-enter-fade-in">
             <div className="flex flex-col gap-8">
                 <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
                     <div className="flex flex-col gap-2">
@@ -53,7 +56,19 @@ export default async function ArtistsPage({
                                     )}
                                 </div>
                                 <CardContent className="p-6 pt-4">
-                                    <h3 className="font-bold text-xl mb-2">{artist.name}</h3>
+                                    <div className="flex items-center justify-between text-xs text-muted-foreground font-medium mb-2">
+                                        <div className="flex items-center gap-1.5" title="Total Tracks">
+                                            <AudioLines className="w-3.5 h-3.5" />
+                                            <span>{((artist as any)._count?.tracks || 0) + ((artist as any)._count?.podcasts || 0)}</span>
+                                        </div>
+                                        <FollowButton
+                                            artistId={artist.id}
+                                            initialIsFollowing={followedIds.has(artist.id)}
+                                            showText={false}
+                                            className="h-6 w-6 hover:bg-transparent hover:text-primary text-muted-foreground p-0 z-10 relative"
+                                        />
+                                    </div>
+                                    <h3 className="font-bold text-xl mb-1">{artist.name}</h3>
                                     <p className="text-sm text-muted-foreground line-clamp-3">
                                         {artist.bio}
                                     </p>

@@ -47,7 +47,7 @@ export default async function TracksPage({
     ]
 
     return (
-        <div className="container py-10 px-4 md:px-8 min-h-screen animate-enter-fade-in relative max-w-[1400px]">
+        <div className="container py-10 px-4 md:px-6 min-h-screen animate-enter-fade-in relative max-w-[1400px]">
             <div className="flex flex-col gap-8">
                 <div className="flex flex-col gap-6 z-10 relative">
                     <div className="flex flex-col xl:flex-row xl:items-end xl:justify-between gap-6">

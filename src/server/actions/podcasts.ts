@@ -159,6 +159,32 @@ export async function getPodcastBySlug(slug: string) {
     })
 }
 
+export async function getRelatedPodcasts(currentId: string, genreId?: string | null, limit: number = 4) {
+    if (!genreId) return []
+
+    const podcasts = await prisma.podcast.findMany({
+        where: {
+            genreId,
+            id: { not: currentId },
+            deletedAt: null,
+            scheduledFor: { lte: new Date() }
+        },
+        include: {
+            artist: true,
+            genre: true,
+            _count: { select: { likedBy: true } },
+        },
+        orderBy: { scheduledFor: 'desc' },
+        take: limit
+    })
+
+    return podcasts.map(podcast => ({
+        ...podcast,
+        likesCount: podcast._count.likedBy,
+        isLiked: false, // For list view, we might not need auth check or can add it if needed
+    }))
+}
+
 import { fromZonedTime } from "date-fns-tz"
 
 // ... imports

@@ -32,7 +32,15 @@ export async function getHomeData(sort: 'a-z' | 'z-a' | 'popular' | 'newest' = '
     // ...
 
     const getCachedArtists = unstable_cache(
-        async (orderBy: any) => prisma.artist.findMany({ orderBy, take: 6 }),
+        async (orderBy: any) => prisma.artist.findMany({
+            orderBy,
+            take: 6,
+            include: {
+                _count: {
+                    select: { followers: true, tracks: true, podcasts: true }
+                }
+            }
+        }),
         ['home-artists'],
         { tags: ['artists'], revalidate: 3600 }
     )
@@ -232,6 +240,7 @@ export async function getHomeData(sort: 'a-z' | 'z-a' | 'popular' | 'newest' = '
             type: "TRACK" as const,
             likesCount: (featuredTrackRaw as any)._count.likedBy,
             isLiked: likedTrackIds.has(featuredTrackRaw.id),
+            label: (featuredTrackRaw as any).label,
         }
     } else if (featuredPodcastRaw) {
         featuredItem = {

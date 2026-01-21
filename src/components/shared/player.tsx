@@ -7,6 +7,8 @@ import { useEffect, useRef, useState } from "react"
 import { FullScreenPlayer } from "@/components/shared/full-screen-player"
 import { Slider } from "@/components/ui/slider"
 import { Visualizer } from "@/components/shared/visualizer"
+import { LikeButton } from "@/components/shared/like-button"
+import { AddToPlaylistButton } from "@/components/shared/add-to-playlist-button"
 import { FollowButton } from "@/components/artist/follow-button"
 
 export function Player() {
@@ -93,7 +95,7 @@ export function Player() {
 
     return (
         <>
-            <div className="fixed bottom-0 left-0 right-0 z-50 bg-[#111111] border-t border-white/10 h-16 flex flex-col justify-center">
+            <div className="fixed bottom-0 left-0 right-0 z-50 bg-[#111111] border-t border-white/10 h-auto min-h-[4rem] pb-[env(safe-area-inset-bottom)] flex flex-col justify-center">
                 {/* Progress Bar (Top of player) */}
                 <div
                     className="absolute top-0 left-0 right-0 h-1 bg-white/10 cursor-pointer group"
@@ -116,14 +118,14 @@ export function Player() {
                     </div>
                 </div>
 
-                <div className="max-w-[1400px] w-full mx-auto px-4 flex items-center justify-between gap-4 h-full">
+                <div className="max-w-[1400px] w-full mx-auto px-2 sm:px-4 flex items-center justify-between gap-2 sm:gap-4 h-full py-2">
 
                     {/* Left: Controls */}
-                    <div className="flex items-center gap-2 sm:gap-4 min-w-fit sm:min-w-[140px]">
+                    <div className="flex items-center gap-2 sm:gap-4 min-w-fit sm:min-w-[140px] flex-shrink-0">
                         <Button
                             size="icon"
                             variant="ghost"
-                            className="text-gray-400 hover:text-white h-8 w-8"
+                            className="text-gray-400 hover:text-white h-8 w-8 hidden sm:inline-flex"
                             onClick={playPrevious}
                             disabled={!hasPlaylist}
                         >
@@ -132,7 +134,7 @@ export function Player() {
                         <Button
                             size="icon"
                             variant="ghost"
-                            className="text-white hover:scale-105 transition-transform h-10 w-10"
+                            className="text-white hover:scale-105 transition-transform h-10 w-10 flex-shrink-0"
                             onClick={(e) => {
                                 e.stopPropagation()
                                 togglePlay()
@@ -147,7 +149,7 @@ export function Player() {
                         <Button
                             size="icon"
                             variant="ghost"
-                            className="text-gray-400 hover:text-white h-8 w-8"
+                            className="text-gray-400 hover:text-white h-8 w-8 hidden sm:inline-flex"
                             onClick={playNext}
                             disabled={!hasPlaylist}
                         >
@@ -156,36 +158,54 @@ export function Player() {
                     </div>
 
                     {/* Center: Track Info & Avatar */}
-                    <div className="flex items-center gap-4 flex-1 max-w-2xl px-4 overflow-hidden">
+                    <div className="flex items-center gap-3 sm:gap-4 flex-1 min-w-0 px-2 sm:px-4 overflow-hidden">
                         {currentTrack.imageUrl || currentTrack.artist?.imageUrl ? (
                             <img
                                 src={currentTrack.imageUrl || currentTrack.artist.imageUrl || ""}
                                 alt={currentTrack.title}
-                                className="h-10 w-10 object-cover bg-neutral-800 flex-shrink-0"
+                                className="h-10 w-10 object-cover bg-neutral-800 flex-shrink-0 rounded-sm"
                             />
                         ) : (
-                            <div className="h-10 w-10 bg-neutral-800 flex-shrink-0" />
+                            <div className="h-10 w-10 bg-neutral-800 flex-shrink-0 rounded-sm" />
                         )}
 
-                        <div className="flex flex-col overflow-hidden justify-center h-full gap-0.5">
-                            <span className="text-xs text-gray-400 truncate hover:underline cursor-pointer">
+                        <div className="flex flex-col justify-center h-full gap-0.5 min-w-0 flex-1">
+                            <span className="text-xs text-gray-400 truncate hover:underline cursor-pointer block">
                                 {currentTrack.artist?.name}
                             </span>
-                            <span className="text-sm text-white/90 font-medium truncate hover:text-white cursor-pointer" onClick={() => setIsFullScreen(true)}>
-                                {currentTrack.title}
-                            </span>
+                            <div className="relative overflow-hidden w-full">
+                                <span className="text-sm text-white/90 font-medium truncate hover:text-white cursor-pointer block">
+                                    {currentTrack.title}
+                                </span>
+                            </div>
                         </div>
                     </div>
 
                     {/* Right: Actions & Volume */}
-                    <div className="flex items-center gap-2 sm:gap-4 min-w-fit sm:min-w-[200px] justify-end">
-                        {/* Follow Button (Icon Only on mobile) */}
+                    <div className="flex items-center gap-1 sm:gap-4 min-w-fit sm:min-w-[200px] justify-end flex-shrink-0">
+                        {/* Like Button (Replaces Follow) */}
+                        <div className="transform scale-90">
+                            <LikeButton
+                                trackId={currentTrack.id}
+                                type={(currentTrack as any).kind || 'TRACK'}
+                                initialLikes={(currentTrack as any).likesCount || 0}
+                                initialIsLiked={(currentTrack as any).isLiked || false}
+                            />
+                        </div>
+
+                        {/* Add to Playlist */}
+                        <div className="transform scale-90">
+                            <AddToPlaylistButton trackId={currentTrack.id} />
+                        </div>
+
+                        {/* Follow Button (Icon Only) */}
                         {currentTrack.artist && currentTrack.artist.id && (
                             <div className="transform scale-90">
                                 <FollowButton
                                     artistId={currentTrack.artist.id}
-                                    showText={true}
-                                    className="w-8 h-8 px-0 sm:w-auto sm:px-3 [&>span]:hidden sm:[&>span]:inline"
+                                    showText={false}
+                                    checkStatus={true}
+                                    className="px-0 w-8 h-8 text-gray-400 hover:text-white"
                                 />
                             </div>
                         )}

@@ -1,5 +1,6 @@
 "use client"
 
+import { useState, useEffect } from "react"
 import Image from "next/image"
 import { usePlayer } from "@/components/shared/player-context"
 import { LikeButton } from "@/components/shared/like-button"
@@ -58,6 +59,17 @@ function getGenreBorderColor(genre: string) {
 
 export function NewPodcastCard({ podcast, hideLikeButton = false }: { podcast: PodcastItem, hideLikeButton?: boolean }) {
     const { playTrack, currentTrack, isPlaying, togglePlay } = usePlayer()
+    const [likesState, setLikesState] = useState({
+        likesCount: podcast.likesCount,
+        isLiked: podcast.isLiked
+    })
+
+    useEffect(() => {
+        setLikesState({
+            likesCount: podcast.likesCount,
+            isLiked: podcast.isLiked
+        })
+    }, [podcast.likesCount, podcast.isLiked])
 
     if (!podcast) return null
 
@@ -72,7 +84,7 @@ export function NewPodcastCard({ podcast, hideLikeButton = false }: { podcast: P
         } else {
             // Force kind to PODCAST if missing
             // @ts-ignore
-            playTrack({ ...podcast, kind: 'PODCAST' })
+            playTrack({ ...podcast, kind: 'PODCAST', ...likesState })
         }
     }
 
@@ -84,12 +96,13 @@ export function NewPodcastCard({ podcast, hideLikeButton = false }: { podcast: P
         <div
             onClick={handleCardClick}
             className={cn(
-                "group relative flex flex-row gap-2 sm:gap-6 rounded-md border border-white/5 bg-white/[0.01] hover:bg-white/[0.05] backdrop-blur-sm transition-colors duration-500 cursor-pointer overflow-hidden hover:shadow-2xl h-28 sm:h-40",
-                isCurrentTrack && isPlaying ? "bg-white/[0.08] border-primary/30" : ""
+                "group/card relative flex flex-row gap-2 sm:gap-6 rounded-md border border-white/5 bg-[#121212] hover:bg-[#1a1a1a] transition-colors duration-500 cursor-pointer overflow-hidden hover:shadow-2xl h-28 sm:h-40",
+                isCurrentTrack && isPlaying ? "bg-[#1a1a1a] border-primary/30" : ""
             )}
         >
-            {/* Absolute Glow Background */}
-            <div className="absolute inset-0 bg-gradient-to-r from-primary/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+            {/* Absolute Glow Background / Shade */}
+            <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent pointer-events-none" />
+            <div className="absolute inset-0 bg-gradient-to-r from-primary/10 via-transparent to-transparent opacity-0 group-hover/card:opacity-100 transition-opacity duration-500 pointer-events-none" />
 
             {/* Image Section */}
             <div className="relative w-28 sm:w-40 h-full shrink-0 overflow-hidden rounded-l-md rounded-r-none shadow-lg isolate ring-1 ring-white/10 ring-inset">
@@ -99,7 +112,7 @@ export function NewPodcastCard({ podcast, hideLikeButton = false }: { podcast: P
                         src={podcast.imageUrl || podcast.artist?.imageUrl || ""}
                         alt={podcast.title}
                         fill
-                        className="object-cover object-top transition-transform duration-700 ease-out group-hover:scale-110"
+                        className="object-cover object-top transition-transform duration-700 ease-out group-hover/card:scale-110"
                         sizes="(max-width: 640px) 112px, 160px"
                     />
                 ) : (
@@ -112,7 +125,7 @@ export function NewPodcastCard({ podcast, hideLikeButton = false }: { podcast: P
                 {!isUpcoming && (
                     <div className={cn(
                         "absolute inset-0 flex items-center justify-center bg-black/40 z-20 transition-all duration-300 backdrop-blur-[2px]",
-                        isCurrentTrack && isPlaying ? "opacity-100 bg-black/60" : "opacity-0 group-hover:opacity-100"
+                        isCurrentTrack && isPlaying ? "opacity-100 bg-black/60" : "opacity-0 group-hover/card:opacity-100"
                     )}>
                         {/* We cast podcast to any or Track for PlayButton compatibility if needed, though PlayButton might accept generic Track-like shape */}
                         <PlayButton track={podcast as any} variant="icon" />
@@ -120,7 +133,7 @@ export function NewPodcastCard({ podcast, hideLikeButton = false }: { podcast: P
                 )}
                 {isUpcoming && (
                     <div className={cn(
-                        "absolute inset-0 flex items-center justify-center bg-black/40 z-20 transition-all duration-300 backdrop-blur-[2px] opacity-0 group-hover:opacity-100",
+                        "absolute inset-0 flex items-center justify-center bg-black/40 z-20 transition-all duration-300 backdrop-blur-[2px] opacity-0 group-hover/card:opacity-100",
                     )}>
                         <span className="text-[10px] font-bold uppercase tracking-wider text-white border border-white/50 px-2 py-1 rounded-md">
                             Coming Soon
@@ -169,6 +182,7 @@ export function NewPodcastCard({ podcast, hideLikeButton = false }: { podcast: P
                                         initialLikes={podcast.likesCount}
                                         initialIsLiked={podcast.isLiked}
                                         type="PODCAST"
+                                        onToggle={(isLiked, likesCount) => setLikesState({ isLiked, likesCount })}
                                     />
                                 </div>
                             </>
@@ -180,7 +194,7 @@ export function NewPodcastCard({ podcast, hideLikeButton = false }: { podcast: P
                 <div className="flex-1 flex flex-col justify-center min-h-0 gap-0.5">
                     <h3 className={cn(
                         "font-bold text-sm sm:text-xl truncate leading-tight transition-colors tracking-tight pr-4 w-full",
-                        isCurrentTrack ? "text-primary" : "text-foreground group-hover:text-primary"
+                        isCurrentTrack ? "text-primary" : "text-foreground group-hover/card:text-primary"
                     )}>
                         {podcast.title}
                     </h3>

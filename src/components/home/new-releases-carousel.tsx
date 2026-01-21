@@ -141,9 +141,9 @@ export function NewReleasesCarousel({ tracks }: { tracks: Track[] }) {
         <div className="space-y-6 w-full">
             <AnalogWheelIndicator key={tracks.length} total={tracks.length} current={currentIndex} />
 
-            <div className="relative">
+            <div className="relative group/carousel">
                 {/* Navigation Arrows */}
-                <div className="absolute top-1/2 -translate-y-1/2 -left-12 z-20 hidden md:block">
+                <div className="absolute top-1/2 -translate-y-1/2 -left-12 z-50 hidden md:block opacity-0 group-hover/carousel:opacity-100 transition-opacity duration-300">
                     <button
                         onClick={() => swiperRef.current?.slidePrev()}
                         className="p-2 text-foreground hover:text-foreground/80 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
@@ -152,7 +152,7 @@ export function NewReleasesCarousel({ tracks }: { tracks: Track[] }) {
                         <ChevronLeft className="h-8 w-8" />
                     </button>
                 </div>
-                <div className="absolute top-1/2 -translate-y-1/2 -right-12 z-20 hidden md:block">
+                <div className="absolute top-1/2 -translate-y-1/2 -right-12 z-50 hidden md:block opacity-0 group-hover/carousel:opacity-100 transition-opacity duration-300">
                     <button
                         onClick={() => swiperRef.current?.slideNext()}
                         className="p-2 text-foreground hover:text-foreground/80 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
@@ -165,6 +165,7 @@ export function NewReleasesCarousel({ tracks }: { tracks: Track[] }) {
                 {/* Negative margin to breakout on mobile, but keeping padding for shadows */}
                 <div className="relative px-0.5 sm:px-0 overflow-hidden">
                     <Swiper
+                        modules={[FreeMode]}
                         onSwiper={(swiper) => {
                             swiperRef.current = swiper
                             setIsBeginning(swiper.isBeginning)
@@ -174,6 +175,11 @@ export function NewReleasesCarousel({ tracks }: { tracks: Track[] }) {
                         spaceBetween={16}
                         centeredSlides={false}
                         loop={true}
+                        freeMode={{
+                            enabled: true,
+                            sticky: false,
+                            momentumRatio: 0.5
+                        }}
                         className="w-full py-4"
                         onSlideChange={(swiper) => {
                             setCurrentIndex(swiper.realIndex)
@@ -184,10 +190,12 @@ export function NewReleasesCarousel({ tracks }: { tracks: Track[] }) {
                             640: {
                                 slidesPerView: 1.5,
                                 spaceBetween: 24,
+                                freeMode: false // Disable free mode on desktop/tablet for snapping? Or keep it? Usually card carousels snap. User noticed "smooth inertial scrolling".
                             },
                             1024: {
                                 slidesPerView: 2.2,
                                 spaceBetween: 32,
+                                freeMode: false
                             }
                         }}
                     >

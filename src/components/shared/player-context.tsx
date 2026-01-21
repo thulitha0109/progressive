@@ -12,6 +12,18 @@ interface Track {
         name: string
         imageUrl?: string | null
     }
+    likesCount?: number
+    isLiked?: boolean
+    kind?: "TRACK" | "PODCAST"
+    genre?: string | null
+    type?: string | null
+    sequence?: number | null
+    genreRel?: {
+        name: string
+        parent?: {
+            name: string
+        }
+    } | null
 }
 
 interface PlayerContextType {

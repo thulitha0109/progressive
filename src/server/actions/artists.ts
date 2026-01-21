@@ -84,7 +84,7 @@ export async function getArtists(
             take: pageSize,
             include: {
                 _count: {
-                    select: { followers: true }
+                    select: { followers: true, tracks: true, podcasts: true }
                 }
             }
         }),
@@ -153,6 +153,7 @@ export async function getArtistById(id: string) {
     const artist = await prisma.artist.findUnique({
         where: { id },
         include: {
+            _count: { select: { followers: true, tracks: true, podcasts: true } },
             tracks: {
                 orderBy: { scheduledFor: "desc" },
                 include: {
@@ -202,6 +203,7 @@ export async function getArtistBySlug(slug: string) {
     const artist = await prisma.artist.findUnique({
         where: { slug },
         include: {
+            _count: { select: { followers: true, tracks: true, podcasts: true } },
             tracks: {
                 orderBy: { scheduledFor: "desc" },
                 include: {
