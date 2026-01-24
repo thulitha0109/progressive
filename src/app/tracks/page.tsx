@@ -52,7 +52,7 @@ export default async function TracksPage({
                 <div className="flex flex-col gap-6 z-10 relative">
                     <div className="flex flex-col xl:flex-row xl:items-end xl:justify-between gap-6">
                         <div className="flex flex-col gap-2 max-w-2xl">
-                            <h1 className="text-4xl sm:text-5xl font-bold tracking-tight bg-gradient-to-br from-foreground to-foreground/60 bg-clip-text text-transparent">
+                            <h1 className="text-4xl sm:text-5xl font-bold tracking-tight bg-linear-to-br from-foreground to-foreground/60 bg-clip-text text-transparent">
                                 Tracks
                             </h1>
                             <p className="text-lg text-muted-foreground leading-relaxed">

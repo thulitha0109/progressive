@@ -1,11 +1,11 @@
 import { getArtistBySlug } from "@/server/actions/artists"
 import { Button } from "@/components/ui/button"
-import { PlayButton } from "@/components/shared/play-button"
-import { LikeButton } from "@/components/shared/like-button"
 import { FollowButton } from "@/components/artist/follow-button"
-import { Calendar, Play, User, AudioLines } from "lucide-react"
-import Link from "next/link"
+import { User, AudioLines } from "lucide-react"
 import { notFound } from "next/navigation"
+import { UpcomingCarousel } from "@/components/shared/upcoming-carousel"
+import { NewReleaseCard } from "@/components/shared/new-release-card"
+import { NewPodcastCard } from "@/components/shared/new-podcast-card"
 
 export default async function ArtistPage({
     params,
@@ -18,6 +18,48 @@ export default async function ArtistPage({
     if (!artist) {
         notFound()
     }
+
+    // Transform data for UpcomingCarousel
+    const upcomingTracks = artist.tracks
+        .filter(track => !track.isReleased)
+        .map(track => ({
+            id: track.id,
+            title: track.title,
+            scheduledFor: track.scheduledFor,
+            kind: "TRACK" as const,
+            type: track.type || null,
+            label: track.label || null,
+            timeZone: track.timeZone,
+            genre: track.genre || null,
+            artist: {
+                name: artist.name,
+                slug: artist.slug,
+                imageUrl: artist.imageUrl
+            }
+        }))
+
+    // Transform data for NewReleaseCard
+    const releasedTracks = artist.tracks
+        .filter(track => track.isReleased)
+        .map(track => ({
+            id: track.id,
+            title: track.title,
+            slug: track.id, // Using ID as slug fallback if needed, or track should have slug logic from backend
+            audioUrl: track.audioUrl,
+            imageUrl: track.imageUrl,
+            scheduledFor: track.scheduledFor,
+            genre: track.genre,
+            type: track.type || null,
+            likesCount: track.likesCount,
+            isLiked: track.isLiked,
+            kind: "TRACK" as const,
+            artist: {
+                id: artist.id,
+                name: artist.name,
+                imageUrl: artist.imageUrl,
+                slug: artist.slug
+            }
+        }))
 
     return (
         <div className="min-h-screen bg-background pb-24 overflow-x-hidden">
@@ -117,45 +159,32 @@ export default async function ArtistPage({
             </div>
 
             <div className="px-4 md:px-6 py-8 grid gap-12 lg:grid-cols-[2fr_1fr]">
-                {/* Tracks */}
+                {/* Tracks & Content */}
                 <div className="space-y-12">
                     {/* Upcoming Tracks */}
-                    {artist.tracks.some(track => !track.isReleased) && (
+                    {upcomingTracks.length > 0 && (
                         <div className="animate-slide-up-fade" style={{ animationDelay: "0.05s" }}>
                             <div className="flex items-center justify-between mb-6">
                                 <h2 className="text-2xl font-bold tracking-tight">Upcoming Releases</h2>
-                                <span className="text-sm text-muted-foreground">{artist.tracks.filter((track) => !track.isReleased).length} tracks</span>
+                                <span className="text-sm text-muted-foreground">{upcomingTracks.length} tracks</span>
                             </div>
-                            <div className="space-y-2">
-                                {artist.tracks
-                                    .filter((track) => !track.isReleased)
-                                    .map((track) => (
-                                        <div
-                                            key={track.id}
-                                            className="group flex items-center gap-4 rounded-lg border p-3 hover:bg-accent transition-colors overflow-hidden opacity-80"
-                                        >
-                                            <div className="flex items-center justify-center h-12 w-12 rounded bg-muted text-muted-foreground shrink-0 border border-dashed">
-                                                <Calendar className="h-5 w-5" />
-                                            </div>
-                                            <div className="flex-1 min-w-0">
-                                                <h3 className="font-medium truncate pr-2 text-lg">{track.title}</h3>
-                                                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                                    <Calendar className="h-3 w-3" />
-                                                    {new Date(track.scheduledFor).toLocaleDateString(undefined, {
-                                                        weekday: 'short',
-                                                        year: 'numeric',
-                                                        month: 'short',
-                                                        day: 'numeric'
-                                                    })}
-                                                </div>
-                                            </div>
-                                            <div className="shrink-0">
-                                                <span className="text-xs font-bold uppercase tracking-wider border px-2 py-1 rounded-md text-muted-foreground">
-                                                    Upcoming
-                                                </span>
-                                            </div>
-                                        </div>
-                                    ))}
+                            <div className="w-full">
+                                <UpcomingCarousel tracks={upcomingTracks} />
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Recent Podcasts */}
+                    {artist.podcasts && artist.podcasts.length > 0 && (
+                        <div className="animate-slide-up-fade" style={{ animationDelay: "0.15s" }}>
+                            <div className="flex items-center justify-between mb-6">
+                                <h2 className="text-2xl font-bold tracking-tight">Recent Podcasts</h2>
+                                <span className="text-sm text-muted-foreground">{artist.podcasts.length} podcasts</span>
+                            </div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                {artist.podcasts.map((podcast: any) => (
+                                    <NewPodcastCard key={podcast.id} podcast={podcast} />
+                                ))}
                             </div>
                         </div>
                     )}
@@ -164,37 +193,14 @@ export default async function ArtistPage({
                     <div className="animate-slide-up-fade" style={{ animationDelay: "0.1s" }}>
                         <div className="flex items-center justify-between mb-6">
                             <h2 className="text-2xl font-bold tracking-tight">Released Tracks</h2>
-                            <span className="text-sm text-muted-foreground">{artist.tracks.filter((track) => track.isReleased).length} tracks</span>
+                            <span className="text-sm text-muted-foreground">{releasedTracks.length} tracks</span>
                         </div>
-                        <div className="space-y-2">
-                            {artist.tracks
-                                .filter((track) => track.isReleased)
-                                .map((track) => (
-                                    <div
-                                        key={track.id}
-                                        className="group flex items-center gap-4 rounded-lg border p-3 hover:bg-accent transition-colors overflow-hidden"
-                                    >
-                                        <div className="flex items-center justify-center h-12 w-12 rounded bg-primary/10 text-primary shrink-0">
-                                            <PlayButton track={track} variant="icon" />
-                                        </div>
-                                        <div className="flex-1 min-w-0">
-                                            <h3 className="font-medium truncate pr-2 text-lg">{track.title}</h3>
-                                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                                <Calendar className="h-3 w-3" />
-                                                {new Date(track.scheduledFor).toLocaleDateString()}
-                                            </div>
-                                        </div>
-                                        <div className="shrink-0">
-                                            <LikeButton
-                                                trackId={track.id}
-                                                initialLikes={track.likesCount}
-                                                initialIsLiked={track.isLiked}
-                                            />
-                                        </div>
-                                    </div>
-                                ))}
-                            {artist.tracks.filter((track) => track.isReleased).length === 0 && (
-                                <p className="text-muted-foreground py-8 text-center bg-muted/30 rounded-lg">No tracks released yet.</p>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {releasedTracks.map((track) => (
+                                <NewReleaseCard key={track.id} track={track} />
+                            ))}
+                            {releasedTracks.length === 0 && (
+                                <p className="text-muted-foreground py-8 text-center bg-muted/30 rounded-lg col-span-full">No tracks released yet.</p>
                             )}
                         </div>
                     </div>

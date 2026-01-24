@@ -3,6 +3,7 @@
 import { createTrack } from "@/server/actions/tracks"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import imageCompression from "browser-image-compression"
 import { Label } from "@/components/ui/label"
 import {
     Select,
@@ -142,8 +143,24 @@ export default function TrackForm({ artists, genres }: { artists: Artist[], genr
 
             // 2. Upload Image (if exists)
             if (imageFile && imageFile.size > 0) {
-                setUploadStatus("Uploading image...")
-                const imageUrl = await uploadFile(imageFile, "image", selectedArtist)
+                setUploadStatus("Compressing & Uploading image...")
+
+                // Compress Image
+                const options = {
+                    maxSizeMB: 1,
+                    maxWidthOrHeight: 1500,
+                    useWebWorker: true,
+                }
+
+                let fileToUpload = imageFile
+                try {
+                    const compressedFile = await imageCompression(imageFile, options)
+                    fileToUpload = compressedFile
+                } catch (err) {
+                    console.warn("Image compression failed, using original:", err)
+                }
+
+                const imageUrl = await uploadFile(fileToUpload, "image", selectedArtist)
                 formData.set("imageUrl", imageUrl)
                 formData.delete("imageFile")
             }

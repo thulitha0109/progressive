@@ -38,6 +38,6 @@ docker compose exec -T app npx prisma migrate deploy --schema=src/prisma/schema.
 
 # 5. Seed essential production data (Admin, Genres)
 echo "🌱 Seeding production data..."
-docker compose exec -T app node scripts/dist/seed-prod.js
+# docker compose exec -T app node scripts/seed-prod.js
 
 echo "✅ Deployment complete! App is running on ${AUTH_URL:-http://localhost:3003}"

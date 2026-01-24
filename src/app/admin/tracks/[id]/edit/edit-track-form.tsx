@@ -134,6 +134,7 @@ export default function EditTrackForm({ track, artists, genres }: { track: Track
             // Upload Image
             if (imageFile && imageFile.size > 0) {
                 setUploadStatus("Compressing & Uploading image...")
+
                 const options = { maxSizeMB: 1, maxWidthOrHeight: 1500, useWebWorker: true }
                 let fileToUpload = imageFile
                 try {
@@ -141,6 +142,7 @@ export default function EditTrackForm({ track, artists, genres }: { track: Track
                 } catch (err) {
                     console.warn("Compression failed, using original:", err)
                 }
+
                 const imageUrl = await uploadFile(fileToUpload)
                 formData.set("imageUrl", imageUrl)
             }

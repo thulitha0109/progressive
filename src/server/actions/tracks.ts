@@ -90,6 +90,7 @@ export async function getUpcomingTracks() {
         include: {
             artist: true,
             genreRel: true,
+            _count: { select: { likedBy: true } },
         },
         orderBy: { scheduledFor: "asc" },
     })
@@ -101,6 +102,7 @@ export async function getTrack(id: string) {
         include: {
             artist: true,
             genreRel: true,
+            _count: { select: { likedBy: true } },
         },
     })
 }

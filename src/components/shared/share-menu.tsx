@@ -18,18 +18,52 @@ interface ShareMenuProps {
 }
 
 export function ShareMenu({ url, title, text, children }: ShareMenuProps) {
-    const handleCopyLink = (e: React.MouseEvent) => {
+    const handleCopyLink = async (e: React.MouseEvent) => {
         e.preventDefault()
         e.stopPropagation()
-        navigator.clipboard.writeText(url)
-        toast.success("Link copied to clipboard")
+
+        try {
+            if (navigator.clipboard) {
+                await navigator.clipboard.writeText(url)
+                toast.success("Link copied to clipboard")
+            } else {
+                // Fallback for non-secure contexts or incompatible browsers
+                const textArea = document.createElement("textarea")
+                textArea.value = url
+                document.body.appendChild(textArea)
+                textArea.select()
+                document.execCommand("copy")
+                document.body.removeChild(textArea)
+                toast.success("Link copied to clipboard")
+            }
+        } catch (err) {
+            console.error("Failed to copy link:", err)
+            toast.error("Failed to copy link")
+        }
     }
 
-    const handleShareInstagram = (e: React.MouseEvent) => {
+    const handleShareInstagram = async (e: React.MouseEvent) => {
         e.preventDefault()
         e.stopPropagation()
-        navigator.clipboard.writeText(url)
-        toast.success("Link copied! Open Instagram to share.")
+
+        try {
+            if (navigator.clipboard) {
+                await navigator.clipboard.writeText(url)
+                toast.success("Link copied! Open Instagram to share.")
+            } else {
+                // Fallback
+                const textArea = document.createElement("textarea")
+                textArea.value = url
+                document.body.appendChild(textArea)
+                textArea.select()
+                document.execCommand("copy")
+                document.body.removeChild(textArea)
+                toast.success("Link copied! Open Instagram to share.")
+            }
+        } catch (err) {
+            console.error("Failed to copy link:", err)
+            toast.error("Failed to copy link")
+        }
     }
 
     const handleShareWhatsApp = (e: React.MouseEvent) => {

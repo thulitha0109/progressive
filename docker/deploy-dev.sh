@@ -38,6 +38,6 @@ docker compose -p progressive-dev exec -T app npx prisma migrate deploy --schema
 
 # Seed development data
 echo "🌱 Seeding DEV data..."
-docker compose -p progressive-dev exec -T app node scripts/dist/seed-dev.js
+# docker compose -p progressive-dev exec -T app npx tsx scripts/seed-dev.ts
 
-echo "✅ DEV Deployment complete! App is running on ${AUTH_URL:-http://localhost:3004}"
+echo "✅ DEV Deployment complete! App is running on ${AUTH_URL:-http://localhost:3003}"

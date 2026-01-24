@@ -210,19 +210,37 @@ export async function getArtistBySlug(slug: string) {
                     _count: { select: { likedBy: true } },
                 },
             },
+            podcasts: {
+                orderBy: { scheduledFor: "desc" },
+                include: {
+                    _count: { select: { likedBy: true } },
+                    genre: {
+                        include: {
+                            parent: true
+                        }
+                    },
+                    artist: true
+                }
+            }
         },
     })
 
     if (!artist) return null
 
     let likedTrackIds = new Set<string>()
+    let likedPodcastIds = new Set<string>()
+
     if (userId) {
         const userLikes = await prisma.user.findUnique({
             where: { id: userId },
-            select: { likes: { select: { id: true } } },
+            select: {
+                likes: { select: { id: true } },
+                likedPodcasts: { select: { id: true } }
+            },
         })
         if (userLikes) {
             likedTrackIds = new Set(userLikes.likes.map((t: { id: string }) => t.id))
+            likedPodcastIds = new Set(userLikes.likedPodcasts.map((p: { id: string }) => p.id))
         }
     }
 
@@ -234,6 +252,14 @@ export async function getArtistBySlug(slug: string) {
         isReleased: new Date(track.scheduledFor) <= now,
     }))
 
+    const podcasts = artist.podcasts.map((podcast: any) => ({
+        ...podcast,
+        likesCount: podcast._count.likedBy,
+        isLiked: likedPodcastIds.has(podcast.id),
+        genreRel: podcast.genre,
+        isReleased: new Date(podcast.scheduledFor) <= now,
+    }))
+
     const isFollowing = userId ? (await prisma.user.count({
         where: {
             id: userId,
@@ -243,7 +269,7 @@ export async function getArtistBySlug(slug: string) {
         }
     })) > 0 : false
 
-    return { ...artist, tracks, isFollowing }
+    return { ...artist, tracks, podcasts, isFollowing }
 }
 
 export async function updateArtist(id: string, formData: FormData) {

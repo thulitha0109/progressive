@@ -110,8 +110,8 @@ export function FeaturedSection({ item }: { item: FeaturedItem }) {
                 />
 
                 {/* Overlays for depth - Pointer events none to allow BG interaction */}
-                <div className="absolute inset-0 bg-gradient-to-r from-background/0 to-background dark:from-background/0 dark:to-background pointer-events-none" />
-                <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-background/0 dark:from-background dark:via-background/20 dark:to-background/0 pointer-events-none" />
+                <div className="absolute inset-0 bg-linear-to-r from-background/0 to-background dark:from-background/0 dark:to-background pointer-events-none" />
+                <div className="absolute inset-0 bg-linear-to-t from-background via-background/50 to-background/0 dark:from-background dark:via-background/20 dark:to-background/0 pointer-events-none" />
             </div>
 
             <div className="container px-4 md:px-6 relative z-10 pt-12 pb-24 pointer-events-none">
@@ -165,7 +165,7 @@ export function FeaturedSection({ item }: { item: FeaturedItem }) {
                                     </h1>
                                 </div>
 
-                                <div className="flex items-center gap-4 justify-start lg:justify-end w-full mt-4">
+                                <div className="flex items-center gap-4 justify-start lg:justify-end w-full">
                                     {item.assignedSequence ? (
                                         <span className={cn(
                                             "font-bold text-xs px-3 py-1 rounded-md border bg-white/5",

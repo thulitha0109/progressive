@@ -103,12 +103,12 @@ export function NewReleaseCard({ track, hideLikeButton = false }: { track: Relea
             )}
         >
             {/* Absolute Glow Background / Shade */}
-            <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent pointer-events-none" />
-            <div className="absolute inset-0 bg-gradient-to-r from-primary/10 via-transparent to-transparent opacity-0 group-hover/card:opacity-100 transition-opacity duration-500 pointer-events-none" />
+            <div className="absolute inset-0 bg-linear-to-br from-white/5 to-transparent pointer-events-none" />
+            <div className="absolute inset-0 bg-linear-to-r from-primary/10 via-transparent to-transparent opacity-0 group-hover/card:opacity-100 transition-opacity duration-500 pointer-events-none" />
 
             {/* Image Section */}
             <div className="relative w-28 sm:w-40 h-full shrink-0 overflow-hidden rounded-l-md rounded-r-none shadow-lg isolate ring-1 ring-white/10 ring-inset">
-                <div className="absolute inset-0 bg-gradient-to-br from-black/20 to-transparent z-10 pointer-events-none" />
+                <div className="absolute inset-0 bg-linear-to-br from-black/20 to-transparent z-10 pointer-events-none" />
                 {track.imageUrl || track.artist?.imageUrl ? (
                     <Image
                         src={track.imageUrl || track.artist?.imageUrl || ""}
@@ -134,10 +134,11 @@ export function NewReleaseCard({ track, hideLikeButton = false }: { track: Relea
                 )}
                 {isUpcoming && (
                     <div className={cn(
-                        "absolute inset-0 flex items-center justify-center bg-black/40 z-20 transition-all duration-300 backdrop-blur-[2px] opacity-0 group-hover/card:opacity-100",
+                        "absolute inset-0 flex flex-col gap-1 items-center justify-center bg-black/60 z-20 transition-all duration-300 backdrop-blur-[2px] opacity-0 group-hover/card:opacity-100",
                     )}>
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-white border border-white/50 px-2 py-1 rounded-md">
-                            Coming Soon
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-white/80">Coming</span>
+                        <span className="text-xs font-bold uppercase tracking-wider text-white border border-white/50 px-2 py-1 rounded-md bg-black/40">
+                            {new Date(track.scheduledFor).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
                         </span>
                     </div>
                 )}
@@ -165,7 +166,7 @@ export function NewReleaseCard({ track, hideLikeButton = false }: { track: Relea
                     {!hideLikeButton && (
                         <div className="flex items-center gap-2 ml-auto">
                             <ShareMenu
-                                url={`${process.env.NEXT_PUBLIC_APP_URL || "https://progressive.lk"}/tracks/${track.slug || track.id}`}
+                                url={`${process.env.NEXT_PUBLIC_APP_URL || "https://progressive.lk"}/${track.kind === "PODCAST" ? "podcasts" : "tracks"}/${track.slug || track.id}`}
                                 title={track.title}
                                 text={`Check out ${track.title} by ${track.artist?.name || "Unknown Artist"} on Progressive.lk`}
                             >

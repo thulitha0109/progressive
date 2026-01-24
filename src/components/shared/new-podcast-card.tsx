@@ -101,12 +101,12 @@ export function NewPodcastCard({ podcast, hideLikeButton = false }: { podcast: P
             )}
         >
             {/* Absolute Glow Background / Shade */}
-            <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent pointer-events-none" />
-            <div className="absolute inset-0 bg-gradient-to-r from-primary/10 via-transparent to-transparent opacity-0 group-hover/card:opacity-100 transition-opacity duration-500 pointer-events-none" />
+            <div className="absolute inset-0 bg-linear-to-br from-white/5 to-transparent pointer-events-none" />
+            <div className="absolute inset-0 bg-linear-to-r from-primary/10 via-transparent to-transparent opacity-0 group-hover/card:opacity-100 transition-opacity duration-500 pointer-events-none" />
 
             {/* Image Section */}
             <div className="relative w-28 sm:w-40 h-full shrink-0 overflow-hidden rounded-l-md rounded-r-none shadow-lg isolate ring-1 ring-white/10 ring-inset">
-                <div className="absolute inset-0 bg-gradient-to-br from-black/20 to-transparent z-10 pointer-events-none" />
+                <div className="absolute inset-0 bg-linear-to-br from-black/20 to-transparent z-10 pointer-events-none" />
                 {podcast.imageUrl || podcast.artist?.imageUrl ? (
                     <Image
                         src={podcast.imageUrl || podcast.artist?.imageUrl || ""}
