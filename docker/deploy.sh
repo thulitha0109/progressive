@@ -23,7 +23,7 @@ fi
 # Ensure uploads directory exists and is writable
 echo "📂 Setting up upload directory..."
 mkdir -p public/uploads
-chmod -R 774 public/uploads
+chmod -R 777 public/uploads
 
 echo "📦 Building and starting containers..."
 docker compose up -d --build
