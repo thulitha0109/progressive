@@ -12,14 +12,18 @@ import { ChevronLeft } from "lucide-react"
 import { ImageUpload } from "@/components/admin/image-upload"
 import { updateShop } from "@/server/actions/admin/shop"
 
-type ShopWithDetails = {
+export type ShopWithDetails = {
     id: string
     name: string
     description: string | null
     location: string | null
     imageUrl: string | null
     isVerified: boolean
-    contactInfo: any
+    contactInfo: {
+        email?: string
+        phone?: string
+        website?: string
+    } | null
 }
 
 export function ShopEditForm({ shop }: { shop: ShopWithDetails }) {

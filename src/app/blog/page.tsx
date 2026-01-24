@@ -3,7 +3,7 @@ import Image from "next/image"
 import { getBlogPosts, getCategories } from "@/server/actions/blog"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Calendar, User } from "lucide-react"
+import { Calendar } from "lucide-react"
 
 export default async function BlogPage({
     searchParams,
@@ -15,7 +15,7 @@ export default async function BlogPage({
     const currentCategory = params.category || undefined
 
     // Fetch posts with category filter
-    const { posts, totalPages } = await getBlogPosts(currentPage, 12, 'published', currentCategory)
+    const { posts } = await getBlogPosts(currentPage, 12, 'published', currentCategory)
     const categories = await getCategories()
 
     return (

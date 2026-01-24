@@ -5,16 +5,24 @@ import { Button } from "@/components/ui/button"
 import { Play, Pause, Clock } from "lucide-react"
 import { cn } from "@/lib/utils"
 
-interface Track {
+export interface Track {
     id: string
     title: string
     audioUrl: string
+    imageUrl?: string | null // Add this to match PlayerContext
     artist: {
         id?: string
         name: string
         imageUrl?: string | null
     }
     scheduledFor?: Date | string
+    // Extended properties for PlayerContext compatibility
+    likesCount?: number
+    isLiked?: boolean
+    kind?: "TRACK" | "PODCAST"
+    genre?: string | null
+    duration?: number
+    waveformPeaks?: number[] | null
 }
 
 export function PlayButton({

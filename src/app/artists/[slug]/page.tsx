@@ -1,11 +1,23 @@
 import { getArtistBySlug } from "@/server/actions/artists"
+import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { FollowButton } from "@/components/artist/follow-button"
 import { User, AudioLines } from "lucide-react"
 import { notFound } from "next/navigation"
+import { Prisma } from "@prisma/client"
 import { UpcomingCarousel } from "@/components/shared/upcoming-carousel"
 import { NewReleaseCard } from "@/components/shared/new-release-card"
 import { NewPodcastCard } from "@/components/shared/new-podcast-card"
+
+type ArtistWithRelations = Prisma.ArtistGetPayload<{
+    include: {
+        tracks: true
+        podcasts: true
+        _count: {
+            select: { followers: true, tracks: true, podcasts: true }
+        }
+    }
+}>
 
 export default async function ArtistPage({
     params,
@@ -67,10 +79,11 @@ export default async function ArtistPage({
             <div className="relative h-[300px] md:h-[350px] w-full overflow-hidden bg-muted">
                 {artist.imageUrl && (
                     <div className="absolute inset-0">
-                        <img
+                        <Image
                             src={artist.imageUrl}
                             alt={artist.name}
-                            className="h-full w-full object-cover object-top opacity-30 blur-sm"
+                            fill
+                            className="object-cover object-top opacity-30 blur-sm"
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-transparent" />
                     </div>
@@ -79,12 +92,13 @@ export default async function ArtistPage({
 
             <div className="px-4 md:px-6 relative z-10 -mt-32 md:-mt-40 mb-10">
                 <div className="flex flex-col md:flex-row md:items-end gap-6 md:gap-8">
-                    <div className="h-40 w-40 md:h-52 md:w-52 overflow-hidden rounded-full border-4 border-background bg-muted flex items-center justify-center shadow-2xl shrink-0">
+                    <div className="relative h-40 w-40 md:h-52 md:w-52 overflow-hidden rounded-full border-4 border-background bg-muted flex items-center justify-center shadow-2xl shrink-0">
                         {artist.imageUrl ? (
-                            <img
+                            <Image
                                 src={artist.imageUrl}
                                 alt={artist.name}
-                                className="h-full w-full object-cover object-top"
+                                fill
+                                className="object-cover object-top"
                             />
                         ) : (
                             <User className="h-20 w-20 text-muted-foreground" />
@@ -97,11 +111,11 @@ export default async function ArtistPage({
                                 <div className="flex items-center gap-4 text-muted-foreground">
                                     <div className="flex items-center gap-2" title="Followers">
                                         <User className="h-4 w-4" />
-                                        <span className="text-sm font-bold">{(artist as any)._count?.followers || 0}</span>
+                                        <span className="text-sm font-bold">{(artist as unknown as ArtistWithRelations)._count?.followers || 0}</span>
                                     </div>
                                     <div className="flex items-center gap-2" title="Total Tracks">
                                         <AudioLines className="h-4 w-4" />
-                                        <span className="text-sm font-bold">{((artist as any)._count?.tracks || 0) + ((artist as any)._count?.podcasts || 0)}</span>
+                                        <span className="text-sm font-bold">{((artist as unknown as ArtistWithRelations)._count?.tracks || 0) + ((artist as unknown as ArtistWithRelations)._count?.podcasts || 0)}</span>
                                     </div>
                                 </div>
                                 <FollowButton artistId={artist.id} initialIsFollowing={artist.isFollowing} />
@@ -111,7 +125,7 @@ export default async function ArtistPage({
                         {artist.socialLinks && (
                             <div className="flex flex-wrap gap-4">
                                 {(() => {
-                                    const links = artist.socialLinks as any
+                                    const links = artist.socialLinks as { instagram?: string; youtube?: string; mixcloud?: string; soundcloud?: string; facebook?: string; spotify?: string; tiktok?: string } || {}
                                     return (
                                         <>
                                             {links.instagram && (
@@ -182,7 +196,7 @@ export default async function ArtistPage({
                                 <span className="text-sm text-muted-foreground">{artist.podcasts.length} podcasts</span>
                             </div>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                {artist.podcasts.map((podcast: any) => (
+                                {artist.podcasts.map((podcast) => (
                                     <NewPodcastCard key={podcast.id} podcast={podcast} />
                                 ))}
                             </div>

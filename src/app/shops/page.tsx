@@ -1,4 +1,5 @@
 import Link from "next/link"
+import Image from "next/image"
 import { getShops } from "@/server/actions/shop"
 import { Card, CardContent, CardTitle, CardHeader } from "@/components/ui/card"
 import { MapPin, ShoppingBag } from "lucide-react"
@@ -22,10 +23,11 @@ export default async function ShopsPage() {
                             <Card className="h-full overflow-hidden border-none bg-secondary/20 hover:bg-secondary/30 transition-colors flex flex-col">
                                 <div className="aspect-video bg-muted relative overflow-hidden">
                                     {shop.imageUrl ? (
-                                        <img
+                                        <Image
                                             src={shop.imageUrl}
                                             alt={shop.name}
-                                            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                            fill
+                                            className="object-cover transition-transform duration-500 group-hover:scale-105"
                                         />
                                     ) : (
                                         <div className="h-full w-full flex items-center justify-center bg-secondary">
@@ -53,9 +55,14 @@ export default async function ShopsPage() {
                                             <div className="text-xs font-medium text-muted-foreground mb-2">Popular Items</div>
                                             <div className="flex gap-2">
                                                 {shop.products.map(p => (
-                                                    <div key={p.id} className="h-8 w-8 rounded overflow-hidden bg-background">
+                                                    <div key={p.id} className="relative h-8 w-8 rounded overflow-hidden bg-background shrink-0">
                                                         {p.images[0] && (
-                                                            <img src={p.images[0]} alt={p.name} className="h-full w-full object-cover" />
+                                                            <Image
+                                                                src={p.images[0]}
+                                                                alt={p.name}
+                                                                fill
+                                                                className="object-cover"
+                                                            />
                                                         )}
                                                     </div>
                                                 ))}

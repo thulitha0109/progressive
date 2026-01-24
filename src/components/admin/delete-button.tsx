@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 
 interface DeleteButtonProps {
     id: string
-    action: (id: string) => Promise<any>
+    action: (id: string) => Promise<unknown>
 }
 
 export function DeleteButton({ id, action }: DeleteButtonProps) {

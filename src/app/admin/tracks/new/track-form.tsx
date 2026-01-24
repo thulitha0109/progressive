@@ -171,19 +171,21 @@ export default function TrackForm({ artists, genres }: { artists: Artist[], genr
             startTransition(async () => {
                 try {
                     await createTrack(formData)
-                } catch (err: any) {
-                    if (err.message === "NEXT_REDIRECT" || err.message.includes("NEXT_REDIRECT")) {
+                } catch (err: unknown) {
+                    const message = err instanceof Error ? err.message : String(err)
+                    if (message === "NEXT_REDIRECT" || message.includes("NEXT_REDIRECT")) {
                         return // Redirecting
                     }
                     console.error("Creation error:", err)
-                    setError(err.message || "Failed to create track.")
+                    setError(message || "Failed to create track.")
                     setUploadStatus("")
                     setIsUploading(false)
                 }
             })
-        } catch (err: any) {
+        } catch (err: unknown) {
             console.error("Upload error:", err)
-            setError(err.message || "Failed to upload files.")
+            const message = err instanceof Error ? err.message : String(err)
+            setError(message || "Failed to upload files.")
             setUploadStatus("")
             setIsUploading(false)
         }

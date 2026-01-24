@@ -1,6 +1,5 @@
 "use client"
 
-import { useState, useEffect } from "react"
 import Image from "next/image"
 import { usePlayer } from "@/components/shared/player-context"
 import { LikeButton } from "@/components/shared/like-button"
@@ -23,7 +22,7 @@ export interface PodcastItem {
         name: string
         parent?: {
             name: string
-        }
+        } | null
     } | null
     likesCount: number
     isLiked: boolean
@@ -32,7 +31,7 @@ export interface PodcastItem {
         id: string
         name: string
         imageUrl?: string | null
-    }
+    } | null
     sequence?: number | null
 }
 
@@ -59,17 +58,7 @@ function getGenreBorderColor(genre: string) {
 
 export function NewPodcastCard({ podcast, hideLikeButton = false }: { podcast: PodcastItem, hideLikeButton?: boolean }) {
     const { playTrack, currentTrack, isPlaying, togglePlay } = usePlayer()
-    const [likesState, setLikesState] = useState({
-        likesCount: podcast.likesCount,
-        isLiked: podcast.isLiked
-    })
 
-    useEffect(() => {
-        setLikesState({
-            likesCount: podcast.likesCount,
-            isLiked: podcast.isLiked
-        })
-    }, [podcast.likesCount, podcast.isLiked])
 
     if (!podcast) return null
 
@@ -83,8 +72,9 @@ export function NewPodcastCard({ podcast, hideLikeButton = false }: { podcast: P
             togglePlay()
         } else {
             // Force kind to PODCAST if missing
-            // @ts-ignore
-            playTrack({ ...podcast, kind: 'PODCAST', ...likesState })
+            // Force kind to PODCAST if missing
+            // @ts-expect-error - PodcastItem is compatible with Track for playback purposes
+            playTrack({ ...podcast, kind: 'PODCAST' })
         }
     }
 
@@ -127,8 +117,9 @@ export function NewPodcastCard({ podcast, hideLikeButton = false }: { podcast: P
                         "absolute inset-0 flex items-center justify-center bg-black/40 z-20 transition-all duration-300 backdrop-blur-[2px]",
                         isCurrentTrack && isPlaying ? "opacity-100 bg-black/60" : "opacity-0 group-hover/card:opacity-100"
                     )}>
-                        {/* We cast podcast to any or Track for PlayButton compatibility if needed, though PlayButton might accept generic Track-like shape */}
-                        <PlayButton track={podcast as any} variant="icon" />
+                        {/* PlayButton expects Track, podcast is compatible */}
+                        {/* @ts-expect-error - PodcastItem overlaps with Track */}
+                        <PlayButton track={podcast} variant="icon" />
                     </div>
                 )}
                 {isUpcoming && (
@@ -178,11 +169,11 @@ export function NewPodcastCard({ podcast, hideLikeButton = false }: { podcast: P
                                 </ShareMenu>
                                 <div onClick={(e) => e.stopPropagation()} className="transform transition-transform active:scale-95 text-muted-foreground hover:text-red-500">
                                     <LikeButton
+                                        key={`${podcast.id}-${podcast.likesCount}-${podcast.isLiked}`}
                                         trackId={podcast.id}
                                         initialLikes={podcast.likesCount}
                                         initialIsLiked={podcast.isLiked}
                                         type="PODCAST"
-                                        onToggle={(isLiked, likesCount) => setLikesState({ isLiked, likesCount })}
                                     />
                                 </div>
                             </>

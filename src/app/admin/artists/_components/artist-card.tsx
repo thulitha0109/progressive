@@ -4,6 +4,7 @@ import { Artist } from "@prisma/client"
 import { Button } from "@/components/ui/button"
 import { Edit, Trash2 } from "lucide-react"
 import Link from "next/link"
+import Image from "next/image"
 import { deleteArtist } from "@/server/actions/artists"
 import { useTransition } from "react"
 import { useRouter } from "next/navigation"
@@ -29,11 +30,14 @@ export function ArtistCard({ artist }: ArtistCardProps) {
         <div className="group relative rounded-lg border bg-card text-card-foreground shadow-sm p-6 overflow-hidden">
             <div className="flex items-center gap-4">
                 {artist.imageUrl && (
-                    <img
-                        src={artist.imageUrl}
-                        alt={artist.name}
-                        className="h-12 w-12 rounded-full object-cover"
-                    />
+                    <div className="relative h-12 w-12 rounded-full overflow-hidden shrink-0">
+                        <Image
+                            src={artist.imageUrl}
+                            alt={artist.name}
+                            fill
+                            className="object-cover"
+                        />
+                    </div>
                 )}
                 <div>
                     <h3 className="text-lg font-semibold">{artist.name}</h3>

@@ -2,13 +2,12 @@
 
 import * as React from "react"
 import { useRouter } from "next/navigation"
-import { Calculator, Calendar, CreditCard, Settings, Smile, User, Search, Loader2, X } from "lucide-react"
+import { Search, Loader2, X } from "lucide-react"
 import { globalSearch, SearchResult } from "@/server/actions/search"
+import Image from "next/image"
 import { usePlayer } from "@/components/shared/player-context"
 
-// Removed unused imports
 import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
 
 export function InlineSearch() {
     const [open, setOpen] = React.useState(false)
@@ -115,9 +114,9 @@ export function InlineSearch() {
                                         onClick={() => handleSelect(result)}
                                         className="flex items-center gap-3 w-full p-2 rounded-sm hover:bg-accent hover:text-accent-foreground text-left transition-colors"
                                     >
-                                        <div className="h-8 w-8 rounded overflow-hidden flex-shrink-0 bg-secondary">
+                                        <div className="h-8 w-8 rounded overflow-hidden shrink-0 bg-secondary">
                                             {result.image ? (
-                                                <img src={result.image} alt={result.title} className="h-full w-full object-cover" />
+                                                <Image src={result.image} alt={result.title} fill className="object-cover" />
                                             ) : (
                                                 <div className="h-full w-full flex items-center justify-center text-[10px] font-bold">
                                                     {result.title[0]}

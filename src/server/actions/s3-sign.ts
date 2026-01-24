@@ -5,16 +5,7 @@ import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3"
 import { auth } from "@/auth"
 import { headers } from "next/headers"
 
-// Initialize S3 Client (Same config as file-upload.ts, but standard initialization)
-const s3Client = new S3Client({
-    region: process.env.S3_REGION || "us-east-1",
-    endpoint: process.env.S3_ENDPOINT || "http://localhost:9000",
-    credentials: {
-        accessKeyId: process.env.S3_ACCESS_KEY || "minioadmin",
-        secretAccessKey: process.env.S3_SECRET_KEY || "minioadminpassword",
-    },
-    forcePathStyle: true, // Required for MinIO
-})
+
 
 const BUCKET_NAME = process.env.S3_BUCKET_NAME || "progressive-uploads"
 

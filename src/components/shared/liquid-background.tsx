@@ -6,6 +6,7 @@ import { useTexture, shaderMaterial } from '@react-three/drei'
 import * as THREE from 'three'
 import { cn } from "@/lib/utils"
 import { useTheme } from "next-themes"
+import Image from "next/image"
 
 // --- 1. Custom Shader Material ---
 const LiquidDistortionMaterial = shaderMaterial(
@@ -132,11 +133,26 @@ const LiquidDistortionMaterial = shaderMaterial(
 
 extend({ LiquidDistortionMaterial })
 
+// Define types for the shader material uniforms
+interface LiquidUniforms {
+    uTexture: THREE.Texture
+    uMouse: THREE.Vector2
+    uResolution: THREE.Vector2
+    uImageResolution: THREE.Vector2
+    uTime: number
+    uHover: number
+    uFit: number
+    uIsDark: number
+}
+
 // --- 2. Scene Component ---
 function Scene({ imageUrl, fit }: { imageUrl: string, fit: 'cover' | 'contain' }) {
     const { viewport, size } = useThree()
     const texture = useTexture(imageUrl)
-    const ref = useRef<any>(null)
+    // Use proper type intersection if possible, but shaderMaterial result is complex.
+    // Using simple explicit any or limited interface for ref access is pragmatic here
+    // but we can do better.
+    const ref = useRef<THREE.ShaderMaterial & LiquidUniforms>(null)
 
     const mouseRef = useRef(new THREE.Vector2(0.5, 0.5))
     const hoverStrength = useRef(0)
@@ -172,7 +188,7 @@ function Scene({ imageUrl, fit }: { imageUrl: string, fit: 'cover' | 'contain' }
     return (
         <mesh scale={[viewport.width, viewport.height, 1]}>
             <planeGeometry args={[1, 1, 32, 32]} />
-            {/* @ts-ignore */}
+            {/* @ts-expect-error - liquidDistortionMaterial is not in JSX elements type definition */}
             <liquidDistortionMaterial
                 ref={ref}
                 uTexture={texture}
@@ -196,20 +212,21 @@ export function LiquidBackground({ imageUrl, className, onReady, objectFit = 'co
     return (
         <div className={className}>
             {/* Static Fallback Image */}
-            <img
+            <Image
                 src={imageUrl}
                 alt="Background"
+                fill
                 className={cn(
-                    "absolute inset-0 w-full h-full blur-xl scale-100 transition-opacity duration-[2000ms] ease-in-out",
+                    "blur-xl scale-100 transition-opacity duration-2000 ease-in-out",
                     objectFit === 'contain' ? 'object-contain' : 'object-cover',
                     ready ? 'opacity-0' : 'opacity-100'
                 )}
-                loading="eager"
+                priority
             />
 
             {/* 3D Liquid Layer */}
             <div
-                className={`absolute inset-0 w-full h-full transition-opacity duration-[2000ms] ease-in-out ${ready ? 'opacity-100' : 'opacity-0'}`}
+                className={`absolute inset-0 w-full h-full transition-opacity duration-2000 ease-in-out ${ready ? 'opacity-100' : 'opacity-0'}`}
             >
                 <Canvas
                     camera={{ position: [0, 0, 1], fov: 75 }}

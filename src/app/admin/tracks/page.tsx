@@ -70,7 +70,7 @@ export default async function TracksPage({ searchParams }: TracksPageProps) {
                                 <span className="truncate">{track.title}</span>
                             </div>
                             <div className="col-span-2 text-muted-foreground truncate">
-                                {(track as any).label || "-"}
+                                {(track as unknown as { label?: string }).label || "-"}
                             </div>
                             <div className="col-span-2">
                                 {track.type && (

@@ -64,12 +64,12 @@ export default function NewArtistForm() {
 
                 setUploadStatus("Creating artist...")
                 await createArtist(formData)
-            } catch (err: any) {
-                if (err.message === "NEXT_REDIRECT" || err.message.includes("NEXT_REDIRECT")) {
+            } catch (err: unknown) {
+                if (err instanceof Error && (err.message === "NEXT_REDIRECT" || err.message.includes("NEXT_REDIRECT"))) {
                     return // Redirecting
                 }
                 console.error("Error:", err)
-                setError(err.message || "Failed to create artist. Please try again.")
+                setError((err instanceof Error ? err.message : "Failed to create artist. Please try again."))
                 setUploadStatus("")
             }
         })

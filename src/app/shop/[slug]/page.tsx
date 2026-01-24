@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { ShoppingCart, Check, Store } from "lucide-react"
 import Link from "next/link"
+import Image from "next/image"
 import { Separator } from "@/components/ui/separator"
 
 export default async function SingleProductPage({
@@ -35,7 +36,12 @@ export default async function SingleProductPage({
                     <div className="space-y-4">
                         <div className="aspect-square bg-secondary/20 rounded-lg overflow-hidden border border-border/50 relative">
                             {product.images[0] ? (
-                                <img src={product.images[0]} alt={product.name} className="h-full w-full object-cover" />
+                                <Image
+                                    src={product.images[0]}
+                                    alt={product.name}
+                                    fill
+                                    className="object-cover"
+                                />
                             ) : (
                                 <div className="h-full w-full flex items-center justify-center bg-secondary">
                                     <span className="text-muted-foreground">No image available</span>
@@ -44,8 +50,13 @@ export default async function SingleProductPage({
                         </div>
                         <div className="grid grid-cols-4 gap-4">
                             {product.images.map((img, i) => (
-                                <div key={i} className="aspect-square rounded-md overflow-hidden border border-border/50 cursor-pointer hover:border-primary transition-colors">
-                                    <img src={img} alt={`${product.name} ${i}`} className="h-full w-full object-cover" />
+                                <div key={i} className="relative aspect-square rounded-md overflow-hidden border border-border/50 cursor-pointer hover:border-primary transition-colors">
+                                    <Image
+                                        src={img}
+                                        alt={`${product.name} ${i}`}
+                                        fill
+                                        className="object-cover"
+                                    />
                                 </div>
                             ))}
                         </div>

@@ -37,7 +37,7 @@ export default function TermsPage() {
                     <section>
                         <h2 className="text-2xl font-semibold mt-8 mb-4">Disclaimer</h2>
                         <p className="text-muted-foreground">
-                            The materials on Progressive.lk are provided on an 'as is' basis. Progressive.lk makes no warranties,
+                            The materials on Progressive.lk are provided on an &apos;as is&apos; basis. Progressive.lk makes no warranties,
                             expressed or implied, and hereby disclaims and negates all other warranties including, without limitation,
                             implied warranties or conditions of merchantability, fitness for a particular purpose, or non-infringement of intellectual property
                             or other violation of rights.

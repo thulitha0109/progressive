@@ -1,14 +1,15 @@
 import NextAuth from "next-auth"
 import { PrismaAdapter } from "@auth/prisma-adapter"
+import { type Adapter } from "next-auth/adapters"
 import { prisma } from "@/lib/prisma"
 import { authConfig } from "./auth.config"
 import Credentials from "next-auth/providers/credentials"
 import { compare } from "bcryptjs"
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+
 export const { handlers, auth, signIn, signOut } = NextAuth({
     ...authConfig,
-    adapter: PrismaAdapter(prisma) as any,
+    adapter: PrismaAdapter(prisma) as Adapter,
     session: { strategy: "jwt" },
     providers: [
         Credentials({
@@ -22,10 +23,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                     return null
                 }
 
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 const user = await prisma.user.findUnique({
                     where: { email: credentials.email as string },
-                }) as any
+                })
 
                 if (!user || !user.password) {
                     return null

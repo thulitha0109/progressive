@@ -16,6 +16,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { ArrowLeft, Loader2 } from "lucide-react"
 import Link from "next/link"
+import Image from "next/image"
 import { useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
 
@@ -154,18 +155,20 @@ export default function EditTrackForm({ track, artists, genres }: { track: Track
                     await updateTrack(track.id, formData)
                     router.push("/admin/tracks")
                     router.refresh()
-                } catch (err: any) {
-                    if (err.message === "NEXT_REDIRECT" || err.message.includes("NEXT_REDIRECT")) {
+                } catch (err: unknown) {
+                    const message = err instanceof Error ? err.message : String(err)
+                    if (message === "NEXT_REDIRECT" || message.includes("NEXT_REDIRECT")) {
                         return // Redirecting
                     }
-                    setError(err.message || "Failed to update track. Please try again.")
+                    setError(message || "Failed to update track. Please try again.")
                     setUploadStatus("")
                     setIsUploading(false)
                 }
             })
-        } catch (err: any) {
+        } catch (err: unknown) {
             console.error("Upload error:", err)
-            setError(err.message || "Failed to upload files.")
+            const message = err instanceof Error ? err.message : String(err)
+            setError(message || "Failed to upload files.")
             setUploadStatus("")
             setIsUploading(false)
         }
@@ -341,11 +344,14 @@ export default function EditTrackForm({ track, artists, genres }: { track: Track
                             {track.imageUrl && (
                                 <div className="mt-2">
                                     <p className="text-sm font-semibold mb-1">Current:</p>
-                                    <img
-                                        src={track.imageUrl}
-                                        alt="Current cover"
-                                        className="w-32 h-32 object-cover rounded-md border"
-                                    />
+                                    <div className="relative w-32 h-32 rounded-md border overflow-hidden">
+                                        <Image
+                                            src={track.imageUrl}
+                                            alt="Current cover"
+                                            fill
+                                            className="object-cover"
+                                        />
+                                    </div>
                                 </div>
                             )}
                         </div>

@@ -2,11 +2,20 @@ import Image from "next/image"
 import Link from "next/link"
 import { getArtists, getFollowedArtists } from "@/server/actions/artists"
 import { User, AudioLines } from "lucide-react"
+import { Prisma } from "@prisma/client"
 import { Card, CardContent } from "@/components/ui/card"
 import { ArtistSearch } from "@/components/artist/artist-search"
 import { ArtistSort } from "@/components/artist/artist-sort"
 import { Pagination } from "@/components/shared/pagination"
 import { FollowButton } from "@/components/artist/follow-button"
+
+type ArtistWithCounts = Prisma.ArtistGetPayload<{
+    include: {
+        _count: {
+            select: { tracks: true, podcasts: true }
+        }
+    }
+}>
 
 export default async function ArtistsPage({
     searchParams,
@@ -16,7 +25,8 @@ export default async function ArtistsPage({
     const params = await searchParams
     const page = Number(params.page) || 1
     const search = params.search as string
-    const sort = (params.sort as any) || "newest"
+    const validSorts = ["newest", "a-z", "z-a", "popular"]
+    const sort = validSorts.includes(params.sort as string) ? (params.sort as "newest" | "a-z" | "z-a" | "popular") : "newest"
 
     const { artists, totalPages, currentPage } = await getArtists(page, 12, search, sort)
     const followedArtists = await getFollowedArtists()
@@ -59,7 +69,7 @@ export default async function ArtistsPage({
                                     <div className="flex items-center justify-between text-xs text-muted-foreground font-medium mb-2">
                                         <div className="flex items-center gap-1.5" title="Total Tracks">
                                             <AudioLines className="w-3.5 h-3.5" />
-                                            <span>{((artist as any)._count?.tracks || 0) + ((artist as any)._count?.podcasts || 0)}</span>
+                                            <span>{((artist as unknown as ArtistWithCounts)._count?.tracks || 0) + ((artist as unknown as ArtistWithCounts)._count?.podcasts || 0)}</span>
                                         </div>
                                         <FollowButton
                                             artistId={artist.id}

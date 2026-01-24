@@ -11,7 +11,7 @@ export default async function UpcomingTracksPage() {
                 <div className="flex flex-col gap-2 border-b pb-6">
                     <h1 className="text-3xl font-bold tracking-tight">Upcoming Releases</h1>
                     <p className="text-muted-foreground text-lg">
-                        Be the first to hear what's coming next.
+                        Be the first to hear what&apos;s coming next.
                     </p>
                 </div>
 

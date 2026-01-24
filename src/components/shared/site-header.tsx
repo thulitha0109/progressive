@@ -1,10 +1,11 @@
 "use client"
 
 import Link from "next/link"
+import Image from "next/image"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
-import { ModeToggle } from "@/components/shared/mode-toggle"
+
 import { Menu, Music2, User, Search, BookOpen, Radio, X, Home, Heart, ListMusic, UserCheck, LayoutDashboard, LogOut } from "lucide-react"
 
 import {
@@ -87,15 +88,19 @@ export function SiteHeader({ user: initialUser }: SiteHeaderProps) {
     ]
 
     return (
-        <header className="sticky top-0 z-50 w-full bg-background/70 backdrop-blur-md supports-[backdrop-filter]:bg-background/60 animate-enter-slide-down border-border/40 mb-0 md:mb-8">
+        <header className="sticky top-0 z-50 w-full bg-background/70 backdrop-blur-md supports-[backdrop-filter]:bg-background/60 animate-enter-slide-down border-border/40 mb-0">
             <div className="flex h-16 items-center px-4 md:pl-6 md:pr-4 justify-between">
                 {/* Left: Logo (Mobile & Desktop) */}
                 <div className="flex items-center">
                     <Link href="/" className="mr-6 flex items-center space-x-2">
                         {/* Mobile Icon Logo */}
-                        <img src="/progressive.lk-icon.svg" alt="Progressive.lk" className="h-6 w-auto invert dark:invert-0 lg:hidden" />
+                        <div className="relative h-6 w-6 lg:hidden">
+                            <Image src="/progressive.lk-icon.svg" alt="Progressive.lk" fill className="object-contain invert dark:invert-0" />
+                        </div>
                         {/* Desktop Full Logo */}
-                        <img src="/progressive.lk-logo.svg" alt="Progressive.lk" className="h-4 w-auto invert dark:invert-0 hidden lg:block cursor-pointer" />
+                        <div className="relative h-4 w-40 hidden lg:block">
+                            <Image src="/progressive.lk-logo.svg" alt="Progressive.lk" fill className="object-contain object-left invert dark:invert-0 cursor-pointer" />
+                        </div>
                     </Link>
 
                     {/* Desktop Navigation */}
@@ -290,8 +295,8 @@ export function SiteHeader({ user: initialUser }: SiteHeaderProps) {
                                         {/* Header Alignment Container */}
                                         <div className="flex items-center justify-between px-8 h-16 border-b border-white/5 shrink-0">
                                             {/* Left: Desktop SVG Logo (Original Colors) */}
-                                            <div className="flex items-center gap-3">
-                                                <img src="/progressive.lk-logo.svg" alt="Progressive.lk" className="h-5 w-auto" />
+                                            <div className="flex items-center gap-3 relative h-5 w-32">
+                                                <Image src="/progressive.lk-logo.svg" alt="Progressive.lk" fill className="object-contain object-left" />
                                             </div>
                                             {/* Right: Placeholder for Close Button (z-60) */}
                                             <div className="w-10 h-10" />
@@ -334,8 +339,8 @@ export function SiteHeader({ user: initialUser }: SiteHeaderProps) {
                                                         {/* Left: Social Links (with White Icon First) */}
                                                         <div className="flex items-center gap-4">
                                                             {/* First: White Logo Icon */}
-                                                            <Link href="/" onClick={() => setIsOpen(false)} className="p-3 bg-white/5 rounded-full hover:bg-white/10 transition-colors group">
-                                                                <img src="/progressive.lk-icon.svg" alt="App" className="w-5 h-5 grayscale opacity-60 group-hover:grayscale-0 group-hover:opacity-100 transition-all" />
+                                                            <Link href="/" onClick={() => setIsOpen(false)} className="p-3 bg-white/5 rounded-full hover:bg-white/10 transition-colors group relative h-11 w-11">
+                                                                <Image src="/progressive.lk-icon.svg" alt="App" fill className="p-3 object-contain grayscale opacity-60 group-hover:grayscale-0 group-hover:opacity-100 transition-all" />
                                                             </Link>
 
                                                             <Link href="#" className="p-3 bg-white/5 rounded-full hover:bg-white/10 transition-colors group">

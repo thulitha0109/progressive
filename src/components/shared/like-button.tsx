@@ -14,6 +14,7 @@ export function LikeButton({
     initialLikes,
     initialIsLiked,
     onToggle,
+    countClassName,
 }: {
     trackId?: string
     itemId?: string
@@ -21,6 +22,7 @@ export function LikeButton({
     initialLikes: number
     initialIsLiked: boolean
     onToggle?: (isLiked: boolean, likesCount: number) => void
+    countClassName?: string
 }) {
     const router = useRouter()
     const [error, setError] = useState("")
@@ -66,7 +68,7 @@ export function LikeButton({
                     setError(result.error)
                 }
             }
-        } catch (err: any) {
+        } catch (err: unknown) {
             // Revert optimistic update on error
             startTransition(() => {
                 addOptimistic(!newState)
@@ -74,7 +76,8 @@ export function LikeButton({
             })
 
             // Check if it's an authentication error
-            if (err.message?.includes("logged in")) {
+            const message = err instanceof Error ? err.message : String(err)
+            if (message?.includes("logged in")) {
                 router.push("/auth/login")
             } else {
                 setError("Failed to update like")
@@ -87,7 +90,7 @@ export function LikeButton({
             <Button
                 size="sm"
                 variant="ghost"
-                className="flex items-center gap-1 hover:text-red-500 px-2"
+                className="flex items-center gap-1 hover:text-red-500"
                 onClick={handleLike}
             >
                 <Heart
@@ -96,7 +99,7 @@ export function LikeButton({
                         optimisticState.isLiked && "fill-red-500 text-red-500"
                     )}
                 />
-                <span className="text-xs tabular-nums">{optimisticState.likes}</span>
+                <span className={cn("text-xs tabular-nums", countClassName)}>{optimisticState.likes}</span>
             </Button>
             {error && (
                 <span className="absolute top-full left-0 text-xs text-destructive whitespace-nowrap">

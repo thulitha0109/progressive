@@ -1,4 +1,5 @@
 import Link from "next/link"
+import Image from "next/image"
 import { prisma } from "@/lib/prisma"
 import { Button } from "@/components/ui/button"
 import {
@@ -9,7 +10,7 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table"
-import { Plus, Pencil, Trash, Eye, Package } from "lucide-react"
+import { Plus, Pencil, Eye, Package } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { deleteProduct } from "@/server/actions/admin/product"
 import { DeleteButton } from "@/components/admin/delete-button"
@@ -49,7 +50,14 @@ export default async function AdminProductsPage() {
                                 <TableCell className="font-medium flex items-center gap-2">
                                     <div className="h-8 w-8 rounded overflow-hidden bg-secondary">
                                         {product.images[0] ? (
-                                            <img src={product.images[0]} alt={product.name} className="h-full w-full object-cover" />
+                                            <div className="relative h-full w-full">
+                                                <Image
+                                                    src={product.images[0]}
+                                                    alt={product.name}
+                                                    fill
+                                                    className="object-cover"
+                                                />
+                                            </div>
                                         ) : (
                                             <div className="h-full w-full flex items-center justify-center">
                                                 <Package className="h-4 w-4 text-muted-foreground/50" />

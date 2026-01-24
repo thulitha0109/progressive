@@ -90,7 +90,7 @@ export async function GET(
                 }
             })
 
-            return new NextResponse(readableStream as any, {
+            return new NextResponse(readableStream as unknown as BodyInit, {
                 status: 206,
                 headers: {
                     "Content-Range": `bytes ${start}-${end}/${fileSize}`,
@@ -122,7 +122,7 @@ export async function GET(
                 }
             })
 
-            return new NextResponse(readableStream as any, {
+            return new NextResponse(readableStream as unknown as BodyInit, {
                 status: 200,
                 headers: {
                     "Content-Length": fileSize.toString(),

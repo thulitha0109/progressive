@@ -4,7 +4,8 @@ import { Button } from "@/components/ui/button"
 import { Slider } from "@/components/ui/slider"
 import { ChevronDown, Pause, Play, SkipBack, SkipForward, Volume2, VolumeX } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { useEffect, useState } from "react"
+import { useState } from "react"
+import Image from "next/image"
 import { Waveform } from "@/components/shared/waveform"
 import { LikeButton } from "@/components/shared/like-button"
 import { AddToPlaylistButton } from "@/components/shared/add-to-playlist-button"
@@ -26,7 +27,8 @@ const GENRE_BORDERS: Record<string, string> = {
     "Chillout": "border-indigo-500/50 text-indigo-400 bg-indigo-500/10",
 }
 
-function getGenreStyle(genre: string) {
+function getGenreStyle(genre: string | null | undefined) {
+    if (!genre || typeof genre !== 'string') return "border-white/10 text-muted-foreground bg-white/5"
     const key = Object.keys(GENRE_BORDERS).find(k => genre.includes(k))
     return key ? GENRE_BORDERS[key] : "border-white/10 text-muted-foreground bg-white/5"
 }
@@ -68,6 +70,8 @@ interface FullScreenPlayerProps {
     volume: number
     onVolumeChange: (value: number) => void
     audioElement?: HTMLMediaElement | null
+    playNext?: () => void
+    playPrevious?: () => void
 }
 
 export function FullScreenPlayer({
@@ -78,10 +82,11 @@ export function FullScreenPlayer({
     onClose,
     currentTime,
     duration,
-    onSeek,
     volume,
     onVolumeChange,
     audioElement,
+    playNext,
+    playPrevious,
 }: FullScreenPlayerProps) {
     const [isMuted, setIsMuted] = useState(false)
     const [prevVolume, setPrevVolume] = useState(volume)
@@ -108,7 +113,7 @@ export function FullScreenPlayer({
     return (
         <div
             className={cn(
-                "fixed inset-0 z-[60] flex flex-col bg-background/95 backdrop-blur-xl supports-[backdrop-filter]:bg-background/80 transition-transform duration-300 ease-in-out",
+                "fixed inset-0 z-60 flex flex-col bg-background/95 backdrop-blur-xl supports-backdrop-filter:bg-background/80 transition-transform duration-300 ease-in-out",
                 isOpen ? "translate-y-0" : "translate-y-full"
             )}
         >
@@ -126,12 +131,15 @@ export function FullScreenPlayer({
             {/* Main Content */}
             <div className="flex flex-1 flex-col items-center justify-center gap-8 p-4 md:p-8">
                 {/* Album Art After Isuued fix*/}
-                <div className="relative inline-block aspect-square max-h-[40vh] overflow-hidden rounded-md shadow-2xl">
+                {/* Album Art After Isuued fix*/}
+                <div className="relative inline-block aspect-square max-h-[40vh] overflow-hidden rounded-md shadow-2xl group">
                     {track.imageUrl || track.artist?.imageUrl ? (
-                        <img
+                        <Image
                             src={track.imageUrl || track.artist.imageUrl || ""}
                             alt={track.title || "Track"}
-                            className="h-full w-full object-cover"
+                            fill
+                            className="object-cover transition-transform duration-700 group-hover:scale-105"
+                            sizes="(max-height: 40vh) 400px, 400px"
                         />
                     ) : (
                         <div className="flex h-full w-full items-center justify-center bg-muted">
@@ -140,13 +148,56 @@ export function FullScreenPlayer({
                             </span>
                         </div>
                     )}
+
+                    {/* Overlay Play Button */}
+                    <div className="absolute inset-0 flex items-center justify-center bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 backdrop-blur-[2px]">
+                        <Button
+                            size="icon"
+                            className="h-16 w-16 rounded-full shadow-lg bg-white/10 hover:bg-white/20 hover:scale-105 transition-all text-white border border-white/20 backdrop-blur-md"
+                            onClick={(e) => {
+                                e.stopPropagation()
+                                togglePlay()
+                            }}
+                        >
+                            {isPlaying ? (
+                                <Pause className="h-8 w-8 fill-current" />
+                            ) : (
+                                <Play className="h-8 w-8 fill-current ml-1" />
+                            )}
+                        </Button>
+                    </div>
+
+                    {/* Mobile: Always visible overlay for touch targets if needed, or rely on just tapping the image to toggle? 
+                        User asked for "like featured card", which usually has a visible button on hover or always.
+                        Let's make it always visible on mobile/touch, or better yet, just center it always.
+                        Actually, "like featured card" usually implies center overlay.
+                        Let's keep it simple: Center overlay, always visible or on hover. 
+                        For mobile usability, maybe always visible but subtle?
+                        Let's follow the "featured card" style:
+                    */}
+                    <div className="absolute inset-0 flex items-center justify-center md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-300">
+                        <Button
+                            size="icon"
+                            className="h-14 w-14 md:h-16 md:w-16 rounded-full shadow-xl bg-primary/90 hover:bg-primary text-primary-foreground hover:scale-105 transition-all"
+                            onClick={(e) => {
+                                e.stopPropagation()
+                                togglePlay()
+                            }}
+                        >
+                            {isPlaying ? (
+                                <Pause className="h-6 w-6 md:h-8 md:w-8 fill-current" />
+                            ) : (
+                                <Play className="h-6 w-6 md:h-8 md:w-8 fill-current ml-1" />
+                            )}
+                        </Button>
+                    </div>
                 </div>
 
                 {/* Track Info & Actions */}
                 <div className="flex flex-col items-center gap-4 text-center w-full">
                     <div className="space-y-1 w-full px-8">
                         <h2 className="text-2xl font-bold leading-tight truncate">{track.title}</h2>
-                        <p className="text-lg text-muted-foreground truncate">{track.artist.name}</p>
+                        <p className="text-lg text-muted-foreground truncate">{track.artist?.name || "Unknown Artist"}</p>
                     </div>
 
                     {/* Metadata: Genres, Type, SQ No */}
@@ -193,7 +244,7 @@ export function FullScreenPlayer({
                     </div>
 
                     <div className="flex items-center gap-6">
-                        <div className="scale-125">
+                        <div className="md:scale-125">
                             <LikeButton
                                 trackId={track.id}
                                 type={track.kind || "TRACK"}
@@ -202,12 +253,12 @@ export function FullScreenPlayer({
                             />
                         </div>
 
-                        <div className="scale-110">
+                        <div className="md:scale-110">
                             <AddToPlaylistButton trackId={track.id} />
                         </div>
 
-                        {track.artist.id && (
-                            <div className="scale-110">
+                        {track.artist?.id && (
+                            <div className="md:scale-110">
                                 <FollowButton
                                     artistId={track.artist.id}
                                     showText={false}
@@ -240,23 +291,23 @@ export function FullScreenPlayer({
                     </div>
                 </div>
 
-                {/* Controls */}
-                <div className="flex items-center gap-6 md:gap-10">
-                    <Button variant="ghost" size="icon" className="h-12 w-12">
+                {/* Controls (Play Button Removed) */}
+                <div className="hidden md:flex items-center gap-8 md:gap-16 justify-center min-h-[64px]">
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-14 w-14 hover:bg-white/10 text-white/70 hover:text-white transition-colors rounded-full"
+                        onClick={playPrevious}
+                    >
                         <SkipBack className="h-8 w-8" />
                     </Button>
+
                     <Button
+                        variant="ghost"
                         size="icon"
-                        className="h-16 w-16 rounded-full shadow-lg"
-                        onClick={togglePlay}
+                        className="h-14 w-14 hover:bg-white/10 text-white/70 hover:text-white transition-colors rounded-full"
+                        onClick={playNext}
                     >
-                        {isPlaying ? (
-                            <Pause className="h-8 w-8" />
-                        ) : (
-                            <Play className="h-8 w-8 ml-1" />
-                        )}
-                    </Button>
-                    <Button variant="ghost" size="icon" className="h-12 w-12">
                         <SkipForward className="h-8 w-8" />
                     </Button>
                 </div>

@@ -4,6 +4,9 @@ import { prisma } from "@/lib/prisma"
 import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
 
+import { Prisma } from "@prisma/client"
+import { auth } from "@/auth"
+
 /**
  * Generate URL-friendly slug from a string
  */
@@ -50,7 +53,7 @@ export async function getArtists(
 ) {
     const skip = (page - 1) * pageSize
 
-    const where: any = {}
+    const where: Prisma.ArtistWhereInput = {}
     if (search) {
         where.OR = [
             { name: { contains: search, mode: 'insensitive' } },
@@ -58,7 +61,7 @@ export async function getArtists(
         ]
     }
 
-    let orderBy: any = {}
+    let orderBy: Prisma.ArtistOrderByWithRelationInput = {}
     switch (sort) {
         case 'a-z':
             orderBy = { name: 'asc' }
@@ -144,7 +147,6 @@ export async function createArtist(formData: FormData) {
     redirect("/admin/artists")
 }
 
-import { auth } from "@/auth"
 
 export async function getArtistById(id: string) {
     const session = await auth()
@@ -177,7 +179,7 @@ export async function getArtistById(id: string) {
     }
 
     const now = new Date()
-    const tracks = artist.tracks.map((track: any) => ({
+    const tracks = artist.tracks.map((track) => ({
         ...track,
         likesCount: track._count.likedBy,
         isLiked: likedTrackIds.has(track.id),
@@ -245,18 +247,19 @@ export async function getArtistBySlug(slug: string) {
     }
 
     const now = new Date()
-    const tracks = artist.tracks.map((track: any) => ({
+    const tracks = artist.tracks.map((track) => ({
         ...track,
         likesCount: track._count.likedBy,
         isLiked: likedTrackIds.has(track.id),
         isReleased: new Date(track.scheduledFor) <= now,
     }))
 
-    const podcasts = artist.podcasts.map((podcast: any) => ({
+    const podcasts = artist.podcasts.map((podcast) => ({
         ...podcast,
         likesCount: podcast._count.likedBy,
         isLiked: likedPodcastIds.has(podcast.id),
         genreRel: podcast.genre,
+        genre: podcast.genre?.name, // Flatten for PodcastItem compatibility
         isReleased: new Date(podcast.scheduledFor) <= now,
     }))
 

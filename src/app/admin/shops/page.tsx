@@ -1,4 +1,5 @@
 import Link from "next/link"
+import Image from "next/image"
 import { prisma } from "@/lib/prisma"
 import { Button } from "@/components/ui/button"
 import {
@@ -9,7 +10,7 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table"
-import { Plus, Pencil, Trash, Eye, ShoppingBag } from "lucide-react"
+import { Plus, Pencil, Eye, ShoppingBag } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { deleteShop } from "@/server/actions/admin/shop"
 import { DeleteButton } from "@/components/admin/delete-button"
@@ -50,7 +51,14 @@ export default async function AdminShopsPage() {
                                 <TableCell className="font-medium flex items-center gap-2">
                                     <div className="h-8 w-8 rounded overflow-hidden bg-secondary">
                                         {shop.imageUrl ? (
-                                            <img src={shop.imageUrl} alt={shop.name} className="h-full w-full object-cover" />
+                                            <div className="relative h-full w-full">
+                                                <Image
+                                                    src={shop.imageUrl}
+                                                    alt={shop.name}
+                                                    fill
+                                                    className="object-cover"
+                                                />
+                                            </div>
                                         ) : (
                                             <div className="h-full w-full flex items-center justify-center">
                                                 <ShoppingBag className="h-4 w-4 text-muted-foreground/50" />

@@ -48,7 +48,7 @@ export default function NewCategoryPage() {
                                 className="min-h-[100px]"
                             />
                             <p className="text-xs text-muted-foreground">
-                                Optional description to help identify the category's purpose.
+                                Optional description to help identify the category&apos;s purpose.
                             </p>
                         </div>
 

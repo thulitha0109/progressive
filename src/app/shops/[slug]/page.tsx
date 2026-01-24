@@ -4,6 +4,23 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { MapPin, Phone, Mail, Globe, Star, ShoppingBag } from "lucide-react"
 import Link from "next/link"
+import Image from "next/image"
+import { Prisma } from "@prisma/client"
+
+// Define a type that matches what getShopBySlug returns
+type ShopWithDetails = Prisma.ShopGetPayload<{
+    include: {
+        products: true,
+        reviews: true,
+        _count: { select: { products: true, reviews: true } }
+    }
+}>
+
+interface ContactInfo {
+    email?: string
+    phone?: string
+    website?: string
+}
 
 export default async function SingleShopPage({
     params
@@ -17,7 +34,7 @@ export default async function SingleShopPage({
         notFound()
     }
 
-    const contactInfo = shop.contactInfo as any || {}
+    const contactInfo = (shop.contactInfo as unknown as ContactInfo) || {}
 
     return (
         <div className="min-h-screen bg-background pb-24">
@@ -25,27 +42,29 @@ export default async function SingleShopPage({
             <div className="relative h-[400px] w-full overflow-hidden bg-muted">
                 {shop.imageUrl ? (
                     <div className="absolute inset-0">
-                        <img
+                        <Image
                             src={shop.imageUrl}
                             alt={shop.name}
-                            className="h-full w-full object-cover opacity-30 blur-sm"
+                            fill
+                            className="object-cover opacity-30 blur-sm"
                         />
-                        <div className="absolute inset-0 bg-gradient-to-t from-background to-transparent" />
+                        <div className="absolute inset-0 bg-linear-to-t from-background to-transparent" />
                     </div>
                 ) : (
                     <div className="absolute inset-0 bg-secondary">
-                        <div className="absolute inset-0 bg-gradient-to-t from-background to-transparent" />
+                        <div className="absolute inset-0 bg-linear-to-t from-background to-transparent" />
                     </div>
                 )}
 
                 <div className="container relative flex h-full flex-col justify-end px-4 md:px-6 pb-12">
                     <div className="flex items-end gap-6">
-                        <div className="h-32 w-32 overflow-hidden rounded-full border-4 border-background bg-muted flex items-center justify-center shadow-xl shrink-0">
+                        <div className="relative h-32 w-32 overflow-hidden rounded-full border-4 border-background bg-muted flex items-center justify-center shadow-xl shrink-0">
                             {shop.imageUrl ? (
-                                <img
+                                <Image
                                     src={shop.imageUrl}
                                     alt={shop.name}
-                                    className="h-full w-full object-cover"
+                                    fill
+                                    className="object-cover"
                                 />
                             ) : (
                                 <ShoppingBag className="h-12 w-12 text-muted-foreground" />
@@ -71,15 +90,16 @@ export default async function SingleShopPage({
                     </div>
 
                     <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                        {shop.products.map((product: any) => (
+                        {shop.products.map((product) => (
                             <Link key={product.id} href={`/shop/${product.slug}`} className="group">
                                 <Card className="h-full border-none bg-secondary/10 hover:bg-secondary/20 transition-colors">
                                     <div className="aspect-square bg-muted relative overflow-hidden rounded-t-lg">
                                         {product.images[0] ? (
-                                            <img
+                                            <Image
                                                 src={product.images[0]}
                                                 alt={product.name}
-                                                className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                                fill
+                                                className="object-cover transition-transform duration-500 group-hover:scale-105"
                                             />
                                         ) : (
                                             <div className="h-full w-full flex items-center justify-center bg-secondary/50">
@@ -155,7 +175,7 @@ export default async function SingleShopPage({
                         </CardHeader>
                         <CardContent>
                             <div className="text-center py-4">
-                                <span className="text-2xl font-bold">{shop.reviews.length > 0 ? (shop.reviews.reduce((a: number, b: any) => a + b.rating, 0) / shop.reviews.length).toFixed(1) : "New"}</span>
+                                <span className="text-2xl font-bold">{shop.reviews.length > 0 ? (shop.reviews.reduce((a, b) => a + b.rating, 0) / shop.reviews.length).toFixed(1) : "New"}</span>
                                 <p className="text-xs text-muted-foreground">{shop.reviews.length} Customer Ratings</p>
                             </div>
                         </CardContent>

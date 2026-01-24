@@ -5,8 +5,6 @@ const nextConfig: NextConfig = {
     serverActions: {
       bodySizeLimit: "150mb",
     },
-    // Increase body size limit for middleware/rewrites (e.g. S3 uploads)
-    // @ts-ignore - Next.js types might not be up to date for this experimental feature
     proxyClientMaxBodySize: "150mb",
   },
   images: {

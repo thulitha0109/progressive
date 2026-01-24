@@ -11,6 +11,7 @@ import { Switch } from "@/components/ui/switch"
 import { ChevronLeft, Trash } from "lucide-react"
 import { ImageUpload } from "@/components/admin/image-upload"
 import { updateEvent, addEventTicket, deleteEventTicket } from "@/server/actions/admin/event"
+import { Prisma } from "@prisma/client"
 
 type EventWithTickets = {
     id: string
@@ -25,7 +26,7 @@ type EventWithTickets = {
     tickets: {
         id: string
         name: string
-        price: any // Decimal
+        price: number
         currency: string
         quantity: number | null
     }[]

@@ -10,7 +10,7 @@ import {
     TableRow,
 } from "@/components/ui/table"
 import { format } from "date-fns"
-import { Edit, Trash2, UserPlus } from "lucide-react"
+import { Edit } from "lucide-react"
 import Link from "next/link"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { DeleteUserButton } from "./delete-user-button"

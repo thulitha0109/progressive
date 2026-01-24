@@ -1,4 +1,4 @@
-import { PrismaClient, Prisma } from "@prisma/client"
+import { PrismaClient, Prisma, Artist, Genre } from "@prisma/client"
 import { hash } from "bcryptjs"
 
 const prisma = new PrismaClient()
@@ -144,7 +144,7 @@ async function seedArtistsAndTracks() {
     return { artists: createdArtists, genres }
 }
 
-async function seedPodcasts(artists: any[], genres: any[]) {
+async function seedPodcasts(artists: Artist[], genres: Genre[]) {
     console.log("Seeding podcasts...")
     const progressive = genres.find(g => g.slug === 'progressive-house')
 

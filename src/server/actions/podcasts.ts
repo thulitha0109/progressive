@@ -8,6 +8,8 @@ import { saveUploadedFile, UPLOAD_DIRS } from "@/lib/file-upload"
 import { generateWaveformPeaks } from "@/lib/waveform-peaks"
 import path from "path"
 
+import { Prisma } from "@prisma/client"
+
 /**
  * Generate URL-friendly slug from a string
  */
@@ -57,7 +59,7 @@ export async function getPodcasts(
     const session = await auth()
     const userId = session?.user?.id
     const now = new Date()
-    const where: any = { deletedAt: null }
+    const where: Prisma.PodcastWhereInput = { deletedAt: null }
 
     if (status === 'published') {
         where.scheduledFor = { lte: now }
@@ -342,7 +344,7 @@ export async function updatePodcast(id: string, formData: FormData) {
 
         const scheduledFor = scheduledForStr ? fromZonedTime(scheduledForStr, timeZone) : undefined
 
-        const data: any = {
+        const data: Prisma.PodcastUncheckedUpdateInput = {
             title,
             description,
             artistId,
@@ -388,7 +390,9 @@ export async function updatePodcast(id: string, formData: FormData) {
         } else {
             // If no new file and no URL from form, retain existing audioUrl
             // This is important if the user didn't touch the audio file input
-            data.audioUrl = currentPodcast?.audioUrl || null;
+            if (currentPodcast?.audioUrl) {
+                data.audioUrl = currentPodcast.audioUrl
+            }
         }
 
 
@@ -409,7 +413,7 @@ export async function updatePodcast(id: string, formData: FormData) {
         })
 
         // Generate waveforms if audio updated
-        if (data.audioUrl) {
+        if (typeof data.audioUrl === 'string') {
             let audioFilePath: string
             const audioUrl = data.audioUrl
 

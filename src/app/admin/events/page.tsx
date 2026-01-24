@@ -9,7 +9,7 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table"
-import { Plus, Pencil, Trash, Eye, Calendar } from "lucide-react"
+import { Plus, Pencil, Eye, Calendar } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { deleteEvent } from "@/server/actions/admin/event"
 import { DeleteButton } from "@/components/admin/delete-button"

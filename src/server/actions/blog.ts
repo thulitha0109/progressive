@@ -1,6 +1,7 @@
 "use server"
 
 import { prisma } from "@/lib/prisma"
+import { Prisma } from "@prisma/client"
 
 export async function getBlogPosts(
     page: number = 1,
@@ -10,7 +11,7 @@ export async function getBlogPosts(
 ) {
     const skip = (page - 1) * pageSize
 
-    const where: any = {}
+    const where: Prisma.BlogPostWhereInput = {}
     if (status === 'published') {
         where.publishedAt = { not: null }
     } else if (status === 'draft') {

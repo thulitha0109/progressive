@@ -1,6 +1,5 @@
 "use client"
 
-import { useState, useEffect } from "react"
 import Image from "next/image"
 
 import { usePlayer } from "@/components/shared/player-context"
@@ -62,17 +61,7 @@ function getGenreBorderColor(genre: string) {
 
 export function NewReleaseCard({ track, hideLikeButton = false }: { track: ReleaseItem, hideLikeButton?: boolean }) {
     const { playTrack, currentTrack, isPlaying, togglePlay } = usePlayer()
-    const [likesState, setLikesState] = useState({
-        likesCount: track.likesCount,
-        isLiked: track.isLiked
-    })
 
-    useEffect(() => {
-        setLikesState({
-            likesCount: track.likesCount,
-            isLiked: track.isLiked
-        })
-    }, [track.likesCount, track.isLiked])
 
     if (!track) return null
 
@@ -86,7 +75,7 @@ export function NewReleaseCard({ track, hideLikeButton = false }: { track: Relea
         if (isCurrentTrack) {
             togglePlay()
         } else {
-            playTrack({ ...track, ...likesState })
+            playTrack({ ...track })
         }
     }
 
@@ -179,11 +168,11 @@ export function NewReleaseCard({ track, hideLikeButton = false }: { track: Relea
                             </ShareMenu>
                             <div onClick={(e) => e.stopPropagation()} className="transform transition-transform active:scale-95 text-muted-foreground hover:text-red-500">
                                 <LikeButton
+                                    key={`${track.id}-${track.likesCount}-${track.isLiked}`}
                                     trackId={track.id}
                                     initialLikes={track.likesCount}
                                     initialIsLiked={track.isLiked}
                                     type="TRACK"
-                                    onToggle={(isLiked, likesCount) => setLikesState({ isLiked, likesCount })}
                                 />
                             </div>
                         </div>

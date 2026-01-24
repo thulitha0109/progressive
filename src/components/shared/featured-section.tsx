@@ -5,12 +5,8 @@ import Image from "next/image"
 import { PlayButton } from "@/components/shared/play-button"
 import { LikeButton } from "@/components/shared/like-button"
 import { FollowButton } from "@/components/artist/follow-button"
-import { Card } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Calendar } from "lucide-react"
 import { usePlayer } from "@/components/shared/player-context"
-import { Slider } from "@/components/ui/slider"
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { cn } from "@/lib/utils"
 import { WaveformBar } from "@/components/shared/waveform-bar"
 import { LiquidBackground } from "@/components/shared/liquid-background"
@@ -63,26 +59,25 @@ interface FeaturedItem {
 
 export function FeaturedSection({ item }: { item: FeaturedItem }) {
     const { currentTrack, isPlaying, togglePlay, playTrack } = usePlayer()
-    const [progress, setProgress] = useState(0)
-
     const isCurrentTrack = currentTrack?.id === item.id
-    const [mousePosition, setMousePosition] = useState<{ x: number; y: number } | null>(null)
-    // Remove complex glitch state, replace with simple mouse tracking for liquid effect
 
+    // Remove complex glitch state, replace with simple mouse tracking for liquid effect
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const handleMouseMove = (e: React.MouseEvent<HTMLElement>) => {
-        const { left, top, width, height } = e.currentTarget.getBoundingClientRect()
-        const x = (e.clientX - left)
-        const y = (e.clientY - top)
-        setMousePosition({ x, y })
+        // Simple mouse tracking if needed later
     }
 
     const handleImageClick = () => {
         if (isCurrentTrack) {
             togglePlay()
         } else {
-            // Need to ensure item has all Track properties required by playTrack
-            // For now casting, but playTrack might need type update or item normalization
-            playTrack(item as any)
+            // Cast to compatible Track type
+            playTrack({
+                id: item.id,
+                title: item.title,
+                audioUrl: item.audioUrl,
+                artist: item.artist ? { name: item.artist.name, imageUrl: item.artist.imageUrl } : { name: "Progressive.lk" }
+            })
         }
     }
 
@@ -184,11 +179,11 @@ export function FeaturedSection({ item }: { item: FeaturedItem }) {
                                         </span>
                                     )}
 
-                                    <span className="font-bold uppercase tracking-wider text-xs px-3 py-1 rounded-md border border-white/10 bg-white/5 text-white/90">
+                                    <span className="font-bold uppercase tracking-wider text-xs px-2 py-1 rounded-md border border-white/10 bg-white/5 text-white/90">
                                         FEATURED
                                     </span>
 
-                                    <div className="ml-2">
+                                    <div className="">
                                         <LikeButton
                                             trackId={item.id}
                                             type={item.type === 'PODCAST' ? 'PODCAST' : 'TRACK'}
@@ -239,7 +234,7 @@ export function FeaturedSection({ item }: { item: FeaturedItem }) {
                                 <div className={cn(
                                     "rounded-full bg-black/30 backdrop-blur-xl p-6 border border-white/20 hover:scale-110 transition-transform hover:bg-black/50"
                                 )}>
-                                    <PlayButton track={item as any} variant="icon" />
+                                    <PlayButton track={item as unknown as import("@/components/shared/play-button").Track} variant="icon" />
                                 </div>
                             </div>
                         </div>

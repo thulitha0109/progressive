@@ -32,8 +32,9 @@ async function main() {
         try {
             await s3Client.send(new HeadBucketCommand({ Bucket: BUCKET_NAME }))
             console.log("Bucket exists.")
-        } catch (error: any) {
-            if (error.name === "NotFound" || error.$metadata?.httpStatusCode === 404) {
+        } catch (error: unknown) {
+            const err = error as { name?: string, $metadata?: { httpStatusCode?: number } }
+            if (err.name === "NotFound" || err.$metadata?.httpStatusCode === 404) {
                 console.log("Bucket not found. Creating...")
                 await s3Client.send(new CreateBucketCommand({ Bucket: BUCKET_NAME }))
                 console.log("Bucket created.")

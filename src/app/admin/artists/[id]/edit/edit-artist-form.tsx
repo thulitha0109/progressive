@@ -18,7 +18,7 @@ interface Artist {
     name: string
     bio: string
     imageUrl?: string | null
-    socialLinks?: any
+    socialLinks?: unknown
     socialProfiles?: string | null
 }
 
@@ -28,10 +28,10 @@ export default function EditArtistForm({ artist }: { artist: Artist }) {
     const [uploadStatus, setUploadStatus] = useState("")
     const [imagePreview, setImagePreview] = useState<string | null>(artist.imageUrl || null)
 
-    let socialProfiles: any = { instagram: "", youtube: "", mixcloud: "", soundcloud: "", facebook: "", tiktok: "", spotify: "" }
+    let socialProfiles: Record<string, string> = { instagram: "", youtube: "", mixcloud: "", soundcloud: "", facebook: "", tiktok: "", spotify: "" }
     try {
-        if (artist.socialLinks) {
-            socialProfiles = artist.socialLinks
+        if (artist.socialLinks && typeof artist.socialLinks === 'object') {
+            socialProfiles = artist.socialLinks as Record<string, string>
         } else if (artist.socialProfiles) {
             socialProfiles = JSON.parse(artist.socialProfiles)
         }
@@ -87,12 +87,13 @@ export default function EditArtistForm({ artist }: { artist: Artist }) {
 
                 setUploadStatus("Updating artist...")
                 await updateArtist(artist.id, formData)
-            } catch (err: any) {
-                if (err.message === "NEXT_REDIRECT" || err.message.includes("NEXT_REDIRECT")) {
+            } catch (err: unknown) {
+                const message = err instanceof Error ? err.message : String(err)
+                if (message === "NEXT_REDIRECT" || message.includes("NEXT_REDIRECT")) {
                     return // Redirecting
                 }
                 console.error("Error:", err)
-                setError(err.message || "Failed to update artist. Please try again.")
+                setError(message || "Failed to update artist. Please try again.")
                 setUploadStatus("")
             }
         })

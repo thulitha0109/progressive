@@ -65,7 +65,7 @@ export default async function ProfilePage() {
                                         name: track.genreRel.name,
                                         parent: track.genreRel.parent ? { name: track.genreRel.parent.name } : undefined
                                     } : null,
-                                    // @ts-ignore - Prisma returns _count which we map to likesCount
+
                                     likesCount: track._count.likedBy,
                                     isLiked: true,
                                     kind: "TRACK"
@@ -100,7 +100,7 @@ export default async function ProfilePage() {
                                     genreRel: podcast.genre ? {
                                         name: podcast.genre.name
                                     } : null,
-                                    // @ts-ignore - Prisma returns _count
+
                                     likesCount: podcast._count.likedBy,
                                     isLiked: true,
                                     kind: "PODCAST"

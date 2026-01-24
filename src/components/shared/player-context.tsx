@@ -4,6 +4,7 @@ import React, { createContext, useContext, useState } from "react"
 
 interface Track {
     id: string
+    // Standard properties
     title: string
     audioUrl: string
     imageUrl?: string | null
@@ -12,12 +13,17 @@ interface Track {
         name: string
         imageUrl?: string | null
     }
+    // Metadata for player
     likesCount?: number
     isLiked?: boolean
     kind?: "TRACK" | "PODCAST"
     genre?: string | null
     type?: string | null
     sequence?: number | null
+    // Waveform
+    waveformPeaks?: number[] | null
+    duration?: number
+    // Relations
     genreRel?: {
         name: string
         parent?: {

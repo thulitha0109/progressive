@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation"
 import { prisma } from "@/lib/prisma"
-import { ShopEditForm } from "./shop-edit-form"
+import { ShopEditForm, ShopWithDetails } from "./shop-edit-form"
 
 export default async function EditShopPage({
     params
@@ -16,5 +16,5 @@ export default async function EditShopPage({
         notFound()
     }
 
-    return <ShopEditForm shop={shop} />
+    return <ShopEditForm shop={shop as unknown as ShopWithDetails} />
 }

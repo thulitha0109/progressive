@@ -67,7 +67,7 @@ export async function toggleLike(trackId: string) {
         revalidatePath("/tracks")
 
         return { success: true }
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error("Toggle like error:", error)
         return { error: "Failed to toggle like. Please try again." }
     }
@@ -136,7 +136,7 @@ export async function togglePodcastLike(podcastId: string) {
         revalidatePath("/tracks") // Just in case
 
         return { success: true }
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error("Toggle podcast like error:", error)
         return { error: "Failed to toggle like. Please try again." }
     }

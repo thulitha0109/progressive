@@ -12,6 +12,11 @@ import {
 } from "@/components/ui/table"
 import { Plus, Pencil, Trash, ChevronLeft } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
+import { Prisma } from "@prisma/client"
+
+type CategoryWithCount = Prisma.CategoryGetPayload<{
+    include: { _count: { select: { posts: true } } }
+}>
 
 export default async function CategoriesPage() {
     const categories = await getCategories()
@@ -58,7 +63,7 @@ export default async function CategoriesPage() {
                                 </TableCell>
                                 <TableCell>
                                     <Badge variant="secondary">
-                                        {(category as any)._count.posts}
+                                        {(category as CategoryWithCount)._count.posts}
                                     </Badge>
                                 </TableCell>
                                 <TableCell className="text-right">
@@ -73,9 +78,9 @@ export default async function CategoriesPage() {
                                                 variant="ghost"
                                                 size="icon"
                                                 className="text-destructive"
-                                                disabled={(category as any)._count.posts > 0}
+                                                disabled={(category as CategoryWithCount)._count.posts > 0}
                                                 title={
-                                                    (category as any)._count.posts > 0
+                                                    (category as CategoryWithCount)._count.posts > 0
                                                         ? "Cannot delete category with posts"
                                                         : "Delete category"
                                                 }

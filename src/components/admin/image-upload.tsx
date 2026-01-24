@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Loader2, Upload, X } from "lucide-react"
@@ -103,11 +104,14 @@ export function ImageUpload({
     if (value) {
         return (
             <div className={cn("relative rounded-lg overflow-hidden border aspect-video w-full max-w-[300px]", className)}>
-                <img
-                    src={value}
-                    alt="Uploaded image"
-                    className="w-full h-full object-cover"
-                />
+                <div className="relative w-full h-full">
+                    <Image
+                        src={value}
+                        alt="Uploaded image"
+                        fill
+                        className="object-cover"
+                    />
+                </div>
                 <Button
                     type="button"
                     variant="destructive"

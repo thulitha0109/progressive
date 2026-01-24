@@ -8,6 +8,7 @@ import { saveUploadedFile, UPLOAD_DIRS } from "@/lib/file-upload"
 import { generateWaveformPeaks } from "@/lib/waveform-peaks"
 import path from "path"
 import { fromZonedTime } from "date-fns-tz"
+import { Prisma } from "@prisma/client"
 
 export async function getTracks(page: number = 1, pageSize: number = 10, genre?: string, status: 'published' | 'upcoming' | 'all' = 'published', type?: string) {
     const skip = (page - 1) * pageSize
@@ -16,7 +17,7 @@ export async function getTracks(page: number = 1, pageSize: number = 10, genre?:
     const now = new Date()
 
     // Build where clause
-    const where: any = {
+    const where: Prisma.TrackWhereInput = {
         deletedAt: null // Only show non-deleted tracks
     }
 
@@ -62,7 +63,7 @@ export async function getTracks(page: number = 1, pageSize: number = 10, genre?:
     }
 
     // Add like data to tracks
-    const tracks = tracksRaw.map((track: any) => ({
+    const tracks = tracksRaw.map((track) => ({
         ...track,
         likesCount: track._count.likedBy,
         isLiked: likedTrackIds.has(track.id),
@@ -341,7 +342,7 @@ export async function updateTrack(id: string, formData: FormData) {
     // Parse scheduledFor using the provided timezone
     const scheduledFor = fromZonedTime(scheduledForStr, timeZone)
 
-    const data: any = {
+    const data: Prisma.TrackUncheckedUpdateInput = {
         title,
         artistId,
         genreId: genreId === "none" ? null : genreId,
@@ -380,7 +381,7 @@ export async function updateTrack(id: string, formData: FormData) {
         })
 
         // Generate waveform peaks if audio was updated
-        if (data.audioUrl) {
+        if (typeof data.audioUrl === 'string') {
             let audioFilePath: string
             const audioUrl = data.audioUrl
 

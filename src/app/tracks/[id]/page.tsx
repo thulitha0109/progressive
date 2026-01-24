@@ -9,6 +9,18 @@ import { Metadata } from "next"
 import { NewReleaseCard } from "@/components/shared/new-release-card"
 import { cn } from "@/lib/utils"
 import { TrackActionBar } from "@/components/shared/track-action-bar"
+import { Prisma } from "@prisma/client"
+
+type TrackWithDetails = Prisma.TrackGetPayload<{
+    include: {
+        artist: true,
+        genreRel: true,
+        _count: { select: { likedBy: true } }
+    }
+}> & {
+    likesCount: number
+    isLiked: boolean
+}
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
     const { id } = await params
@@ -41,7 +53,7 @@ export default async function TrackPage({ params }: { params: Promise<{ id: stri
 
     // Fetch related tracks (same genre, exclude current)
     const { tracks: relatedTracksRaw } = await getTracks(1, 4, track.genreId || "all", 'published')
-    const relatedTracks = relatedTracksRaw.filter((t: any) => t.id !== track.id).slice(0, 4)
+    const relatedTracks = (relatedTracksRaw as TrackWithDetails[]).filter((t) => t.id !== track.id).slice(0, 4)
 
     // Transform for player
     const playerTrack = {
@@ -55,7 +67,7 @@ export default async function TrackPage({ params }: { params: Promise<{ id: stri
             imageUrl: track.artist?.imageUrl
         },
         kind: "TRACK" as const,
-        likesCount: (track as any)._count?.likedBy || 0,
+        likesCount: track._count?.likedBy || 0,
         isLiked: false // TODO: Fetch actual user like status if available server-side
     }
 
@@ -179,7 +191,7 @@ export default async function TrackPage({ params }: { params: Promise<{ id: stri
                             trackId={track.id}
                             trackTitle={track.title}
                             artistName={artistName}
-                            initialLikes={(track as any)._count?.likedBy || 0}
+                            initialLikes={track._count?.likedBy || 0}
                             initialIsLiked={false}
                         />
                     </div>
@@ -196,8 +208,8 @@ export default async function TrackPage({ params }: { params: Promise<{ id: stri
                             <ArrowRight className="w-6 h-6 group-hover:translate-x-1 transition-transform" />
                         </Link>
                     </div>
-                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
-                        {relatedTracks.map((related: any) => (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+                        {relatedTracks.map((related) => (
                             <NewReleaseCard
                                 key={related.id}
                                 track={{

@@ -6,7 +6,9 @@ export function ClientDate({ date, options }: { date: Date | string, options?: I
     const [mounted, setMounted] = useState(false)
 
     useEffect(() => {
-        setMounted(true)
+        // Delay slightly to avoid direct state update warning if strict mode is on
+        const timer = setTimeout(() => setMounted(true), 0)
+        return () => clearTimeout(timer)
     }, [])
 
     if (!mounted) return null // Prevent hydration mismatch by rendering nothing initially or a fallback

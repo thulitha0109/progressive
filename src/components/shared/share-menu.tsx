@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { Share2, Copy, Instagram, MessageCircle } from "lucide-react"
+import { Share2, Copy, Instagram, MessageCircle, Upload } from "lucide-react"
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -76,8 +76,8 @@ export function ShareMenu({ url, title, text, children }: ShareMenuProps) {
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
                 {children || (
-                    <button className="p-2 hover:bg-accent rounded-full transition-colors">
-                        <Share2 className="h-4 w-4" />
+                    <button className="p-2 hover:bg-accent hover:text-accent-foreground rounded-full transition-colors">
+                        <Upload className="h-4 w-4" />
                     </button>
                 )}
             </DropdownMenuTrigger>

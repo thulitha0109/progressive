@@ -37,7 +37,7 @@ export default function AboutPage() {
                     <section>
                         <h2 className="text-2xl font-semibold mt-8 mb-4">Get Involved</h2>
                         <p className="text-muted-foreground">
-                            Whether you're an artist looking to share your music or a fan discovering new sounds,
+                            Whether you&apos;re an artist looking to share your music or a fan discovering new sounds,
                             Progressive.lk is your destination for the progressive music scene in Sri Lanka.
                         </p>
                     </section>

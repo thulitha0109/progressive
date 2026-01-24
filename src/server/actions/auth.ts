@@ -24,13 +24,12 @@ export async function signup(formData: FormData) {
 
     const hashedPassword = await hash(password, 10)
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     await prisma.user.create({
         data: {
             name,
             email,
             password: hashedPassword,
-        } as any,
+        },
     })
 
     // Automatically sign in after signup

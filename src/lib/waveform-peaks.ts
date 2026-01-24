@@ -58,7 +58,7 @@ export async function generateWaveformPeaks(
 
             // Stream to file
             const fileStream = createWriteStream(tempFilePath)
-            // @ts-ignore - ReadableStream/Node stream mismatch
+            // @ts-expect-error - ReadableStream/Node stream mismatch
             await pipeline(Readable.fromWeb(response.body), fileStream)
 
             console.log(`[WAVEFORM] Downloaded to: ${tempFilePath}`)
@@ -213,8 +213,9 @@ async function generateWithFFmpeg(audioPath: string, peakCount: number): Promise
                 console.log(`[WAVEFORM] Generated ${finalPeaks.length} peaks using ffmpeg`)
                 return finalPeaks
             }
-        } catch (error: any) {
-            console.warn('[WAVEFORM] Fast method failed, trying fallback:', error.message)
+        } catch (error: unknown) {
+            const message = error instanceof Error ? error.message : String(error)
+            console.warn('[WAVEFORM] Fast method failed, trying fallback:', message)
         }
 
         // Fallback: Generate simple envelope based on file size if fast method fails

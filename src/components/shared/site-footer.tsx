@@ -1,18 +1,19 @@
 import Link from "next/link"
-import { Facebook, Twitter, Instagram, Youtube, Music2, Heart } from "lucide-react"
+import Image from "next/image"
+import { Heart } from "lucide-react"
 
 export function SiteFooter() {
     const currentYear = new Date().getFullYear()
 
     return (
-        <footer className="border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <footer className="border-t bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60">
             <div className="container px-4 md:px-6 py-12">
                 {/* Main Footer Content */}
                 <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
                     {/* Branding Section */}
                     <div className="space-y-4">
-                        <Link href="/" className="flex items-center space-x-2">
-                            <img src="/progressive.lk-icon.svg" alt="Progressive.lk" className="h-12 w-auto invert dark:invert-0" />
+                        <Link href="/" className="flex items-center space-x-2 relative h-12 w-48">
+                            <Image src="/progressive.lk-icon.svg" alt="Progressive.lk" fill className="object-contain object-left invert dark:invert-0" />
                         </Link>
                         <p className="text-sm text-muted-foreground">
                             The ‘All in One’ void for the past, present, and future of Sri Lankan underground EDM culture.
@@ -86,28 +87,28 @@ export function SiteFooter() {
                                 href="https://web.facebook.com/progressive.lk"
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="opacity-70 hover:opacity-100 transition-opacity"
+                                className="opacity-70 hover:opacity-100 transition-opacity relative h-6 w-6"
                                 aria-label="Facebook"
                             >
-                                <img src="/images/ICONS/fb.svg" alt="Facebook" className="h-6 w-6 invert dark:invert-0" />
+                                <Image src="/images/ICONS/fb.svg" alt="Facebook" fill className="invert dark:invert-0 object-contain" />
                             </Link>
                             <Link
                                 href="https://www.instagram.com/progressive.lk/"
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="opacity-70 hover:opacity-100 transition-opacity"
+                                className="opacity-70 hover:opacity-100 transition-opacity relative h-6 w-6"
                                 aria-label="Instagram"
                             >
-                                <img src="/images/ICONS/instagram.svg" alt="Instagram" className="h-6 w-6 invert dark:invert-0" />
+                                <Image src="/images/ICONS/instagram.svg" alt="Instagram" fill className="invert dark:invert-0 object-contain" />
                             </Link>
                             <Link
                                 href="https://www.tiktok.com/@progressive.lk"
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="opacity-70 hover:opacity-100 transition-opacity"
+                                className="opacity-70 hover:opacity-100 transition-opacity relative h-6 w-6"
                                 aria-label="Tiktok"
                             >
-                                <img src="/images/ICONS/tiktok.svg" alt="Tiktok" className="h-6 w-6 invert dark:invert-0" />
+                                <Image src="/images/ICONS/tiktok.svg" alt="Tiktok" fill className="invert dark:invert-0 object-contain" />
                             </Link>
                         </div>
                         <p className="text-sm text-muted-foreground mt-4">

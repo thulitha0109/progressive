@@ -6,9 +6,9 @@ const prisma = new PrismaClient()
 
 // Mock FormData
 class MockFormData {
-    private data: Map<string, any> = new Map()
+    private data: Map<string, unknown> = new Map()
 
-    append(key: string, value: any) {
+    append(key: string, value: unknown) {
         this.data.set(key, value)
     }
 
@@ -62,12 +62,13 @@ async function main() {
 
     // 3. Call updateTrack
     try {
-        // @ts-ignore
+        // @ts-expect-error - Mocking FormData compatibility
         await updateTrack(track.id, formData)
         console.log('updateTrack called successfully')
-    } catch (error: any) {
+    } catch (error: unknown) {
         // If it's a redirect error, it means success (Next.js redirect throws an error)
-        if (error.message === 'NEXT_REDIRECT' || error.message.includes('NEXT_REDIRECT')) {
+        const err = error as Error
+        if (err.message === 'NEXT_REDIRECT' || err.message.includes('NEXT_REDIRECT')) {
             console.log('Caught expected redirect, update successful')
         } else {
             throw error

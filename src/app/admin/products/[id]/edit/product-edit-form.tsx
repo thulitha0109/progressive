@@ -11,12 +11,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { ChevronLeft, Trash } from "lucide-react"
 import { ImageUpload } from "@/components/admin/image-upload"
 import { updateProduct } from "@/server/actions/admin/product"
+import { Prisma } from "@prisma/client"
+import Image from "next/image"
 
 type Product = {
     id: string
     name: string
     description: string
-    price: any // Decimal
+    price: number
     stock: number
     images: string[]
     shopId: string | null
@@ -100,10 +102,11 @@ export function ProductEditForm({ product, shops }: { product: Product, shops: S
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
                             {imageUrl.map((url, index) => (
                                 <div key={url} className="relative group dark:bg-muted rounded-lg overflow-hidden border aspect-square">
-                                    <img
+                                    <Image
                                         src={url}
                                         alt={`Product image ${index + 1}`}
-                                        className="w-full h-full object-cover"
+                                        fill
+                                        className="object-cover"
                                     />
                                     <Button
                                         type="button"

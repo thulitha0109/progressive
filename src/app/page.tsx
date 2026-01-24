@@ -14,6 +14,16 @@ import { NewReleasesCarousel } from "@/components/home/new-releases-carousel"
 import { NewPodcastsCarousel } from "@/components/home/new-podcasts-carousel"
 
 import { ArtistSort } from "@/components/artist/artist-sort"
+import { Prisma, Podcast } from "@prisma/client"
+import { Track } from "@/components/shared/play-button"
+
+type ArtistWithCounts = Prisma.ArtistGetPayload<{
+  include: {
+    _count: {
+      select: { followers: true, tracks: true, podcasts: true }
+    }
+  }
+}>
 
 export default async function HomePage({
   searchParams,
@@ -21,7 +31,8 @@ export default async function HomePage({
   searchParams: Promise<{ sort?: string }>
 }) {
   const params = await searchParams
-  const sort = (params.sort as any) || "popular"
+  const validSorts = ["popular", "a-z", "z-a", "newest"]
+  const sort = validSorts.includes(params.sort as string) ? (params.sort as "popular" | "a-z" | "z-a" | "newest") : "popular"
   const { upcomingTracks, publishedTracks, newPodcasts, featuredItem, artists, blogPosts } = await getHomeData(sort)
 
   // Fallback to latest published track if no featured item
@@ -31,10 +42,11 @@ export default async function HomePage({
     <div className="min-h-screen bg-background pb-24 overflow-x-hidden">
       {/* Featured Section (Replaces Hero) */}
       {displayItem ? (
-        <FeaturedSection item={displayItem} />
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        <FeaturedSection item={displayItem as unknown as any} />
       ) : (
         <section className="relative h-[400px] w-full overflow-hidden bg-primary/5">
-          <div className="absolute inset-0 bg-gradient-to-b from-transparent to-background" />
+          <div className="absolute inset-0 bg-linear-to-b from-transparent to-background" />
           <div className="container relative flex h-full flex-col justify-center px-4 md:px-6">
             <h1 className="text-4xl font-bold tracking-tighter sm:text-5xl md:text-6xl lg:text-7xl">
               Discover the Future of Sound
@@ -56,7 +68,8 @@ export default async function HomePage({
             </Link>
           </div>
           <div className="block">
-            <UpcomingCarousel tracks={upcomingTracks} />
+            {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+            <UpcomingCarousel tracks={upcomingTracks as unknown as any[]} />
             {upcomingTracks.length === 0 && (
               <p className="text-muted-foreground col-span-full">No upcoming tracks scheduled.</p>
             )}
@@ -73,7 +86,8 @@ export default async function HomePage({
           </div>
 
           {publishedTracks.length > 0 ? (
-            <NewReleasesCarousel tracks={publishedTracks} />
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            <NewReleasesCarousel tracks={publishedTracks as unknown as any[]} />
           ) : (
             <p className="text-muted-foreground">No tracks published yet.</p>
           )}
@@ -89,7 +103,8 @@ export default async function HomePage({
           </div>
 
           {newPodcasts && newPodcasts.length > 0 ? (
-            <NewPodcastsCarousel podcasts={newPodcasts} />
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            <NewPodcastsCarousel podcasts={newPodcasts as unknown as any[]} />
           ) : (
             <p className="text-muted-foreground">No podcasts published yet.</p>
           )}
@@ -127,7 +142,7 @@ export default async function HomePage({
                     <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-full backdrop-blur-[2px]">
                       <UserPlus className="h-8 w-8 text-white drop-shadow-md" />
                       <span className="text-white text-xs font-bold drop-shadow-md">
-                        {(artist as any)._count?.followers || 0}
+                        {(artist as ArtistWithCounts)._count?.followers || 0}
                       </span>
                     </div>
                   </div>
@@ -135,7 +150,7 @@ export default async function HomePage({
                     <h3 className="font-medium truncate max-w-[120px]">{artist.name}</h3>
                     <div className="flex items-center justify-center gap-1 mt-1 text-xs text-muted-foreground font-medium">
                       <AudioLines className="w-3 h-3" />
-                      <span>{((artist as any)._count?.tracks || 0) + ((artist as any)._count?.podcasts || 0)} Tracks</span>
+                      <span>{((artist as ArtistWithCounts)._count?.tracks || 0) + ((artist as ArtistWithCounts)._count?.podcasts || 0)} Tracks</span>
                     </div>
                   </div>
                 </div>

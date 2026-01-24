@@ -4,14 +4,16 @@ import { prisma } from "@/lib/prisma"
 import { auth } from "@/auth"
 import { unstable_cache } from "next/cache"
 
+import { Prisma } from "@prisma/client"
+
 export async function getHomeData(sort: 'a-z' | 'z-a' | 'popular' | 'newest' = 'popular') {
     const session = await auth()
     const userId = session?.user?.id
-    const now = new Date()
+
 
     // ... (keep existing code)
 
-    let artistOrderBy: any = {}
+    let artistOrderBy: Prisma.ArtistOrderByWithRelationInput = {}
     switch (sort) {
         case 'a-z':
             artistOrderBy = { name: 'asc' }
@@ -32,7 +34,7 @@ export async function getHomeData(sort: 'a-z' | 'z-a' | 'popular' | 'newest' = '
     // ...
 
     const getCachedArtists = unstable_cache(
-        async (orderBy: any) => prisma.artist.findMany({
+        async (orderBy: Prisma.ArtistOrderByWithRelationInput) => prisma.artist.findMany({
             orderBy,
             take: 6,
             include: {
@@ -188,7 +190,7 @@ export async function getHomeData(sort: 'a-z' | 'z-a' | 'popular' | 'newest' = '
         }
     }
 
-    const upcomingTracks = upcomingTracksRaw.map((track: any) => ({
+    const upcomingTracks = upcomingTracksRaw.map((track) => ({
         ...track,
         kind: "TRACK" as const, // For internal distinction
         type: track.type, // Pass actual type (Remix, Bootleg, or null)
@@ -197,7 +199,7 @@ export async function getHomeData(sort: 'a-z' | 'z-a' | 'popular' | 'newest' = '
         isLiked: likedTrackIds.has(track.id),
     }))
 
-    const upcomingPodcasts = upcomingPodcastsRaw.map((podcast: any) => ({
+    const upcomingPodcasts = upcomingPodcastsRaw.map((podcast) => ({
         ...podcast,
         kind: "PODCAST" as const, // For internal distinction
         type: podcast.type, // Pass actual type (Warm, Drive, Peak)
@@ -213,14 +215,14 @@ export async function getHomeData(sort: 'a-z' | 'z-a' | 'popular' | 'newest' = '
         .sort((a, b) => new Date(a.scheduledFor).getTime() - new Date(b.scheduledFor).getTime())
         .slice(0, 8) // Take top 8
 
-    const publishedTracks = publishedTracksRaw.map((track: any) => ({
+    const publishedTracks = publishedTracksRaw.map((track) => ({
         ...track,
         genre: track.genreRel?.name, // Keep for backward compat
         likesCount: track._count.likedBy,
         isLiked: likedTrackIds.has(track.id),
     }))
 
-    const newPodcasts = publishedPodcastsRaw.map((podcast: any) => ({
+    const newPodcasts = publishedPodcastsRaw.map((podcast) => ({
         ...podcast,
         kind: "PODCAST" as const, // For internal distinction
         type: podcast.type, // Pass actual type (Warm, Drive, Peak)
@@ -238,19 +240,19 @@ export async function getHomeData(sort: 'a-z' | 'z-a' | 'popular' | 'newest' = '
         featuredItem = {
             ...featuredTrackRaw,
             type: "TRACK" as const,
-            likesCount: (featuredTrackRaw as any)._count.likedBy,
+            likesCount: featuredTrackRaw._count.likedBy,
             isLiked: likedTrackIds.has(featuredTrackRaw.id),
-            label: (featuredTrackRaw as any).label,
+            label: featuredTrackRaw.label,
         }
     } else if (featuredPodcastRaw) {
         featuredItem = {
             ...featuredPodcastRaw,
             type: "PODCAST" as const,
-            genreRel: (featuredPodcastRaw as any).genre,
-            genre: (featuredPodcastRaw as any).genre?.name,
-            likesCount: (featuredPodcastRaw as any)._count.likedBy,
+            genreRel: featuredPodcastRaw.genre,
+            genre: featuredPodcastRaw.genre?.name,
+            likesCount: featuredPodcastRaw._count.likedBy,
             isLiked: likedPodcastIds.has(featuredPodcastRaw.id),
-            assignedSequence: (featuredPodcastRaw as any).sequence,
+            assignedSequence: featuredPodcastRaw.sequence,
         }
     }
 

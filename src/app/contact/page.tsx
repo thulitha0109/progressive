@@ -1,4 +1,4 @@
-import { Mail, MapPin, Phone } from "lucide-react"
+import { Mail } from "lucide-react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 
 export default function ContactPage() {
@@ -7,7 +7,7 @@ export default function ContactPage() {
             <div className="max-w-4xl mx-auto">
                 <h1 className="text-4xl font-bold tracking-tight mb-4">Contact Us</h1>
                 <p className="text-muted-foreground mb-12">
-                    Get in touch with the Progressive.lk team. We'd love to hear from you!
+                    Get in touch with the Progressive.lk team. We&apos;d love to hear from you!
                 </p>
 
                 <div className="grid gap-6 md:grid-cols-2">
@@ -74,12 +74,12 @@ export default function ContactPage() {
                 <div className="mt-12 p-6 bg-muted/20 rounded-lg">
                     <h2 className="text-2xl font-semibold mb-4">For Artists</h2>
                     <p className="text-muted-foreground">
-                        If you're an artist interested in featuring your music on Progressive.lk,
+                        If you&apos;re an artist interested in featuring your music on Progressive.lk,
                         please email us at{" "}
                         <a href="mailto:artists@progressive.lk" className="text-primary hover:underline">
                             artists@progressive.lk
                         </a>{" "}
-                        with your portfolio and we'll get back to you as soon as possible.
+                        with your portfolio and we&apos;ll get back to you as soon as possible.
                     </p>
                 </div>
             </div>

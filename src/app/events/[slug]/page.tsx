@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Calendar, MapPin, Ticket as TicketIcon, Clock, Share2 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
+import Image from "next/image"
 
 export default async function SingleEventPage({
     params
@@ -23,16 +24,17 @@ export default async function SingleEventPage({
             <div className="relative h-[400px] w-full overflow-hidden bg-muted">
                 {event.coverImage ? (
                     <div className="absolute inset-0">
-                        <img
+                        <Image
                             src={event.coverImage}
                             alt={event.title}
-                            className="h-full w-full object-cover opacity-40 blur-sm"
+                            fill
+                            className="object-cover opacity-40 blur-sm"
                         />
-                        <div className="absolute inset-0 bg-gradient-to-t from-background to-transparent" />
+                        <div className="absolute inset-0 bg-linear-to-t from-background to-transparent" />
                     </div>
                 ) : (
                     <div className="absolute inset-0 bg-secondary">
-                        <div className="absolute inset-0 bg-gradient-to-t from-background to-transparent" />
+                        <div className="absolute inset-0 bg-linear-to-t from-background to-transparent" />
                     </div>
                 )}
 
