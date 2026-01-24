@@ -43,7 +43,7 @@ export async function getHomeData(sort: 'a-z' | 'z-a' | 'popular' | 'newest' = '
                 }
             }
         }),
-        ['home-artists'],
+        ['home-artists-v2'],
         { tags: ['artists'], revalidate: 3600 }
     )
 
@@ -60,7 +60,7 @@ export async function getHomeData(sort: 'a-z' | 'z-a' | 'popular' | 'newest' = '
             orderBy: { scheduledFor: "asc" },
             take: 5,
         }),
-        ['home-upcoming-tracks'],
+        ['home-upcoming-tracks-v2'],
         { tags: ['tracks'], revalidate: 60 }
     )
 
@@ -76,7 +76,7 @@ export async function getHomeData(sort: 'a-z' | 'z-a' | 'popular' | 'newest' = '
             orderBy: { scheduledFor: "asc" },
             take: 5,
         }),
-        ['home-upcoming-podcasts'],
+        ['home-upcoming-podcasts-v2'],
         { tags: ['podcasts'], revalidate: 60 }
     )
 
@@ -91,7 +91,7 @@ export async function getHomeData(sort: 'a-z' | 'z-a' | 'popular' | 'newest' = '
             orderBy: { scheduledFor: "desc" },
             take: 12,
         }),
-        ['home-published-tracks'],
+        ['home-published-tracks-v2'],
         { tags: ['tracks'], revalidate: 60 }
     )
 
@@ -106,7 +106,7 @@ export async function getHomeData(sort: 'a-z' | 'z-a' | 'popular' | 'newest' = '
             orderBy: { scheduledFor: "desc" },
             take: 12,
         }),
-        ['home-published-podcasts'],
+        ['home-published-podcasts-v2'],
         { tags: ['podcasts'], revalidate: 60 }
     )
 
@@ -119,7 +119,7 @@ export async function getHomeData(sort: 'a-z' | 'z-a' | 'popular' | 'newest' = '
                 _count: { select: { likedBy: true } },
             },
         }),
-        ['home-featured-track'],
+        ['home-featured-track-v2'],
         { tags: ['tracks'], revalidate: 60 }
     )
 
@@ -132,7 +132,7 @@ export async function getHomeData(sort: 'a-z' | 'z-a' | 'popular' | 'newest' = '
                 _count: { select: { likedBy: true } },
             },
         }),
-        ['home-featured-podcast'],
+        ['home-featured-podcast-v2'],
         { tags: ['podcasts'], revalidate: 60 }
     )
 
@@ -146,7 +146,7 @@ export async function getHomeData(sort: 'a-z' | 'z-a' | 'popular' | 'newest' = '
                 coverImage: true, publishedAt: true,
             }
         }),
-        ['home-blog-posts'],
+        ['home-blog-posts-v2'],
         { tags: ['blog'], revalidate: 3600 }
     )
 

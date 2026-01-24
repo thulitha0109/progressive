@@ -132,7 +132,8 @@ export function FullScreenPlayer({
             <div className="flex flex-1 flex-col items-center justify-center gap-8 p-4 md:p-8">
                 {/* Album Art After Isuued fix*/}
                 {/* Album Art After Isuued fix*/}
-                <div className="relative inline-block aspect-square max-h-[40vh] overflow-hidden rounded-md shadow-2xl group">
+                {/* Album Art After Isuued fix*/}
+                <div className="relative block h-[30vh] w-[30vh] sm:h-[40vh] sm:w-[40vh] overflow-hidden rounded-md shadow-2xl group mx-auto">
                     {track.imageUrl || track.artist?.imageUrl ? (
                         <Image
                             src={track.imageUrl || track.artist?.imageUrl || ""}
@@ -140,6 +141,7 @@ export function FullScreenPlayer({
                             fill
                             className="object-cover transition-transform duration-700 group-hover:scale-105"
                             sizes="(max-height: 40vh) 400px, 400px"
+                            unoptimized={(track.imageUrl || track.artist?.imageUrl || "").startsWith("/s3-storage")}
                         />
                     ) : (
                         <div className="flex h-full w-full items-center justify-center bg-muted">
@@ -271,8 +273,22 @@ export function FullScreenPlayer({
 
                 {/* Waveform */}
                 <div className="w-full max-w-2xl space-y-3 sm:space-y-4">
+                    {/* Debug info */}
+                    {/* <div className="text-xs text-red-500 font-mono hidden">
+                        Audio: {track.audioUrl ? 'Yes' : 'No'} | 
+                        Element: {audioElement ? 'Yes' : 'No'} | 
+                        Peaks: {track?.waveformPeaks?.length || 0}
+                    </div> */}
                     <div className="h-24 sm:h-28 md:h-32 lg:h-24 xl:h-20 w-full flex items-center justify-center rounded-md bg-muted/20 p-3 sm:p-4">
-                        {track.audioUrl && audioElement && duration > 0 && (
+                        {(function () {
+                            console.log('FullScreenPlayer Render Check:', {
+                                audioUrl: track.audioUrl,
+                                hasAudioElement: !!audioElement,
+                                peaks: track.waveformPeaks?.length
+                            });
+                            return null;
+                        })()}
+                        {track.audioUrl && audioElement && (
                             <Waveform
                                 audioUrl={track.audioUrl}
                                 media={audioElement}

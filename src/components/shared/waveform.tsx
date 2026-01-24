@@ -34,6 +34,8 @@ export function Waveform({
             return
         }
 
+        console.log('Waveform mounting', { media: !!media, peaksLength: peaks?.length, duration })
+
         const options = {
             container: containerRef.current,
             waveColor: waveColor,

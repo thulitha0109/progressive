@@ -12,56 +12,57 @@ import { FollowButton } from "@/components/artist/follow-button"
 
 export function Player() {
     const { currentTrack, isPlaying, togglePlay, setIsPlaying, playNext, playPrevious, playlist } = usePlayer()
-    const audioRef = useRef<HTMLAudioElement>(null)
+    // Use state callback ref to ensure re-render when audio element is available
+    const [audioElement, setAudioElement] = useState<HTMLAudioElement | null>(null)
+    // We still need a ref for internal access if we want to avoid stale state in closures,
+    // but here we can just use the state variable for most things, or keep a synced ref.
+    // Simpler: Just use the state `audioElement` everywhere instead of `audioRef.current`.
     const [isFullScreen, setIsFullScreen] = useState(false)
     const [currentTime, setCurrentTime] = useState(0)
     const [duration, setDuration] = useState(0)
     const [volume, setVolume] = useState(1)
-    const [audioElement, setAudioElement] = useState<HTMLAudioElement | null>(null)
 
     useEffect(() => {
-        if (audioRef.current) {
+        if (audioElement) {
             if (isPlaying) {
-                const playPromise = audioRef.current.play()
+                const playPromise = audioElement.play()
                 if (playPromise !== undefined) {
                     playPromise.catch((error) => {
                         console.error("Playback failed:", error)
                     })
                 }
             } else {
-                audioRef.current.pause()
+                audioElement.pause()
             }
         }
-    }, [isPlaying, currentTrack])
+    }, [isPlaying, currentTrack, audioElement])
 
     // ... (rest of the component)
 
 
 
+    // Removed redundant useEffect setting setAudioElement(audioRef.current)
     useEffect(() => {
-        setAudioElement(audioRef.current)
-    }, [])
-    useEffect(() => {
-        if (audioRef.current) {
-            audioRef.current.volume = volume
+        if (audioElement) {
+            audioElement.volume = volume
         }
-    }, [volume])
+    }, [volume, audioElement])
 
     const handleTimeUpdate = () => {
-        if (audioRef.current) {
-            setCurrentTime(audioRef.current.currentTime)
+        if (audioElement) {
+            setCurrentTime(audioElement.currentTime)
         }
     }
 
     const handleLoadedMetadata = () => {
-        if (audioRef.current) {
-            setDuration(audioRef.current.duration)
+        if (audioElement) {
+            setDuration(audioElement.duration)
         }
     }
 
     const handleSeek = (value: number) => {
-        if (audioRef.current) {
-            audioRef.current.currentTime = value
+        if (audioElement) {
+            audioElement.currentTime = value
             setCurrentTime(value)
         }
     }
@@ -194,9 +195,9 @@ export function Player() {
                     onClick={(e) => {
                         const rect = e.currentTarget.getBoundingClientRect()
                         const percent = (e.clientX - rect.left) / rect.width
-                        if (audioRef.current) {
+                        if (audioElement) {
                             const newTime = percent * duration
-                            audioRef.current.currentTime = newTime
+                            audioElement.currentTime = newTime
                             setCurrentTime(newTime)
                         }
                     }}
@@ -210,7 +211,7 @@ export function Player() {
             </div>
 
             <audio
-                ref={audioRef}
+                ref={setAudioElement}
                 src={currentTrack.audioUrl}
                 onTimeUpdate={handleTimeUpdate}
                 onLoadedMetadata={handleLoadedMetadata}
