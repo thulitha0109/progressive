@@ -37,9 +37,9 @@ services:
       dockerfile: docker/Dockerfile.dev
     depends_on:
       postgres:
-        condition: service_started
+        condition: service_healthy
       minio:
-        condition: service_started
+        condition: service_healthy
     environment:
       # Use same DB URL as app
       DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
@@ -48,7 +48,7 @@ services:
       S3_SECRET_KEY: ${S3_SECRET_KEY:-minioadminpassword}
       S3_BUCKET_NAME: ${S3_BUCKET_NAME:-progressive-uploads}
     command: >
-      sh -c "npx prisma migrate deploy --schema=./src/prisma/schema.prisma && tsx scripts/seed-dev.ts && tsx scripts/init-storage.ts"
+      sh -c "npx prisma migrate deploy --schema=./src/prisma/schema.prisma && npx tsx scripts/seed-dev.ts && npx tsx scripts/init-storage.ts"
 
   minio:
     image: minio/minio:latest

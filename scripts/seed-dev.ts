@@ -10,6 +10,10 @@ function generateSlug(name: string): string {
         .replace(/[^\w\-]+/g, '') + "-" + Date.now().toString().slice(-4)
 }
 
+function generateWaveform(samples = 100): number[] {
+    return Array.from({ length: samples }, () => Math.random())
+}
+
 // --- Data ---
 const ARTISTS = [
     { name: "Neon Pulse", bio: "Electronic duo from the future.", imageUrl: "https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=400&h=400&fit=crop" },
@@ -136,7 +140,8 @@ async function seedArtistsAndTracks() {
                     scheduledFor: new Date(),
                     timeZone: "Asia/Colombo",
                     label: "Progressive Records",
-                    type: ["Remix", "Bootleg", "Mashup"][Math.floor(Math.random() * 3)]
+                    type: ["Remix", "Bootleg", "Mashup"][Math.floor(Math.random() * 3)],
+                    waveformPeaks: generateWaveform()
                 }
             })
         }
@@ -169,7 +174,8 @@ async function seedPodcasts(artists: Artist[], genres: Genre[]) {
                 timeZone: "Asia/Colombo",
                 artistId: artist.id,
                 genreId: progressive?.id,
-                sequence: index + 1
+                sequence: index + 1,
+                waveformPeaks: generateWaveform()
             }
         })
     }

@@ -135,7 +135,7 @@ export function FullScreenPlayer({
                 <div className="relative inline-block aspect-square max-h-[40vh] overflow-hidden rounded-md shadow-2xl group">
                     {track.imageUrl || track.artist?.imageUrl ? (
                         <Image
-                            src={track.imageUrl || track.artist.imageUrl || ""}
+                            src={track.imageUrl || track.artist?.imageUrl || ""}
                             alt={track.title || "Track"}
                             fill
                             className="object-cover transition-transform duration-700 group-hover:scale-105"
@@ -291,25 +291,9 @@ export function FullScreenPlayer({
                     </div>
                 </div>
 
-                {/* Controls (Play Button Removed) */}
+                {/* Controls (Play Button Removed, Prev/Next Removed) */}
                 <div className="hidden md:flex items-center gap-8 md:gap-16 justify-center min-h-[64px]">
-                    <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-14 w-14 hover:bg-white/10 text-white/70 hover:text-white transition-colors rounded-full"
-                        onClick={playPrevious}
-                    >
-                        <SkipBack className="h-8 w-8" />
-                    </Button>
-
-                    <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-14 w-14 hover:bg-white/10 text-white/70 hover:text-white transition-colors rounded-full"
-                        onClick={playNext}
-                    >
-                        <SkipForward className="h-8 w-8" />
-                    </Button>
+                    {/* Icons removed as per request */}
                 </div>
 
                 {/* Volume Control */}

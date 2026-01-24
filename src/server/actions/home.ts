@@ -52,6 +52,7 @@ export async function getHomeData(sort: 'a-z' | 'z-a' | 'popular' | 'newest' = '
             where: { scheduledFor: { gt: new Date() }, deletedAt: null },
             select: {
                 id: true, title: true, scheduledFor: true, timeZone: true, label: true, type: true,
+                imageUrl: true, waveformPeaks: true,
                 artist: { select: { name: true, slug: true, imageUrl: true } },
                 genreRel: { select: { name: true } },
                 _count: { select: { likedBy: true } },
@@ -67,7 +68,7 @@ export async function getHomeData(sort: 'a-z' | 'z-a' | 'popular' | 'newest' = '
         async () => prisma.podcast.findMany({
             where: { scheduledFor: { gt: new Date() }, deletedAt: null },
             select: {
-                id: true, title: true, scheduledFor: true, timeZone: true, type: true, sequence: true, imageUrl: true,
+                id: true, title: true, scheduledFor: true, timeZone: true, type: true, sequence: true, imageUrl: true, waveformPeaks: true,
                 artist: { select: { name: true, slug: true, imageUrl: true } },
                 genre: { select: { name: true } },
                 _count: { select: { likedBy: true } },

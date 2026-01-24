@@ -38,11 +38,15 @@ export function Waveform({
             container: containerRef.current,
             waveColor: waveColor,
             progressColor: progressColor,
-            barRadius: 2,
+
             cursorWidth: 1, // Show cursor for visual feedback
             cursorColor: progressColor,
             normalize: true,
             interact: true, // Ensure interaction is enabled
+            height: height,
+            barWidth: 3,
+            barGap: 2,
+            barRadius: 3,
             // Use pre-computed peaks - no URL needed!
             peaks: [peaks], // WaveSurfer expects array of channels
             duration: duration || media.duration || 1, // Fallback duration to prevent div/0
