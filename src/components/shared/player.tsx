@@ -43,10 +43,12 @@ export function Player() {
 
     // Removed redundant useEffect setting setAudioElement(audioRef.current)
     useEffect(() => {
-        if (audioElement) {
-            audioElement.volume = volume
-        }
-    }, [volume, audioElement])
+        if (!audioElement) return
+
+        // Mobile (especially iOS): volume may be ignored/reset, but muted is reliable
+        audioElement.muted = volume === 0
+        audioElement.volume = volume
+    }, [volume, audioElement, currentTrack?.id])
 
     const handleTimeUpdate = () => {
         if (audioElement) {
@@ -191,7 +193,7 @@ export function Player() {
 
                 {/* Progress Bar (Bottom of player - Thick line) */}
                 <div
-                    className="absolute bottom-0 left-0 right-0 h-[3px] bg-white/10 cursor-pointer group hover:h-[5px] transition-all z-10"
+                    className="absolute bottom-0 left-0 right-0 h-[3px] bg-white/10 cursor-pointer group hover:h-[5px] transition-all z-[99990]"
                     onClick={(e) => {
                         const rect = e.currentTarget.getBoundingClientRect()
                         const percent = (e.clientX - rect.left) / rect.width

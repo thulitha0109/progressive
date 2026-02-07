@@ -102,7 +102,10 @@ export function InlineSearch() {
             </div>
 
             {open && query.length > 0 && (
-                <div className="absolute top-full mt-2 w-[350px] bg-popover rounded-md border shadow-md animate-in fade-in-0 zoom-in-95 z-50 overflow-hidden">
+                <>
+                {/* Close overlay to click away*/}
+                <div className="fixed inset-0 z-[9998]" onClick={() => setOpen(false)} />
+                <div className="absolute top-full mt-2 w-[240px] sm:w-[280px] bg-popover rounded-md border shadow-md animate-in fade-in-0 zoom-in-95 z-[9999] overflow-hidden">
                     <div className="max-h-[300px] overflow-y-auto p-1">
                         {results.length === 0 && !isPending ? (
                             <p className="p-4 text-sm text-muted-foreground text-center">No results found.</p>
@@ -114,7 +117,7 @@ export function InlineSearch() {
                                         onClick={() => handleSelect(result)}
                                         className="flex items-center gap-3 w-full p-2 rounded-sm hover:bg-accent hover:text-accent-foreground text-left transition-colors"
                                     >
-                                        <div className="h-8 w-8 rounded overflow-hidden shrink-0 bg-secondary">
+                                        <div className="relative h-8 w-8 rounded overflow-hidden shrink-0 bg-secondary">
                                             {result.image ? (
                                                 <Image src={result.image} alt={result.title} fill className="object-cover" />
                                             ) : (
@@ -136,9 +139,8 @@ export function InlineSearch() {
                             </div>
                         )}
                     </div>
-                    {/* Close overlay to click away*/}
-                    <div className="fixed inset-0 z-[-1]" onClick={() => setOpen(false)} />
                 </div>
+                </>
             )}
         </div>
     )

@@ -189,7 +189,7 @@ export function FullScreenPlayer({
                             {isPlaying ? (
                                 <Pause className="h-6 w-6 md:h-8 md:w-8 fill-current" />
                             ) : (
-                                <Play className="h-6 w-6 md:h-8 md:w-8 fill-current ml-1" />
+                                <Play className="h-6 w-6 md:h-8 md:w-8 fill-current" />
                             )}
                         </Button>
                     </div>

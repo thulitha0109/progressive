@@ -32,15 +32,16 @@ export default async function HomePage({
 }) {
   const params = await searchParams
   const validSorts = ["popular", "a-z", "z-a", "newest"]
-  const sort = validSorts.includes(params.sort as string) ? (params.sort as "popular" | "a-z" | "z-a" | "newest") : "popular"
+  const sort = validSorts.includes(params.sort as string) ? (params.sort as "popular" | "a-z" | "z-a" | "newest") : "newest"
   const { upcomingTracks, publishedTracks, newPodcasts, featuredItem, artists, blogPosts } = await getHomeData(sort)
 
   // Fallback to latest published track if no featured item
   const displayItem = featuredItem || (publishedTracks.length > 0 ? { ...publishedTracks[0], type: publishedTracks[0].type || "TRACK" } : null)
 
   return (
-    <div className="min-h-screen bg-background pb-24 overflow-x-hidden">
+    <div className="min-h-screen bg-background pb-24">
       {/* Featured Section (Replaces Hero) */}
+      <div className="overflow-x-hidden">
       {displayItem ? (
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         <FeaturedSection item={displayItem as unknown as any} />
@@ -57,9 +58,10 @@ export default async function HomePage({
           </div>
         </section>
       )}
-
+      </div>
       <div className="px-4 md:px-6 py-16 md:py-24 space-y-24 md:space-y-32">
         {/* Upcoming Tracks */}
+        <div className="overflow-x-hidden">
         <section>
           <div className="flex items-center justify-between mb-8">
             <h2 className="text-2xl font-bold tracking-tight">Upcoming Releases</h2>
@@ -75,7 +77,7 @@ export default async function HomePage({
             )}
           </div>
         </section>
-
+        </div>
         {/* Published Tracks (New Releases) */}
         <section>
           <div className="flex items-center justify-between mb-8">
@@ -111,6 +113,7 @@ export default async function HomePage({
         </section>
 
         {/* Artists */}
+        <div className="overflow-x-hidden">
         <section>
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
             <h2 className="text-2xl font-bold tracking-tight">Popular Artists</h2>
@@ -163,9 +166,10 @@ export default async function HomePage({
             </Button> */}
           </div>
         </section>
-
+        </div>
         {/* Blog Section */}
         {blogPosts && blogPosts.length > 0 && (
+          <div className="overflow-x-hidden">
           <section>
             <div className="flex items-center justify-between mb-8">
               <h2 className="text-2xl font-bold tracking-tight">Latest from the Blog</h2>
@@ -203,6 +207,7 @@ export default async function HomePage({
               ))}
             </div>
           </section>
+          </div>
         )}
       </div>
     </div>
