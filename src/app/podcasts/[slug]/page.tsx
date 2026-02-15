@@ -91,14 +91,14 @@ export default async function PodcastPage({ params }: { params: Promise<{ slug: 
     return (
         <div className="min-h-screen bg-background pb-24">
             {/* Hero Section */}
-            <div className="relative w-full h-[50vh] min-h-[400px] lg:h-[60vh]">
+            <div className="relative w-full h-[75vh] min-h-[400px] lg:h-[60vh]">
                 <div className="absolute inset-0">
                     {podcast.imageUrl ? (
                         <Image
                             src={podcast.imageUrl}
                             alt={podcast.title}
                             fill
-                            className="object-cover"
+                            className="object-fill md:object-cover"
                             priority
                         />
                     ) : (
@@ -109,15 +109,15 @@ export default async function PodcastPage({ params }: { params: Promise<{ slug: 
 
                     {/* Centered Play Button Overlay */}
                     {/* Centered Play Button Overlay */}
-                    <div className="absolute inset-0 flex items-center justify-center z-20 pointer-events-none pb-32 md:pb-0">
-                        <div className="pointer-events-auto">
-                            <PlayButton
-                                track={playerTrack}
-                                variant="glass"
-                                className="h-20 w-20 md:h-24 md:w-24"
-                            />
+                     <div className="relative z-20 h-full flex items-center justify-center pointer-events-none">
+                        <div className="pointer-events-auto -mt-40 md:mt-0">
+                        <PlayButton
+                            track={playerTrack}
+                            variant="glass"
+                            className="h-20 w-20 md:h-24 md:w-24"
+                        />
                         </div>
-                    </div>
+                    </div>  
                 </div>
 
                 <div className="container relative h-full flex flex-col justify-end pb-12 z-10 px-4 md:px-6">
@@ -226,8 +226,8 @@ export default async function PodcastPage({ params }: { params: Promise<{ slug: 
                             <ArrowRight className="w-6 h-6 group-hover:translate-x-1 transition-transform" />
                         </Link>
                     </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
-                        {relatedPodcasts.map((related) => (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
+                        {relatedPodcasts.slice(0, 3).map((related) => (
                             <NewReleaseCard
                                 key={related.id}
                                 track={{

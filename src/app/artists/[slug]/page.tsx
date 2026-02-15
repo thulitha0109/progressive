@@ -8,6 +8,7 @@ import { Prisma } from "@prisma/client"
 import { UpcomingCarousel } from "@/components/shared/upcoming-carousel"
 import { NewReleaseCard } from "@/components/shared/new-release-card"
 import { NewPodcastCard } from "@/components/shared/new-podcast-card"
+import { UpcomingTrackCard } from "@/components/shared/upcoming-track-tile"
 
 type ArtistWithRelations = Prisma.ArtistGetPayload<{
     include: {
@@ -183,7 +184,12 @@ export default async function ArtistPage({
                                 <span className="text-sm text-muted-foreground">{upcomingTracks.length} tracks</span>
                             </div>
                             <div className="w-full">
-                                <UpcomingCarousel tracks={upcomingTracks} />
+                                 {/* <UpcomingCarousel tracks={upcomingTracks} /> */}
+                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-8">
+                                    {upcomingTracks.map((item) => (
+                                        <UpcomingTrackCard key={item.id} item={item} />
+                                    ))}
+                                </div>
                             </div>
                         </div>
                     )}

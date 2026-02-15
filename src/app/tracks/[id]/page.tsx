@@ -99,14 +99,14 @@ export default async function TrackPage({ params }: { params: Promise<{ id: stri
     return (
         <div className="min-h-screen bg-background pb-24">
             {/* Hero Section */}
-            <div className="relative w-full h-[50vh] min-h-[400px] lg:h-[60vh]">
+            <div className="relative w-full h-[75vh] min-h-[400px] lg:h-[60vh]">
                 <div className="absolute inset-0">
                     {track.imageUrl ? (
                         <Image
                             src={track.imageUrl}
                             alt={track.title}
                             fill
-                            className="object-cover"
+                            className="object-fill md:object-cover"
                             priority
                         />
                     ) : (
@@ -116,8 +116,8 @@ export default async function TrackPage({ params }: { params: Promise<{ id: stri
                     <div className="absolute inset-0 bg-black/30" />
 
                     {/* Centered Play Button Overlay */}
-                    <div className="absolute inset-0 flex items-center justify-center z-20 pointer-events-none pb-24 md:pb-0">
-                        <div className="pointer-events-auto">
+                    <div className="relative z-20 h-full flex items-center justify-center pointer-events-none">
+                        <div className="pointer-events-auto -mt-40 md:mt-0">
                             <PlayButton
                                 track={playerTrack}
                                 variant="glass"
@@ -208,8 +208,8 @@ export default async function TrackPage({ params }: { params: Promise<{ id: stri
                             <ArrowRight className="w-6 h-6 group-hover:translate-x-1 transition-transform" />
                         </Link>
                     </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
-                        {relatedTracks.map((related) => (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6">
+                        {relatedTracks.slice(0, 2).map((related) => (
                             <NewReleaseCard
                                 key={related.id}
                                 track={{
