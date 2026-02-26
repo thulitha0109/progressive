@@ -78,6 +78,10 @@ export function FeaturedSection({ item }: { item: FeaturedItem }) {
                 title: item.title,
                 audioUrl: item.audioUrl,
                 waveformPeaks: item.waveformPeaks,
+                genre: item.genre,
+                type: item.type,
+                kind: item.type === 'PODCAST' ? 'PODCAST' : 'TRACK',
+                genreRel: item.genreRel,
                 artist: item.artist ? { name: item.artist.name, imageUrl: item.artist.imageUrl } : { name: "Progressive.lk" }
             })
         }
