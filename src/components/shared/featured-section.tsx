@@ -40,6 +40,7 @@ interface FeaturedItem {
     scheduledFor: Date
     likesCount: number
     isLiked: boolean
+    waveformPeaks?: number[] | null
     artist?: {
         id: string
         name: string
@@ -76,6 +77,7 @@ export function FeaturedSection({ item }: { item: FeaturedItem }) {
                 id: item.id,
                 title: item.title,
                 audioUrl: item.audioUrl,
+                waveformPeaks: item.waveformPeaks,
                 artist: item.artist ? { name: item.artist.name, imageUrl: item.artist.imageUrl } : { name: "Progressive.lk" }
             })
         }
