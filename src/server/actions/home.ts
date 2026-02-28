@@ -242,6 +242,7 @@ export async function getHomeData(sort: 'a-z' | 'z-a' | 'popular' | 'newest' = '
             ...featuredTrackRaw,
             type: "TRACK" as const,
             likesCount: featuredTrackRaw._count.likedBy,
+            waveformPeaks: featuredTrackRaw.waveformPeaks,
             isLiked: likedTrackIds.has(featuredTrackRaw.id),
             label: featuredTrackRaw.label,
         }
@@ -252,6 +253,7 @@ export async function getHomeData(sort: 'a-z' | 'z-a' | 'popular' | 'newest' = '
             genreRel: featuredPodcastRaw.genre,
             genre: featuredPodcastRaw.genre?.name,
             likesCount: featuredPodcastRaw._count.likedBy,
+            waveformPeaks: featuredPodcastRaw.waveformPeaks,
             isLiked: likedPodcastIds.has(featuredPodcastRaw.id),
             assignedSequence: featuredPodcastRaw.sequence,
         }
