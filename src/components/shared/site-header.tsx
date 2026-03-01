@@ -88,7 +88,12 @@ export function SiteHeader({ user: initialUser }: SiteHeaderProps) {
     ]
 
     return (
-        <header className="sticky top-0 z-50 w-full bg-background/70 backdrop-blur-md supports-[backdrop-filter]:bg-background/60 animate-enter-slide-down border-border/40 mb-0">
+        <motion.header
+            initial={{ y: "-100%", opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ duration: 0.8, ease: "easeOut" }}
+            className="sticky top-0 z-50 w-full bg-background/70 backdrop-blur-md supports-[backdrop-filter]:bg-background/60 border-border/40 mb-0"
+        >
             <div className="flex h-16 items-center px-4 md:pl-6 md:pr-4 justify-between">
                 {/* Left: Logo (Mobile & Desktop) */}
                 <div className="flex items-center">
@@ -387,6 +392,6 @@ export function SiteHeader({ user: initialUser }: SiteHeaderProps) {
                     </nav>
                 </div>
             </div>
-        </header>
+        </motion.header>
     )
 }

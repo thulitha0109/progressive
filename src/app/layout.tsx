@@ -75,7 +75,7 @@ export default async function RootLayout({
   const session = await auth()
 
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" className="dark" suppressHydrationWarning>
       <body
         className="antialiased"
         suppressHydrationWarning

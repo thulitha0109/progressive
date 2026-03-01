@@ -76,7 +76,7 @@ export function Player() {
                 artist: currentTrack.artist?.name || "Progressive.lk",
                 album: "Progressive.lk",
                 artwork: [
-                    { src: currentTrack.imageUrl || currentTrack.artist?.imageUrl || "/site-icon.jpg", sizes: "512x512", type: "image/jpeg" },
+                    { src: currentTrack.imageUrl || currentTrack.artist?.imageUrl || "/socialicon.png", sizes: "512x512", type: "image/png" },
                 ]
             });
 
