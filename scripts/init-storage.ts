@@ -72,7 +72,20 @@ async function main() {
             )
             console.log("CORS policy set successfully.")
         } catch (corsError) {
-            console.warn("⚠️ Warning: Failed to set bucket CORS policy (expected on standard MinIO):", corsError)
+            const errorWithMetadata = corsError as {
+                name?: string
+                Code?: string
+                message?: string
+                $metadata?: { httpStatusCode?: number }
+            }
+            const message = errorWithMetadata.message || errorWithMetadata.name || String(corsError)
+            const statusCode = errorWithMetadata.$metadata?.httpStatusCode
+            const isExpectedMinioUnsupported = /NotImplemented|MethodNotAllowed|NotSupported/i.test(message) || statusCode === 501 || errorWithMetadata.Code === "NotImplemented"
+            if (isExpectedMinioUnsupported) {
+                console.warn("⚠️ MinIO does not support bucket CORS API in this deployment; relying on server-level CORS settings.")
+            } else {
+                console.warn("⚠️ Warning: Failed to set bucket CORS policy:", corsError)
+            }
         }
 
     } catch (error) {
