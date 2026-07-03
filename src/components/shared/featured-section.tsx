@@ -6,10 +6,10 @@ import { PlayButton } from "@/components/shared/play-button"
 import { LikeButton } from "@/components/shared/like-button"
 import { FollowButton } from "@/components/artist/follow-button"
 import { usePlayer } from "@/components/shared/player-context"
-import { useState } from "react"
 import { cn } from "@/lib/utils"
-import { WaveformBar } from "@/components/shared/waveform-bar"
+// import { WaveformBar } from "@/components/shared/waveform-bar" // Removed
 import { LiquidBackground } from "@/components/shared/liquid-background"
+import { StyledWaveform } from "@/components/shared/styled-waveform"
 
 const GENRE_BORDERS: Record<string, string> = {
     "Progressive": "border-blue-500/50 text-blue-500",
@@ -63,11 +63,6 @@ export function FeaturedSection({ item }: { item: FeaturedItem }) {
     const isCurrentTrack = currentTrack?.id === item.id
 
     // Remove complex glitch state, replace with simple mouse tracking for liquid effect
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const handleMouseMove = (e: React.MouseEvent<HTMLElement>) => {
-        // Simple mouse tracking if needed later
-    }
-
     const handleImageClick = () => {
         if (isCurrentTrack) {
             togglePlay()
@@ -82,7 +77,7 @@ export function FeaturedSection({ item }: { item: FeaturedItem }) {
                 type: item.type,
                 kind: item.type === 'PODCAST' ? 'PODCAST' : 'TRACK',
                 genreRel: item.genreRel,
-                artist: item.artist ? { name: item.artist.name, imageUrl: item.artist.imageUrl } : { name: "Progressive.lk" }
+                artist: item.artist ? { id: item.artist.id, name: item.artist.name, imageUrl: item.artist.imageUrl } : { name: "Progressive.lk" }
             })
         }
     }
@@ -223,14 +218,10 @@ export function FeaturedSection({ item }: { item: FeaturedItem }) {
                                 </div>
                             )}
 
-                            {/* Center Overlay: Waveform Only (Bottom Middle) - Visible ONLY when playing */}
-                            {isCurrentTrack && isPlaying && (
-                                <div className="absolute bottom-12 left-0 right-0 flex justify-center z-10 pointer-events-none">
-                                    <div className="animate-in fade-in duration-300">
-                                        <WaveformBar isPlaying={true} count={16} height="h-8" color="bg-white" />
-                                    </div>
-                                </div>
-                            )}
+                            {/* Waveform - Bottom Center */}
+                            <div className="absolute bottom-12 inset-x-0 flex justify-center z-30 pointer-events-none opacity-90 scale-150">
+                                <StyledWaveform isPlaying={isCurrentTrack && isPlaying} />
+                            </div>
 
                             {/* Play Overlay - Always Visible */}
                             <div className={cn(

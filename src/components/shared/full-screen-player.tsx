@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button"
 import { Slider } from "@/components/ui/slider"
-import { ChevronDown, Pause, Play, SkipBack, SkipForward, Volume2, VolumeX } from "lucide-react"
+import { ChevronDown, Pause, Play, Volume2, VolumeX } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useState } from "react"
 import Image from "next/image"
@@ -85,8 +85,6 @@ export function FullScreenPlayer({
     volume,
     onVolumeChange,
     audioElement,
-    playNext,
-    playPrevious,
 }: FullScreenPlayerProps) {
     const [isMuted, setIsMuted] = useState(false)
     const [prevVolume, setPrevVolume] = useState(volume)
@@ -199,7 +197,9 @@ export function FullScreenPlayer({
                 <div className="flex flex-col items-center gap-4 text-center w-full">
                     <div className="space-y-1 w-full px-8">
                         <h2 className="text-2xl font-bold leading-tight truncate">{track.title}</h2>
-                        <p className="text-lg text-muted-foreground truncate">{track.artist?.name || "Unknown Artist"}</p>
+                        <div className="flex items-center justify-center gap-2">
+                            <p className="text-lg text-muted-foreground truncate">{track.artist?.name || "Unknown Artist"}</p>
+                        </div>
                     </div>
 
                     {/* Metadata: Genres, Type, SQ No */}
@@ -256,15 +256,17 @@ export function FullScreenPlayer({
                         </div>
 
                         <div className="md:scale-110">
-                            <AddToPlaylistButton trackId={track.id} />
+                            <AddToPlaylistButton itemId={track.id} type={track.kind || "TRACK"} />
                         </div>
 
-                        {track.artist?.id && (
+                        {(track.artist?.id || (track.artist as any)?.slug) && (
                             <div className="md:scale-110">
                                 <FollowButton
-                                    artistId={track.artist.id}
+                                    artistId={track.artist.id || (track.artist as any).slug}
                                     showText={false}
                                     checkStatus={true}
+                                    className="h-8 w-8 text-white/60 hover:text-white p-0 bg-white/5 rounded-full hover:bg-white/10 transition-all shadow-md"
+                                    iconClassName="h-4 w-4"
                                 />
                             </div>
                         )}

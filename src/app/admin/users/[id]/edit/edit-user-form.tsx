@@ -30,7 +30,7 @@ export function EditUserForm({ user }: { user: User }) {
                 toast.success("User updated successfully")
                 router.push("/admin/users")
                 router.refresh()
-            } catch (error) {
+            } catch {
                 toast.error("Failed to update user")
             }
         })

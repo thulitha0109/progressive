@@ -19,7 +19,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { ArrowLeft, Loader2 } from "lucide-react"
 import Link from "next/link"
 import { useState, useTransition } from "react"
-import { useRouter } from "next/navigation"
 import { Switch } from "@/components/ui/switch"
 
 interface Artist {
@@ -37,7 +36,6 @@ export default function PodcastForm({ artists, genres }: { artists: Artist[], ge
     const [selectedArtist, setSelectedArtist] = useState("")
     const [error, setError] = useState("")
     const [isPending, startTransition] = useTransition()
-    const router = useRouter()
     const [uploadProgress, setUploadProgress] = useState(0)
     const [uploadStatus, setUploadStatus] = useState("")
     const [isUploading, setIsUploading] = useState(false)

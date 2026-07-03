@@ -23,7 +23,7 @@ export default async function UsersPage({
     const { page: pageParam, search: searchParam } = await searchParams
     const page = Number(pageParam) || 1
     const search = searchParam || ""
-    const { users, totalPages } = await getUsers(page, 20, search)
+    const { users } = await getUsers(page, 20, search)
 
     return (
         <div className="space-y-6">

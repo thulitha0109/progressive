@@ -2,19 +2,22 @@
 
 import { Button } from "@/components/ui/button"
 import { ListPlus } from "lucide-react"
-import { toast } from "sonner"
 import { cn } from "@/lib/utils"
+import { useUserActions } from "@/contexts/user-actions-context"
 
 interface AddToPlaylistButtonProps {
-    trackId: string
+    itemId: string
+    type: "TRACK" | "PODCAST"
     className?: string
 }
 
-export function AddToPlaylistButton({ trackId, className }: AddToPlaylistButtonProps) {
-    const handleAddToPlaylist = (e: React.MouseEvent) => {
+export function AddToPlaylistButton({ itemId, type, className }: AddToPlaylistButtonProps) {
+    const { openPlaylistDialog } = useUserActions()
+
+    const handleClick = (e: React.MouseEvent) => {
         e.stopPropagation()
-        // TODO: Implement actual playlist logic
-        toast.success("Added to playlist")
+        e.preventDefault()
+        openPlaylistDialog(itemId, type)
     }
 
     return (
@@ -22,7 +25,7 @@ export function AddToPlaylistButton({ trackId, className }: AddToPlaylistButtonP
             variant="ghost"
             size="icon"
             className={cn("text-gray-400 hover:text-white hover:scale-105 transition-all", className)}
-            onClick={handleAddToPlaylist}
+            onClick={handleClick}
             title="Add to Playlist"
         >
             <ListPlus className="h-5 w-5" />

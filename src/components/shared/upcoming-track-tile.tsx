@@ -29,7 +29,7 @@ export function UpcomingTrackCard({ item }: { item: UpcomingItem }) {
   const formattedTime = format(scheduledDate, "h:mm a", { timeZone })
 
   return (
-   <div className="group relative aspect-[1/1.1] sm:aspect-square overflow-hidden rounded-md bg-muted shadow-lg transition-all hover:shadow-xl isolate ring-1 ring-white/10 ring-inset">
+    <div className="group relative aspect-[1/1.1] sm:aspect-square overflow-hidden rounded-md bg-muted shadow-lg transition-all hover:shadow-xl isolate ring-1 ring-white/10 ring-inset">
       {/* Full Image Background */}
       {item.artist?.imageUrl ? (
         <Image
@@ -40,7 +40,7 @@ export function UpcomingTrackCard({ item }: { item: UpcomingItem }) {
           sizes="(max-width: 640px) 80vw, (max-width: 1024px) 40vw, 25vw"
         />
       ) : (
-        <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-gray-900 to-gray-800">
+        <div className="flex h-full w-full items-center justify-center bg-linear-to-br from-gray-900 to-gray-800">
           <User className="h-20 w-20 text-muted-foreground/50" />
         </div>
       )}
@@ -48,16 +48,16 @@ export function UpcomingTrackCard({ item }: { item: UpcomingItem }) {
       {/* Top Left Badge: Rotating Type/Kind Pill */}
       <div className="absolute top-2 left-2 z-20 perspective-[1000px]">
         {(item.type || item.kind) && (
-          <div className="grid transition-all duration-500 [transform-style:preserve-3d] group-hover:[transform:rotateX(180deg)]">
+          <div className="grid transition-all duration-500 transform-3d group-hover:transform-[rotateX(180deg)]">
             {/* Front Face: Type (Default) */}
             <div
               className={cn(
-                "col-start-1 row-start-1 flex items-center justify-center gap-1 text-[9px] sm:text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-md border text-background shadow-sm [backface-visibility:hidden]",
+                "col-start-1 row-start-1 flex items-center justify-center gap-1 text-[9px] sm:text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-md border text-background shadow-sm backface-hidden",
                 item.type === "Warm" && "bg-yellow-500 border-yellow-400",
                 item.type === "Drive" && "bg-orange-500 border-orange-400",
                 item.type === "Peak" && "bg-red-500 border-red-400",
                 !["Warm", "Drive", "Peak"].includes(item.type || "") &&
-                  "bg-primary border-primary text-primary-foreground"
+                "bg-primary border-primary text-primary-foreground"
               )}
             >
               <span>{item.type || item.kind}</span>
@@ -66,7 +66,7 @@ export function UpcomingTrackCard({ item }: { item: UpcomingItem }) {
             {/* Back Face: Kind (Hover) */}
             <div
               className={cn(
-                "col-start-1 row-start-1 flex items-center justify-center gap-1 text-[9px] sm:text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-md border shadow-sm [backface-visibility:hidden] [transform:rotateX(180deg)]",
+                "col-start-1 row-start-1 flex items-center justify-center gap-1 text-[9px] sm:text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-md border shadow-sm backface-hidden transform-[rotateX(180deg)]",
                 item.kind === "TRACK"
                   ? "bg-primary border-primary text-primary-foreground"
                   : "bg-purple-600 border-purple-600 text-white"
@@ -79,7 +79,7 @@ export function UpcomingTrackCard({ item }: { item: UpcomingItem }) {
       </div>
 
       {/* Content Overlay - Scrim Gradient (Bottom) */}
-      <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/95 via-black/60 to-transparent flex flex-col justify-end p-4 sm:p-5 pt-16">
+      <div className="absolute inset-x-0 bottom-0 bg-linear-to-t from-black/95 via-black/60 to-transparent flex flex-col justify-end p-4 sm:p-5 pt-16">
         <div className="transform transition-transform duration-300 translate-y-2 group-hover:translate-y-0">
           <div className="mb-1.5 flex items-center gap-2">
             <div className="text-[10px] sm:text-xs font-bold uppercase tracking-widest text-primary flex items-center gap-2 shadow-sm">

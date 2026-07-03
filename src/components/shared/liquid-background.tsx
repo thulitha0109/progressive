@@ -221,6 +221,7 @@ export function LiquidBackground({ imageUrl, className, onReady, objectFit = 'co
                     objectFit === 'contain' ? 'object-contain' : 'object-cover',
                     ready ? 'opacity-0' : 'opacity-100'
                 )}
+                sizes="100vw"
                 priority
             />
 

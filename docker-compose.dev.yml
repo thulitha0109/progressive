@@ -9,7 +9,11 @@ services:
       POSTGRES_DB: ${POSTGRES_DB:-progressive}
     ports:
       - "5433:5432"
-
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
   app:
     image: progressive-app-dev
     ports:
@@ -17,13 +21,25 @@ services:
     build:
       context: .
       dockerfile: docker/Dockerfile.dev
+    depends_on:
+      postgres:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+      init-job:
+        condition: service_completed_successfully
     environment:
       # Update AUTH_URL for dev environment
       AUTH_URL: http://localhost:3003
       # Override DATABASE_URL to ensure it uses the container service name, not localhost from .env
-      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-password}@postgres:5432/${POSTGRES_DB:-progressive}
       # Set NODE_ENV to development for hot reloading
       NODE_ENV: development
+      S3_ENDPOINT: http://minio:9000
+      S3_ACCESS_KEY: ${S3_ACCESS_KEY:-minioadmin}
+      S3_SECRET_KEY: ${S3_SECRET_KEY:-minioadminpassword}
+      S3_BUCKET_NAME: ${S3_BUCKET_NAME:-progressive-uploads}
+      NEXT_PUBLIC_S3_PUBLIC_URL: /s3-storage
     command: npm run dev
     volumes:
       - .:/app
@@ -42,13 +58,13 @@ services:
         condition: service_healthy
     environment:
       # Use same DB URL as app
-      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-password}@postgres:5432/${POSTGRES_DB:-progressive}
       S3_ENDPOINT: http://minio:9000
       S3_ACCESS_KEY: ${S3_ACCESS_KEY:-minioadmin}
       S3_SECRET_KEY: ${S3_SECRET_KEY:-minioadminpassword}
       S3_BUCKET_NAME: ${S3_BUCKET_NAME:-progressive-uploads}
     command: >
-      sh -c "npx prisma migrate deploy --schema=./src/prisma/schema.prisma && npx tsx scripts/seed-dev.ts && npx tsx scripts/init-storage.ts"
+      sh -c "until npx prisma migrate deploy --schema=./src/prisma/schema.prisma; do echo 'Waiting for database to be ready...'; sleep 2; done && npx tsx scripts/seed-dev.ts && npx tsx scripts/init-storage.ts"
 
   minio:
     image: minio/minio:latest
@@ -59,3 +75,8 @@ services:
     environment:
       MINIO_ROOT_USER: ${S3_ACCESS_KEY:-minioadmin}
       MINIO_ROOT_PASSWORD: ${S3_SECRET_KEY:-minioadminpassword}
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:9000/minio/health/live" ]
+      interval: 30s
+      timeout: 20s
+      retries: 3

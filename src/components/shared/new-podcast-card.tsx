@@ -7,7 +7,8 @@ import { PlayButton } from "@/components/shared/play-button"
 import { ShareMenu } from "@/components/shared/share-menu"
 import { User, Share2 } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { WaveformBar } from "@/components/shared/waveform-bar"
+import { StyledWaveform } from "@/components/shared/styled-waveform"
+import { AddToPlaylistButton } from "@/components/shared/add-to-playlist-button"
 
 export interface PodcastItem {
     id: string
@@ -111,11 +112,11 @@ export function NewPodcastCard({ podcast, hideLikeButton = false }: { podcast: P
                     </div>
                 )}
 
-                {/* Overlay Play Button */}
+                {/* Overlay Play Button - Always Visible */}
                 {!isUpcoming && (
                     <div className={cn(
-                        "absolute inset-0 flex items-center justify-center bg-black/40 z-20 transition-all duration-300 backdrop-blur-[2px]",
-                        isCurrentTrack && isPlaying ? "opacity-100 bg-black/60" : "opacity-0 group-hover/card:opacity-100"
+                        "absolute inset-0 flex items-center justify-center z-20 transition-all duration-300 bg-black/10 group-hover/card:bg-black/20",
+                        isCurrentTrack && isPlaying ? "bg-black/40" : ""
                     )}>
                         {/* PlayButton expects Track, podcast is compatible */}
                         {/* @ts-expect-error - PodcastItem overlaps with Track */}
@@ -124,13 +125,18 @@ export function NewPodcastCard({ podcast, hideLikeButton = false }: { podcast: P
                 )}
                 {isUpcoming && (
                     <div className={cn(
-                        "absolute inset-0 flex items-center justify-center bg-black/40 z-20 transition-all duration-300 backdrop-blur-[2px] opacity-0 group-hover/card:opacity-100",
+                        "absolute inset-0 flex items-center justify-center bg-black/40 z-20 transition-all duration-300 backdrop-blur-[2px]",
                     )}>
                         <span className="text-[10px] font-bold uppercase tracking-wider text-white border border-white/50 px-2 py-1 rounded-md">
                             Coming Soon
                         </span>
                     </div>
                 )}
+
+                {/* Waveform - Bottom Center of Image */}
+                <div className="absolute bottom-3 inset-x-0 flex justify-center z-30 pointer-events-none opacity-90 scale-125">
+                    <StyledWaveform isPlaying={isCurrentTrack && isPlaying} />
+                </div>
             </div>
 
             {/* Info Section - Right */}
@@ -169,11 +175,17 @@ export function NewPodcastCard({ podcast, hideLikeButton = false }: { podcast: P
                                 </ShareMenu>
                                 <div onClick={(e) => e.stopPropagation()} className="transform transition-transform active:scale-95 text-muted-foreground hover:text-red-500">
                                     <LikeButton
-                                        key={`${podcast.id}-${podcast.likesCount}-${podcast.isLiked}`}
                                         trackId={podcast.id}
                                         initialLikes={podcast.likesCount}
                                         initialIsLiked={podcast.isLiked}
                                         type="PODCAST"
+                                    />
+                                </div>
+                                <div className="transform transition-transform active:scale-95">
+                                    <AddToPlaylistButton
+                                        itemId={podcast.id}
+                                        type="PODCAST"
+                                        className="h-8 w-8 p-1.5"
                                     />
                                 </div>
                             </>
@@ -235,12 +247,6 @@ export function NewPodcastCard({ podcast, hideLikeButton = false }: { podcast: P
                     )}
                 </div>
 
-                {/* Waveform */}
-                {isCurrentTrack && isPlaying && (
-                    <div className="absolute bottom-0 right-0 opacity-50">
-                        <WaveformBar isPlaying={true} count={12} height="h-4 sm:h-6" color="bg-primary" />
-                    </div>
-                )}
             </div>
         </div>
     )

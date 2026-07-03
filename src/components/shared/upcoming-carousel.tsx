@@ -6,11 +6,9 @@ import { FreeMode } from "swiper/modules"
 import "swiper/css"
 import "swiper/css/free-mode"
 import Link from "next/link"
-import { Badge } from "@/components/ui/badge"
-import { Calendar, User } from "lucide-react"
+import { User } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { ClientDate } from "@/components/shared/client-date"
-import { toZonedTime, format } from "date-fns-tz"
+import { format } from "date-fns-tz"
 
 interface Item {
     id: string

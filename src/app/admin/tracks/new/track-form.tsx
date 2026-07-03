@@ -16,7 +16,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { ArrowLeft, Loader2 } from "lucide-react"
 import Link from "next/link"
 import { useState, useTransition } from "react"
-import { useRouter } from "next/navigation"
 
 interface Artist {
     id: string
@@ -33,12 +32,11 @@ export default function TrackForm({ artists, genres }: { artists: Artist[], genr
     const [selectedArtist, setSelectedArtist] = useState("")
     const [error, setError] = useState("")
     const [isPending, startTransition] = useTransition()
-    const router = useRouter()
     const [uploadProgress, setUploadProgress] = useState(0)
     const [uploadStatus, setUploadStatus] = useState("")
     const [isUploading, setIsUploading] = useState(false)
 
-    async function uploadFile(file: File, type: "audio" | "image", artistId: string): Promise<string> {
+    async function uploadFile(file: File, type: "audio" | "image"): Promise<string> {
         return new Promise(async (resolve, reject) => {
             try {
                 // Get Presigned URL
@@ -61,6 +59,8 @@ export default function TrackForm({ artists, genres }: { artists: Artist[], genr
 
                 const xhr = new XMLHttpRequest()
                 xhr.open("PUT", signedUrl)
+                // Do NOT set common headers if they might conflict with signed headers
+                // But Content-Type is usually signed.
                 xhr.setRequestHeader("Content-Type", file.type)
 
                 xhr.upload.onprogress = (event) => {
@@ -137,7 +137,7 @@ export default function TrackForm({ artists, genres }: { artists: Artist[], genr
         try {
             // 1. Upload Audio
             setUploadStatus("Uploading audio...")
-            const audioUrl = await uploadFile(audioFile, "audio", selectedArtist)
+            const audioUrl = await uploadFile(audioFile, "audio")
             formData.set("audioUrl", audioUrl)
             formData.delete("audioFile") // Remove file from server action payload
 
@@ -160,7 +160,7 @@ export default function TrackForm({ artists, genres }: { artists: Artist[], genr
                     console.warn("Image compression failed, using original:", err)
                 }
 
-                const imageUrl = await uploadFile(fileToUpload, "image", selectedArtist)
+                const imageUrl = await uploadFile(fileToUpload, "image")
                 formData.set("imageUrl", imageUrl)
                 formData.delete("imageFile")
             }

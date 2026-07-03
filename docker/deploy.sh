@@ -23,21 +23,20 @@ fi
 # Ensure uploads directory exists and is writable
 echo "📂 Setting up upload directory..."
 mkdir -p public/uploads
-chmod -R 777 public/uploads
+chmod -R 777 public/uploads 2>/dev/null || true
 
 echo "📦 Building and starting containers..."
-docker compose up -d --build
+docker compose up -d --build --renew-anon-volumes
 
-# 3. Wait for database to be ready
-echo "⏳ Waiting for database..."
-sleep 20
+# Follow init-job logs to show setup progress
+echo "🔄 Running migrations, seeding, and storage initialization..."
+docker compose logs -f init-job
 
-# 4. Run migrations only (no full seeding for existing data)
-echo "🔄 Running database migrations..."
-docker compose exec -T app npx prisma migrate deploy --schema=src/prisma/schema.prisma
-
-# 5. Seed essential production data (Admin, Genres)
-echo "🌱 Seeding production data..."
-# docker compose exec -T app node scripts/seed-prod.js
+# Check if init-job succeeded
+INIT_JOB_EXIT_CODE=$(docker inspect -f '{{.State.ExitCode}}' progressive-init-job-1 2>/dev/null || echo "1")
+if [ "$INIT_JOB_EXIT_CODE" != "0" ]; then
+  echo "❌ Database initialization job failed! Please run 'docker compose logs init-job' for details."
+  exit 1
+fi
 
 echo "✅ Deployment complete! App is running on ${AUTH_URL:-http://localhost:3003}"

@@ -19,7 +19,7 @@ interface GenreFilterProps {
     allowTypes?: boolean
 }
 
-export function GenreFilter({ genres, selectedGenreId, status, basePath = "/tracks", allowTypes = false }: GenreFilterProps) {
+export function GenreFilter({ genres, selectedGenreId, status, basePath = "/tracks" }: GenreFilterProps) {
     const router = useRouter()
 
     const handleValueChange = (value: string) => {

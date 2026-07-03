@@ -1,7 +1,6 @@
 import { notFound } from "next/navigation"
 import { getProductBySlug } from "@/server/actions/shop"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
 import { ShoppingCart, Check, Store } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"

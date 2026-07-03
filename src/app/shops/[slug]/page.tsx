@@ -1,20 +1,10 @@
 import { notFound } from "next/navigation"
 import { getShopBySlug } from "@/server/actions/shop"
-import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { MapPin, Phone, Mail, Globe, Star, ShoppingBag } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
-import { Prisma } from "@prisma/client"
 
-// Define a type that matches what getShopBySlug returns
-type ShopWithDetails = Prisma.ShopGetPayload<{
-    include: {
-        products: true,
-        reviews: true,
-        _count: { select: { products: true, reviews: true } }
-    }
-}>
 
 interface ContactInfo {
     email?: string

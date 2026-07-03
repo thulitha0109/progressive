@@ -30,7 +30,7 @@ export function TrackActionBar({
             } else {
                 throw new Error("Clipboard API unavailable")
             }
-        } catch (err) {
+        } catch {
             // Fallback
             const textarea = document.createElement("textarea")
             textarea.value = url
@@ -39,7 +39,7 @@ export function TrackActionBar({
             try {
                 document.execCommand("copy")
                 toast.success("Link copied to clipboard")
-            } catch (e) {
+            } catch {
                 toast.error("Failed to copy link")
             } finally {
                 document.body.removeChild(textarea)

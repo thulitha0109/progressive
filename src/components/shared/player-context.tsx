@@ -37,11 +37,13 @@ interface PlayerContextType {
     isPlaying: boolean
     playlist: Track[]
     currentIndex: number
+    isFullScreen: boolean
     playTrack: (track: Track, newPlaylist?: Track[]) => void
     togglePlay: () => void
     setIsPlaying: (isPlaying: boolean) => void
     playNext: () => void
     playPrevious: () => void
+    setIsFullScreen: (isFullScreen: boolean) => void
 }
 
 const PlayerContext = createContext<PlayerContextType | undefined>(undefined)
@@ -51,6 +53,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     const [isPlaying, setIsPlaying] = useState(false)
     const [playlist, setPlaylist] = useState<Track[]>([])
     const [currentIndex, setCurrentIndex] = useState(0)
+    const [isFullScreen, setIsFullScreen] = useState(false)
 
     const playTrack = (track: Track, newPlaylist?: Track[]) => {
         if (newPlaylist) {
@@ -102,11 +105,13 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
                 isPlaying,
                 playlist,
                 currentIndex,
+                isFullScreen,
                 playTrack,
                 togglePlay,
                 setIsPlaying,
                 playNext,
-                playPrevious
+                playPrevious,
+                setIsFullScreen
             }}
         >
             {children}

@@ -8,7 +8,7 @@ export function ArtistSort() {
     const searchParams = useSearchParams()
     const pathname = usePathname()
     const { replace } = useRouter()
-    const [isPending, startTransition] = useTransition()
+    const [, startTransition] = useTransition()
 
     const handleSort = (value: string) => {
         startTransition(() => {

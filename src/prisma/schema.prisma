@@ -8,37 +8,38 @@ generator client {
 }
 
 model User {
-  id            String    @id @default(cuid())
-  name          String?
-  email         String?   @unique
-  emailVerified DateTime?
-  image         String?
-  password      String?
-  role          String    @default("USER") // USER, ADMIN
-  accounts      Account[]
-  sessions      Session[]
-  likes         Track[]   @relation("UserLikes")
-  likedPodcasts Podcast[] @relation("UserPodcastLikes")
-  followedArtists Artist[] @relation("UserFollows")
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  posts         BlogPost[]
-  reviews       Review[]
+  id              String     @id @default(cuid())
+  name            String?
+  email           String?    @unique
+  emailVerified   DateTime?
+  image           String?
+  password        String?
+  role            String     @default("USER") // USER, ADMIN
+  accounts        Account[]
+  sessions        Session[]
+  likes           Track[]    @relation("UserLikes")
+  likedPodcasts   Podcast[]  @relation("UserPodcastLikes")
+  followedArtists Artist[]   @relation("UserFollows")
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+  posts           BlogPost[]
+  reviews         Review[]
+  playlists       Playlist[]
 }
 
 model Account {
-  id                 String  @id @default(cuid())
-  userId             String
-  type               String
-  provider           String
-  providerAccountId  String
-  refresh_token      String?
-  access_token       String?
-  expires_at         Int?
-  token_type         String?
-  scope              String?
-  id_token           String?
-  session_state      String?
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -62,84 +63,121 @@ model VerificationToken {
 }
 
 model Artist {
-  id             String   @id @default(cuid())
+  id             String    @id @default(cuid())
   name           String
-  slug           String   @unique
+  slug           String    @unique
   bio            String
   imageUrl       String?
-  socialLinks    Json?    // { facebook: string, instagram: string, youtube: string, mixcloud: string, ... }
-  socialProfiles String?  // Deprecated: use socialLinks
+  socialLinks    Json? // { facebook: string, instagram: string, youtube: string, mixcloud: string, ... }
+  socialProfiles String? // Deprecated: use socialLinks
   tracks         Track[]
   podcasts       Podcast[]
-  followers      User[]   @relation("UserFollows")
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
-}
-
-
-model Genre {
-  id        String   @id @default(cuid())
-  name      String   @unique
-  slug      String   @unique
-  parentId  String?
-  parent    Genre?   @relation("SubGenres", fields: [parentId], references: [id])
-  subGenres Genre[]  @relation("SubGenres")
-  tracks    Track[]
-  podcasts  Podcast[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-
-model Track {
-  id             String    @id @default(cuid())
-  title          String
-  audioUrl       String
-  imageUrl       String?
-  genre          String?   // Deprecated: use genreId
-  genreId        String?
-  genreRel       Genre?    @relation(fields: [genreId], references: [id])
-  scheduledFor   DateTime
-  artistId       String
-  artist         Artist    @relation(fields: [artistId], references: [id], onDelete: Cascade)
-  likedBy        User[]    @relation("UserLikes")
-  isFeatured     Boolean   @default(false)
-  type           String?  // "Remix", "Bootleg", "Mashup". Null = Original/Standard
-  label          String?  // Record Label
-  timeZone       String    @default("Asia/Colombo") // Publisher's timezone
-  waveformPeaks  Json?     // Pre-computed waveform peak data for instant rendering
-  deletedAt      DateTime?
+  followers      User[]    @relation("UserFollows")
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
 }
 
-model Podcast {
-  id          String    @id @default(cuid())
-  title       String
-  slug        String    @unique
-  description String
-  audioUrl    String
-  imageUrl    String?
-  // host     String? // Removed
-  duration    String?
-  scheduledFor DateTime @default(now())
-  timeZone    String    @default("Asia/Colombo") // Publisher's timezone
-  
-  artistId    String?
-  artist      Artist?   @relation(fields: [artistId], references: [id])
-  
-  genreId     String?
-  genre       Genre?    @relation(fields: [genreId], references: [id])
-  
-  sequence    Int       @default(0)
-  isFeatured  Boolean   @default(false)
-  type        String    @default("Warm") // "Warm", "Drive", "Peak"
-  waveformPeaks Json?     // Pre-computed waveform peak data
-  
-  likedBy     User[]    @relation("UserPodcastLikes")
+model Genre {
+  id        String    @id @default(cuid())
+  name      String    @unique
+  slug      String    @unique
+  parentId  String?
+  parent    Genre?    @relation("SubGenres", fields: [parentId], references: [id])
+  subGenres Genre[]   @relation("SubGenres")
+  tracks    Track[]
+  podcasts  Podcast[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
 
-  deletedAt    DateTime?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+model Track {
+  id            String          @id @default(cuid())
+  title         String
+  audioUrl      String
+  imageUrl      String?
+  genre         String? // Deprecated: use genreId
+  genreId       String?
+  genreRel      Genre?          @relation(fields: [genreId], references: [id])
+  scheduledFor  DateTime
+  artistId      String
+  artist        Artist          @relation(fields: [artistId], references: [id], onDelete: Cascade)
+  likedBy       User[]          @relation("UserLikes")
+  isFeatured    Boolean         @default(false)
+  type          String? // "Remix", "Bootleg", "Mashup". Null = Original/Standard
+  label         String? // Record Label
+  timeZone      String          @default("Asia/Colombo") // Publisher's timezone
+  waveformPeaks Json? // Pre-computed waveform peak data for instant rendering
+  deletedAt     DateTime?
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  playlists     PlaylistTrack[]
+}
+
+model Playlist {
+  id          String            @id @default(cuid())
+  name        String
+  description String?
+  isPublic    Boolean           @default(false)
+  userId      String
+  user        User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tracks      PlaylistTrack[]
+  podcasts    PlaylistPodcast[]
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+}
+
+model PlaylistTrack {
+  id         String   @id @default(cuid())
+  playlistId String
+  playlist   Playlist @relation(fields: [playlistId], references: [id], onDelete: Cascade)
+  trackId    String
+  track      Track    @relation(fields: [trackId], references: [id], onDelete: Cascade)
+  addedAt    DateTime @default(now())
+
+  @@unique([playlistId, trackId])
+}
+
+model PlaylistPodcast {
+  id         String   @id @default(cuid())
+  playlistId String
+  playlist   Playlist @relation(fields: [playlistId], references: [id], onDelete: Cascade)
+  podcastId  String
+  podcast    Podcast  @relation(fields: [podcastId], references: [id], onDelete: Cascade)
+  addedAt    DateTime @default(now())
+
+  @@unique([playlistId, podcastId])
+}
+
+model Podcast {
+  id           String   @id @default(cuid())
+  title        String
+  slug         String   @unique
+  description  String
+  audioUrl     String
+  imageUrl     String?
+  // host     String? // Removed
+  duration     String?
+  scheduledFor DateTime @default(now())
+  timeZone     String   @default("Asia/Colombo") // Publisher's timezone
+
+  artistId String?
+  artist   Artist? @relation(fields: [artistId], references: [id])
+
+  genreId String?
+  genre   Genre?  @relation(fields: [genreId], references: [id])
+
+  sequence      Int     @default(0)
+  isFeatured    Boolean @default(false)
+  type          String  @default("Warm") // "Warm", "Drive", "Peak"
+  waveformPeaks Json? // Pre-computed waveform peak data
+
+  likedBy User[] @relation("UserPodcastLikes")
+
+  playlists PlaylistPodcast[]
+
+  deletedAt DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
 }
 
 model BlogPost {
@@ -178,7 +216,6 @@ model Tag {
   updatedAt DateTime   @updatedAt
 }
 
-
 model Product {
   id          String   @id @default(cuid())
   name        String
@@ -187,47 +224,47 @@ model Product {
   price       Decimal
   images      String[]
   stock       Int      @default(0)
-  
-  shopId      String?
-  shop        Shop?    @relation(fields: [shopId], references: [id])
-  
-  reviews     Review[]
-  
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+
+  shopId String?
+  shop   Shop?   @relation(fields: [shopId], references: [id])
+
+  reviews Review[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Shop {
-  id          String    @id @default(cuid())
+  id          String  @id @default(cuid())
   name        String
-  slug        String    @unique
+  slug        String  @unique
   description String?
   location    String?
   imageUrl    String?
-  contactInfo Json?     // { email: string, phone: string, website: string }
-  isVerified  Boolean   @default(false)
-  
-  products    Product[]
-  reviews     Review[]
-  
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  contactInfo Json? // { email: string, phone: string, website: string }
+  isVerified  Boolean @default(false)
+
+  products Product[]
+  reviews  Review[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Review {
-  id        String   @id @default(cuid())
-  rating    Int      // 1-5
-  comment   String?
-  
-  userId    String
-  user      User     @relation(fields: [userId], references: [id])
-  
+  id      String  @id @default(cuid())
+  rating  Int // 1-5
+  comment String?
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
   productId String?
   product   Product? @relation(fields: [productId], references: [id])
-  
-  shopId    String?
-  shop      Shop?    @relation(fields: [shopId], references: [id])
-  
+
+  shopId String?
+  shop   Shop?   @relation(fields: [shopId], references: [id])
+
   createdAt DateTime @default(now())
 }
 
@@ -240,23 +277,23 @@ model Event {
   location    String
   venue       String?
   coverImage  String?
-  
-  isFeatured  Boolean  @default(false)
-  
-  ticketUrl   String?  // External link fallback
-  tickets     EventTicket[]
-  
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+
+  isFeatured Boolean @default(false)
+
+  ticketUrl String? // External link fallback
+  tickets   EventTicket[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model EventTicket {
-  id          String   @id @default(cuid())
-  name        String   // e.g. "Early Bird", "VIP"
-  price       Decimal
-  currency    String   @default("LKR")
-  quantity    Int?     // Available quantity
-  
-  eventId     String
-  event       Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  id       String  @id @default(cuid())
+  name     String // e.g. "Early Bird", "VIP"
+  price    Decimal
+  currency String  @default("LKR")
+  quantity Int? // Available quantity
+
+  eventId String
+  event   Event  @relation(fields: [eventId], references: [id], onDelete: Cascade)
 }

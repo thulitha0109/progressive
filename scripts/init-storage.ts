@@ -1,5 +1,5 @@
 
-import { S3Client, CreateBucketCommand, PutBucketPolicyCommand, HeadBucketCommand } from "@aws-sdk/client-s3"
+import { S3Client, CreateBucketCommand, PutBucketPolicyCommand, HeadBucketCommand, PutBucketCorsCommand } from "@aws-sdk/client-s3"
 
 const s3Client = new S3Client({
     region: process.env.S3_REGION || "us-east-1",
@@ -50,7 +50,30 @@ async function main() {
                 Policy: JSON.stringify(policy),
             })
         )
-        console.log("Policy set successfully to PUBLIC READ (Anonymous GetObject).")
+        console.log("Policy set successfully to PUBLIC READ.")
+
+        console.log("Setting CORS policy...")
+        try {
+            await s3Client.send(
+                new PutBucketCorsCommand({
+                    Bucket: BUCKET_NAME,
+                    CORSConfiguration: {
+                        CORSRules: [
+                            {
+                                AllowedHeaders: ["*"],
+                                AllowedMethods: ["PUT", "POST", "GET", "HEAD"],
+                                AllowedOrigins: ["*"],
+                                ExposeHeaders: ["ETag"],
+                                MaxAgeSeconds: 3000,
+                            },
+                        ],
+                    },
+                })
+            )
+            console.log("CORS policy set successfully.")
+        } catch (corsError) {
+            console.warn("⚠️ Warning: Failed to set bucket CORS policy (expected on standard MinIO):", corsError)
+        }
 
     } catch (error) {
         console.error("Failed to initialize storage:", error)

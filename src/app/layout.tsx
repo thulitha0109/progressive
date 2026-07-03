@@ -66,6 +66,8 @@ import { Toaster } from "@/components/ui/sonner"
 import { Providers } from "@/components/shared/providers"
 import ProgressProvider from "@/components/shared/progress-provider"
 import { NavigationLoader } from "@/components/shared/navigation-loader"
+import { PlaylistDialog } from "@/components/shared/playlist-dialog"
+import { UserActionsProvider } from "@/contexts/user-actions-context"
 
 export default async function RootLayout({
   children,
@@ -90,13 +92,16 @@ export default async function RootLayout({
             <ProgressProvider>
               <NavigationLoader />
               <PlayerProvider>
-                <div className="relative flex min-h-screen flex-col mx-auto max-w-[1400px] pb-24 md:pb-28">
-                  <SiteHeader user={session?.user} />
-                  <main className="flex-1">{children}</main>
-                  <SiteFooter />
-                </div>
-                <Player />
-                <Toaster />
+                <UserActionsProvider>
+                  <div className="relative flex min-h-screen flex-col mx-auto max-w-[1400px] pb-24 md:pb-28">
+                    <SiteHeader user={session?.user} />
+                    <main className="flex-1">{children}</main>
+                    <SiteFooter />
+                  </div>
+                  <Player />
+                  <PlaylistDialog />
+                  <Toaster />
+                </UserActionsProvider>
               </PlayerProvider>
             </ProgressProvider>
           </Providers>

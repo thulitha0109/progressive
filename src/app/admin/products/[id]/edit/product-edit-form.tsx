@@ -11,7 +11,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { ChevronLeft, Trash } from "lucide-react"
 import { ImageUpload } from "@/components/admin/image-upload"
 import { updateProduct } from "@/server/actions/admin/product"
-import { Prisma } from "@prisma/client"
 import Image from "next/image"
 
 type Product = {

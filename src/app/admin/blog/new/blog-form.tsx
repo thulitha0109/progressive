@@ -2,7 +2,6 @@
 
 import { useState, useTransition } from "react"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
 import { createBlogPost } from "@/server/actions/admin/blog"
 import { getPresignedUrl } from "@/server/actions/s3-sign"
 import imageCompression from "browser-image-compression"
@@ -11,7 +10,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { ArrowLeft, Loader2, Upload } from "lucide-react"
+import { ArrowLeft, Loader2 } from "lucide-react"
 import { Switch } from "@/components/ui/switch"
 import {
     Select,
@@ -30,7 +29,6 @@ export default function NewBlogPostForm({ categories }: { categories: Category[]
     const [isPending, startTransition] = useTransition()
     const [error, setError] = useState("")
     const [uploadStatus, setUploadStatus] = useState("")
-    const router = useRouter()
 
     async function uploadImage(file: File): Promise<string> {
         try {

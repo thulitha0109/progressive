@@ -1,5 +1,4 @@
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3"
-import { join } from "path"
 
 /**
  * File upload utility for handling file storage in S3 (MinIO)

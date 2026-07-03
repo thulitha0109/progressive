@@ -1,21 +1,15 @@
 import Link from "next/link"
 import Image from "next/image"
 import { getHomeData } from "@/server/actions/home"
-import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { PlayButton } from "@/components/shared/play-button"
-import { LikeButton } from "@/components/shared/like-button"
-import { Calendar, User, UserPlus, ArrowRight, AudioLines } from "lucide-react"
+import { User, UserPlus, ArrowRight, AudioLines } from "lucide-react"
 import { FeaturedSection } from "@/components/shared/featured-section"
-import { NewReleaseCard } from "@/components/shared/new-release-card"
-import { ArtistCarousel } from "@/components/shared/artist-carousel"
 import { UpcomingCarousel } from "@/components/shared/upcoming-carousel"
 import { NewReleasesCarousel } from "@/components/home/new-releases-carousel"
 import { NewPodcastsCarousel } from "@/components/home/new-podcasts-carousel"
 
 import { ArtistSort } from "@/components/artist/artist-sort"
-import { Prisma, Podcast } from "@prisma/client"
-import { Track } from "@/components/shared/play-button"
+import { Prisma } from "@prisma/client"
 
 type ArtistWithCounts = Prisma.ArtistGetPayload<{
   include: {

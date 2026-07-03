@@ -16,7 +16,7 @@ export default function ClosePopupPage() {
 
     return (
         <div className="flex items-center justify-center min-vh-100 p-8 text-center text-sm text-muted-foreground animate-enter-fade-in">
-            <p>Authentication complete. You can close this window now if it didn't close automatically.</p>
+            <p>Authentication complete. You can close this window now if it didn&apos;t close automatically.</p>
         </div>
     );
 }

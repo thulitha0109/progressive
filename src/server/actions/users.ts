@@ -79,7 +79,7 @@ export async function deleteUser(id: string) {
         })
         revalidatePath("/admin/users")
         return { success: true }
-    } catch (error: unknown) {
+    } catch {
         return { error: "Failed to delete user. They might be referenced elsewhere." }
     }
 }

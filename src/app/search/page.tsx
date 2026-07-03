@@ -23,7 +23,6 @@ export default async function SearchPage({
     const podcasts = results.filter(r => r.type === 'podcast')
     const events = results.filter(r => r.type === 'event')
     const shop = results.filter(r => r.type === 'shop' || r.type === 'product')
-    const blog = results.filter(r => r.type === 'blog')
 
     return (
         <div className="container py-12 px-4 md:px-8 min-h-screen max-w-[1400px]">

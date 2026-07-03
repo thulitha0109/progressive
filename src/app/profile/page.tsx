@@ -1,12 +1,11 @@
 import { auth, signOut } from "@/auth"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { redirect } from "next/navigation"
 import { getLikedTracks } from "@/server/actions/tracks"
 import { getLikedPodcasts } from "@/server/actions/podcasts"
-import { PlayButton } from "@/components/shared/play-button"
-import { Music2 } from "lucide-react"
+import { getUserPlaylists } from "@/server/actions/playlists"
+import { Music2, ListPlus, Plus } from "lucide-react"
 import { NewReleaseCard } from "@/components/shared/new-release-card"
 import { NewPodcastCard } from "@/components/shared/new-podcast-card"
 
@@ -19,6 +18,7 @@ export default async function ProfilePage() {
 
     const likedTracks = await getLikedTracks(session.user.id || "")
     const likedPodcasts = await getLikedPodcasts(session.user.id || "")
+    const { playlists = [] } = await getUserPlaylists()
 
     return (
         <div className="container py-10 px-4 md:px-8">
@@ -114,6 +114,52 @@ export default async function ProfilePage() {
                             <p className="text-muted-foreground">
                                 Podcasts you like will appear here.
                             </p>
+                        </div>
+                    )}
+                </div>
+
+                <div className="space-y-6">
+                    <div className="flex items-center justify-between">
+                        <h2 className="text-2xl font-semibold tracking-tight">Your Playlists</h2>
+                        <Link href="/library/playlists">
+                            <Button variant="ghost" size="sm" className="text-primary hover:text-primary hover:bg-primary/10 gap-2">
+                                <Plus className="h-4 w-4" />
+                                Create New
+                            </Button>
+                        </Link>
+                    </div>
+
+                    {playlists.length > 0 ? (
+                        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                            {playlists.map((playlist) => (
+                                <Link key={playlist.id} href={`/library/playlists/${playlist.id}`}>
+                                    <div className="group p-4 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 hover:border-primary/30 transition-all duration-300">
+                                        <div className="flex items-center justify-between mb-2">
+                                            <div className="h-10 w-10 rounded-lg bg-primary/20 flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
+                                                <ListPlus className="h-5 w-5" />
+                                            </div>
+                                            <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground group-hover:text-primary transition-colors">
+                                                {((playlist as any)._count?.tracks || 0) + ((playlist as any)._count?.podcasts || 0)} Items
+                                            </span>
+                                        </div>
+                                        <h3 className="font-semibold text-lg truncate mb-1">{playlist.name}</h3>
+                                        {playlist.description && (
+                                            <p className="text-xs text-muted-foreground line-clamp-1">{playlist.description}</p>
+                                        )}
+                                    </div>
+                                </Link>
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="text-center py-12 rounded-xl border border-dashed border-white/10 bg-white/5">
+                            <ListPlus className="h-10 w-10 mx-auto mb-4 text-muted-foreground/50" />
+                            <h3 className="text-lg font-medium">No playlists found</h3>
+                            <p className="text-sm text-muted-foreground mb-6">Create a playlist to organize your favorite tracks and podcasts.</p>
+                            <Link href="/library/playlists">
+                                <Button className="bg-primary text-black hover:bg-primary/90 font-bold px-8">
+                                    Create First Playlist
+                                </Button>
+                            </Link>
                         </div>
                     )}
                 </div>

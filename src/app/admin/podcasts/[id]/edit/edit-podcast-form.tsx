@@ -51,7 +51,7 @@ interface EditPodcastFormProps {
 
 export default function EditPodcastForm({ podcast, artists, genres }: EditPodcastFormProps) {
     const [isLoading, setIsLoading] = useState(false)
-    const [uploadProgress, setUploadProgress] = useState(0)
+    const [, setUploadProgress] = useState(0)
     const [uploadStatus, setUploadStatus] = useState("")
     const [selectedArtist, setSelectedArtist] = useState<string>(podcast.artistId || "")
     const router = useRouter()

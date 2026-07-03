@@ -37,7 +37,7 @@ export async function getPresignedUrl(
         try {
             const authUrl = new URL(process.env.AUTH_URL || "http://localhost:3000")
             host = authUrl.host
-        } catch (e) {
+        } catch {
             host = "localhost:3000"
         }
     }
@@ -71,7 +71,13 @@ export async function getPresignedUrl(
     })
 
     try {
-        const rawSignedUrl = await getSignedUrl(signingClient, command, { expiresIn: 3600 })
+        // We MUST explicitly disable checksums if we don't want them in the signature params
+        // because AWS SDK v3 sometimes adds them by default for PutObject.
+        // We also use unsignableHeaders to prevent some headers from being part of the signature if needed.
+        const rawSignedUrl = await getSignedUrl(signingClient, command, {
+            expiresIn: 3600,
+            signableHeaders: new Set(["host", "content-type"]) // Only sign these to be safe
+        })
 
         // The signed URL points to the internal endpoint (e.g. http://minio:9000/...)
         // We need to rewrite the origin to the public proxy path so the client can reach it
@@ -104,7 +110,9 @@ export async function getPresignedUrl(
         const safePublicBase = publicBaseUrl.endsWith('/') ? publicBaseUrl.slice(0, -1) : publicBaseUrl
 
         // Final URL: https://progressive.lk/s3-storage/bucket/key?...
-        const signedUrl = `${publicOrigin}${safePublicBase}${pathAndQuery}`
+        // NOTE: We don't need protocol/host if we use a relative path for the client
+        // This is safer for both local dev (localhost:3000) and production (progressive.lk)
+        const signedUrl = `${safePublicBase}${pathAndQuery}`
 
         // Construct the public URL (what the database will save)
         const normalizedBase = safePublicBase

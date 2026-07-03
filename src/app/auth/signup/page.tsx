@@ -6,13 +6,11 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 
 import Link from "next/link"
-import { useRouter } from "next/navigation"
 import { useState, useTransition, useEffect } from "react"
 import { LiquidBackground } from "@/components/shared/liquid-background"
 
 
 export default function SignupPage() {
-    const router = useRouter()
     const [error, setError] = useState<string | null>(null)
     const [isPending, startTransition] = useTransition()
 

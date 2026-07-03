@@ -2,7 +2,6 @@
 
 import { useState, useTransition } from "react"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
 import { createEvent } from "@/server/actions/admin/event"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"

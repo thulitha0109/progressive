@@ -22,22 +22,21 @@ fi
 # Ensure uploads directory exists and is writable
 echo "📂 Setting up upload directory..."
 mkdir -p public/uploads
-chmod -R 777 public/uploads
+chmod -R 777 public/uploads 2>/dev/null || true
 
 # Build and start containers with dev project name and override file
 echo "📦 Building and starting DEV containers..."
-docker compose -p progressive-dev -f docker-compose.yml -f docker-compose.dev.yml up -d --build
+docker compose -p progressive-dev -f docker-compose.yml -f docker-compose.dev.yml up -d --build --renew-anon-volumes
 
-# Wait for database to be ready
-echo "⏳ Waiting for database..."
-sleep 20
+# Follow init-job logs to show setup progress
+echo "🔄 Running migrations and database seeding..."
+docker compose -p progressive-dev logs -f init-job
 
-# Run migrations only
-echo "🔄 Running database migrations..."
-docker compose -p progressive-dev exec -T app npx prisma migrate deploy --schema=src/prisma/schema.prisma
-
-# Seed development data
-echo "🌱 Seeding DEV data..."
-docker compose -p progressive-dev exec -T app npx tsx scripts/seed-dev.ts
+# Check if init-job succeeded
+INIT_JOB_EXIT_CODE=$(docker inspect -f '{{.State.ExitCode}}' progressive-dev-init-job-1 2>/dev/null || echo "1")
+if [ "$INIT_JOB_EXIT_CODE" != "0" ]; then
+  echo "❌ Database initialization job failed! Please run 'docker compose -p progressive-dev logs init-job' for details."
+  exit 1
+fi
 
 echo "✅ DEV Deployment complete! App is running on ${AUTH_URL:-http://localhost:3003}"

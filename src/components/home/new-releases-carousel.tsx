@@ -97,7 +97,6 @@ function AnalogWheelIndicator({ total, current }: { total: number, current: numb
                     // Center (dist=0) -> 3px.
                     // Neighbors -> reduce.
                     const heightValue = Math.max(1, 3 - Math.round(dist))
-                    const heightClass = `h-[${heightValue}px]`
 
                     return (
                         <div

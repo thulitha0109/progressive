@@ -20,7 +20,7 @@ export default async function AdminBlogPage({
 }) {
     const params = await searchParams
     const currentPage = Number(params.page) || 1
-    const { posts, totalPages } = await getBlogPosts(currentPage, 10, 'all')
+    const { posts } = await getBlogPosts(currentPage, 10, 'all')
 
     return (
         <div>

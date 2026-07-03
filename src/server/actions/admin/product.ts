@@ -10,7 +10,6 @@ export async function createProduct(formData: FormData) {
     const description = formData.get("description") as string
     const price = formData.get("price") as string
     const shopId = formData.get("shopId") as string
-    const imageUrl = formData.get("imageUrl") as string
     const stock = formData.get("stock") as string
 
     // Simple slug generator
@@ -58,7 +57,6 @@ export async function updateProduct(id: string, formData: FormData) {
     const description = formData.get("description") as string
     const price = formData.get("price") as string
     const shopId = formData.get("shopId") as string
-    const imageUrl = formData.get("imageUrl") as string
     const stock = formData.get("stock") as string
 
     try {

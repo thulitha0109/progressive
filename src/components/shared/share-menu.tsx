@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { Share2, Copy, Instagram, MessageCircle, Upload } from "lucide-react"
+import { Copy, Instagram, MessageCircle, Upload } from "lucide-react"
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -17,7 +17,7 @@ interface ShareMenuProps {
     children?: React.ReactNode
 }
 
-export function ShareMenu({ url, title, text, children }: ShareMenuProps) {
+export function ShareMenu({ url, text, children }: ShareMenuProps) {
     const handleCopyLink = async (e: React.MouseEvent) => {
         e.preventDefault()
         e.stopPropagation()

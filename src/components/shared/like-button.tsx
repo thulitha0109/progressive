@@ -1,14 +1,16 @@
 "use client"
 
-import { toggleLike, togglePodcastLike } from "@/server/actions/likes"
 import { Button } from "@/components/ui/button"
 import { Heart } from "lucide-react"
-import { useOptimistic, startTransition, useState } from "react"
+import { useSession } from "next-auth/react"
+import { useState, useEffect } from "react"
 import { cn } from "@/lib/utils"
 import { useRouter } from "next/navigation"
+import { useUserActions } from "@/contexts/user-actions-context"
+import { usePlayer } from "@/components/shared/player-context"
 
 export function LikeButton({
-    trackId, // Rename to itemId conceptually, but keep trackId for compat or alias it
+    trackId,
     itemId = trackId,
     type = "TRACK",
     initialLikes,
@@ -25,65 +27,48 @@ export function LikeButton({
     countClassName?: string
 }) {
     const router = useRouter()
+    const { data: session } = useSession()
     const [error, setError] = useState("")
-    const [optimisticState, addOptimistic] = useOptimistic(
-        { likes: initialLikes, isLiked: initialIsLiked },
-        (state, newIsLiked: boolean) => ({
-            likes: state.likes + (newIsLiked ? 1 : -1),
-            isLiked: newIsLiked,
-        })
-    )
+    const { likeStates, initializeLikeState, handleToggleLike } = useUserActions()
+    const { setIsFullScreen } = usePlayer()
+
+    const effectiveId = itemId || trackId
+
+    // Initialize state strictly once per component unmount/mount cycle, or if the ID changes
+    useEffect(() => {
+        if (effectiveId) {
+            initializeLikeState(effectiveId, initialIsLiked, initialLikes)
+        }
+    }, [effectiveId, initialIsLiked, initialLikes, initializeLikeState])
 
     const handleLike = async (e: React.MouseEvent) => {
         e.preventDefault()
         e.stopPropagation()
 
-        if (!itemId) return
+        if (!effectiveId) return
 
         setError("")
-        const newState = !optimisticState.isLiked
-        const newLikes = optimisticState.likes + (newState ? 1 : -1)
 
-        startTransition(() => {
-            addOptimistic(newState)
-            onToggle?.(newState, newLikes)
-        })
+        // Ensure UI reacts immediately
+        const currentState = likeStates[effectiveId] || { isLiked: initialIsLiked, likesCount: initialLikes }
+        const newIsLiked = !currentState.isLiked
+        const newLikes = currentState.likesCount + (newIsLiked ? 1 : -1)
 
-        try {
-            const result = type === "PODCAST"
-                ? await togglePodcastLike(itemId)
-                : await toggleLike(itemId)
+        onToggle?.(newIsLiked, newLikes)
 
-            if (result?.error) {
-                // Revert optimistic update on error
-                startTransition(() => {
-                    addOptimistic(!newState)
-                    onToggle?.(!newState, optimisticState.likes)
-                })
+        const result = await handleToggleLike(effectiveId, type as "TRACK" | "PODCAST", !!session?.user)
 
-                // If unauthorized, redirect to login
-                if (result.error === "Unauthorized") {
-                    router.push("/auth/login")
-                } else {
-                    setError(result.error)
-                }
-            }
-        } catch (err: unknown) {
-            // Revert optimistic update on error
-            startTransition(() => {
-                addOptimistic(!newState)
-                onToggle?.(!newState, optimisticState.likes)
-            })
-
-            // Check if it's an authentication error
-            const message = err instanceof Error ? err.message : String(err)
-            if (message?.includes("logged in")) {
-                router.push("/auth/login")
-            } else {
-                setError("Failed to update like")
-            }
+        if (result === "Unauthorized") {
+            setIsFullScreen(false)
+            router.push("/auth/login")
+        } else if (typeof result === "string") {
+            setError(result)
+            // Revert parent callback on error
+            onToggle?.(!newIsLiked, currentState.likesCount)
         }
     }
+
+    const state = effectiveId && likeStates[effectiveId] ? likeStates[effectiveId] : { isLiked: initialIsLiked, likesCount: initialLikes }
 
     return (
         <div className="relative">
@@ -96,10 +81,10 @@ export function LikeButton({
                 <Heart
                     className={cn(
                         "h-4 w-4 transition-colors",
-                        optimisticState.isLiked && "fill-red-500 text-red-500"
+                        state.isLiked && "fill-red-500 text-red-500"
                     )}
                 />
-                <span className={cn("text-xs tabular-nums", countClassName)}>{optimisticState.likes}</span>
+                <span className={cn("text-xs tabular-nums", countClassName)}>{state.likesCount}</span>
             </Button>
             {error && (
                 <span className="absolute top-full left-0 text-xs text-destructive whitespace-nowrap">

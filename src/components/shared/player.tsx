@@ -3,24 +3,42 @@
 import { usePlayer } from "@/components/shared/player-context"
 import { Button } from "@/components/ui/button"
 import { Pause, Play, Maximize2 } from "lucide-react"
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useState } from "react"
 import Image from "next/image"
 import { FullScreenPlayer } from "@/components/shared/full-screen-player"
 import { AddToPlaylistButton } from "@/components/shared/add-to-playlist-button"
 import { LikeButton } from "@/components/shared/like-button"
 import { FollowButton } from "@/components/artist/follow-button"
+import { usePlayerKeybindings } from "@/hooks/use-player-keybindings"
 
 export function Player() {
-    const { currentTrack, isPlaying, togglePlay, setIsPlaying, playNext, playPrevious, playlist } = usePlayer()
+    const {
+        currentTrack,
+        isPlaying,
+        togglePlay,
+        setIsPlaying,
+        playNext,
+        playPrevious,
+        playlist,
+        isFullScreen,
+        setIsFullScreen
+    } = usePlayer()
     // Use state callback ref to ensure re-render when audio element is available
     const [audioElement, setAudioElement] = useState<HTMLAudioElement | null>(null)
     // We still need a ref for internal access if we want to avoid stale state in closures,
     // but here we can just use the state variable for most things, or keep a synced ref.
     // Simpler: Just use the state `audioElement` everywhere instead of `audioRef.current`.
-    const [isFullScreen, setIsFullScreen] = useState(false)
+    // (audioElement state remains)
     const [currentTime, setCurrentTime] = useState(0)
     const [duration, setDuration] = useState(0)
     const [volume, setVolume] = useState(1)
+
+    const handleMuteToggle = () => {
+        if (audioElement) {
+            // eslint-disable-next-line react-hooks/immutability
+            audioElement.muted = !audioElement.muted
+        }
+    }
 
     useEffect(() => {
         if (audioElement) {
@@ -46,7 +64,9 @@ export function Player() {
         if (!audioElement) return
 
         // Mobile (especially iOS): volume may be ignored/reset, but muted is reliable
+        // eslint-disable-next-line react-hooks/immutability
         audioElement.muted = volume === 0
+
         audioElement.volume = volume
     }, [volume, audioElement, currentTrack?.id])
 
@@ -64,10 +84,25 @@ export function Player() {
 
     const handleSeek = (value: number) => {
         if (audioElement) {
+            // eslint-disable-next-line react-hooks/immutability
             audioElement.currentTime = value
             setCurrentTime(value)
         }
     }
+
+    usePlayerKeybindings({
+        isPlaying,
+        isOpen: isFullScreen,
+        onPlayPause: togglePlay,
+        onSeek: handleSeek,
+        currentTime,
+        duration,
+        onVolumeChange: setVolume,
+        volume,
+        onMuteToggle: handleMuteToggle,
+        playNext,
+        playPrevious,
+    })
 
     useEffect(() => {
         if (typeof navigator !== 'undefined' && "mediaSession" in navigator && currentTrack) {
@@ -147,12 +182,13 @@ export function Player() {
                                     {currentTrack.artist?.name}
                                 </span>
                                 {/* Follow Icon Next to Artist */}
-                                {currentTrack.artist && currentTrack.artist.id && (
+                                {(currentTrack.artist?.id || (currentTrack.artist as any)?.slug) && (
                                     <FollowButton
-                                        artistId={currentTrack.artist.id}
+                                        artistId={currentTrack.artist.id || (currentTrack.artist as any).slug}
                                         showText={false}
                                         checkStatus={true}
-                                        className="h-4 w-4 text-gray-400 hover:text-white p-0"
+                                        className="h-6 w-6 text-gray-400 hover:text-white p-0 bg-white/5 rounded-full hover:bg-white/10 transition-all shadow-sm"
+                                        iconClassName="h-3.5 w-3.5"
                                     />
                                 )}
                             </div>
@@ -174,7 +210,7 @@ export function Player() {
 
                         {/* Add to Playlist */}
                         <div className="hidden sm:block text-gray-400 hover:text-white">
-                            <AddToPlaylistButton trackId={currentTrack.id} />
+                            <AddToPlaylistButton itemId={currentTrack.id} type={currentTrack.kind || 'TRACK'} />
                         </div>
 
 
@@ -199,6 +235,7 @@ export function Player() {
                         const percent = (e.clientX - rect.left) / rect.width
                         if (audioElement) {
                             const newTime = percent * duration
+                            // eslint-disable-next-line react-hooks/immutability
                             audioElement.currentTime = newTime
                             setCurrentTime(newTime)
                         }
