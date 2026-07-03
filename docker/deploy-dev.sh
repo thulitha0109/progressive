@@ -20,14 +20,23 @@ if [ -z "$AUTH_SECRET" ]; then
 fi
 
 # Prefer an internal container DB URL for compose services, while still supporting
-# externally provided DATABASE_URL values for non-container deployments.
+# externally provided DATABASE_URL values when no explicit DB_* overrides are present.
+export DB_HOST="${DB_HOST:-postgres}"
+export DB_PORT="${DB_PORT:-5432}"
+export DB_USER="${DB_USER:-${POSTGRES_USER:-postgres}}"
+export DB_PASSWORD="${DB_PASSWORD:-${POSTGRES_PASSWORD:-password}}"
+export DB_NAME="${DB_NAME:-${POSTGRES_DB:-progressive}}"
+export POSTGRES_USER="${POSTGRES_USER:-$DB_USER}"
+export POSTGRES_PASSWORD="${POSTGRES_PASSWORD:-$DB_PASSWORD}"
+export POSTGRES_DB="${POSTGRES_DB:-$DB_NAME}"
+
 if [ -z "$DATABASE_URL_INTERNAL" ]; then
-  if [ -n "$DATABASE_URL" ]; then
+  if [ -n "$DATABASE_URL" ] && [ -z "$DB_HOST" ] && [ -z "$DB_PORT" ] && [ -z "$DB_NAME" ] && [ -z "$DB_USER" ] && [ -z "$DB_PASSWORD" ]; then
     export DATABASE_URL_INTERNAL="${DATABASE_URL/localhost/postgres}"
     export DATABASE_URL_INTERNAL="${DATABASE_URL_INTERNAL/127.0.0.1/postgres}"
     export DATABASE_URL_INTERNAL="${DATABASE_URL_INTERNAL/::1/postgres}"
   else
-    export DATABASE_URL_INTERNAL="postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-password}@postgres:5432/${POSTGRES_DB:-progressive}"
+    export DATABASE_URL_INTERNAL="postgresql://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}"
   fi
 fi
 
