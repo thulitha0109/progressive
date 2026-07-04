@@ -151,7 +151,10 @@ export async function getPodcast(id: string) {
 }
 
 export async function getPodcastBySlug(slug: string) {
-    return await prisma.podcast.findUnique({
+    const session = await auth()
+    const userId = session?.user?.id
+
+    const podcast = await prisma.podcast.findUnique({
         where: { slug },
         include: {
             artist: true,
@@ -159,6 +162,26 @@ export async function getPodcastBySlug(slug: string) {
             _count: { select: { likedBy: true } },
         },
     })
+
+    if (!podcast) return null
+
+    let isLiked = false
+    if (userId) {
+        const userLikes = await prisma.user.findUnique({
+            where: { id: userId },
+            select: { likedPodcasts: { select: { id: true } } },
+        })
+
+        if (userLikes) {
+            isLiked = userLikes.likedPodcasts.some((likedPodcast: { id: string }) => likedPodcast.id === podcast.id)
+        }
+    }
+
+    return {
+        ...podcast,
+        likesCount: podcast._count.likedBy,
+        isLiked,
+    }
 }
 
 export async function getRelatedPodcasts(currentId: string, genreId?: string | null, limit: number = 4) {

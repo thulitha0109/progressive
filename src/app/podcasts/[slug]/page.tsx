@@ -57,8 +57,8 @@ export default async function PodcastPage({ params }: { params: Promise<{ slug: 
             imageUrl: podcast.artist?.imageUrl
         },
         kind: "PODCAST" as const,
-        likesCount: podcast._count.likedBy,
-        isLiked: false, // TODO: Fetch actual user like status if available server-side
+        likesCount: podcast.likesCount ?? podcast._count.likedBy,
+        isLiked: podcast.isLiked ?? false,
         waveformPeaks: (podcast.waveformPeaks as unknown as number[]) || []
     }
 
@@ -99,7 +99,7 @@ export default async function PodcastPage({ params }: { params: Promise<{ slug: 
                             src={podcast.imageUrl}
                             alt={podcast.title}
                             fill
-                            className="object-fill md:object-cover"
+                            className="object-cover object-center"
                             priority
                         />
                     ) : (
@@ -195,8 +195,8 @@ export default async function PodcastPage({ params }: { params: Promise<{ slug: 
                             podcastSlug={podcast.slug}
                             podcastTitle={podcast.title}
                             artistName={artistName}
-                            initialLikes={podcast._count.likedBy}
-                            initialIsLiked={false}
+                            initialLikes={podcast.likesCount ?? podcast._count.likedBy}
+                            initialIsLiked={podcast.isLiked ?? false}
                         />
                     </div>
                 </div>

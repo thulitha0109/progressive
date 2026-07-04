@@ -67,8 +67,8 @@ export default async function TrackPage({ params }: { params: Promise<{ id: stri
             imageUrl: track.artist?.imageUrl
         },
         kind: "TRACK" as const,
-        likesCount: track._count?.likedBy || 0,
-        isLiked: false, // TODO: Fetch actual user like status if available server-side
+        likesCount: track.likesCount ?? track._count?.likedBy ?? 0,
+        isLiked: track.isLiked ?? false,
         waveformPeaks: (track.waveformPeaks as unknown as number[]) || []
     }
 
@@ -107,7 +107,7 @@ export default async function TrackPage({ params }: { params: Promise<{ id: stri
                             src={track.imageUrl}
                             alt={track.title}
                             fill
-                            className="object-fill md:object-cover"
+                            className="object-cover object-center"
                             priority
                         />
                     ) : (
@@ -192,8 +192,8 @@ export default async function TrackPage({ params }: { params: Promise<{ id: stri
                             trackId={track.id}
                             trackTitle={track.title}
                             artistName={artistName}
-                            initialLikes={track._count?.likedBy || 0}
-                            initialIsLiked={false}
+                            initialLikes={track.likesCount ?? track._count?.likedBy ?? 0}
+                            initialIsLiked={track.isLiked ?? false}
                         />
                     </div>
                 </div>

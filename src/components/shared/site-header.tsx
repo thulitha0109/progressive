@@ -54,6 +54,8 @@ export function SiteHeader({ user: initialUser }: SiteHeaderProps) {
         }
     }, [isOpen])
 
+    const isHeroPage = pathname === "/tracks" || pathname.startsWith("/tracks/") || pathname === "/podcasts" || pathname.startsWith("/podcasts/")
+
     const routes = [
         {
             href: "/",
@@ -92,12 +94,18 @@ export function SiteHeader({ user: initialUser }: SiteHeaderProps) {
             initial={{ y: "-100%", opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ duration: 0.8, ease: "easeOut" }}
-            className="sticky top-0 z-50 w-full bg-background/70 backdrop-blur-md supports-[backdrop-filter]:bg-background/60 border-border/40 mb-0"
+            className={cn(
+                "fixed top-0 left-0 right-0 z-50 w-full mb-0 transition-all duration-300",
+                isHeroPage
+                    ? "bg-black/10 backdrop-blur-xl supports-[backdrop-filter]:bg-black/10 border-white/10 shadow-[0_8px_30px_rgba(0,0,0,0.25)]"
+                    : "bg-background/70 backdrop-blur-md supports-[backdrop-filter]:bg-background/60 border-border/40"
+            )}
         >
-            <div className="flex h-16 items-center px-4 md:pl-6 md:pr-4 justify-between">
+        <div className="mx-auto md:mx-[-3.2em] lg:px-[2em] max-w-full">
+            <div className="flex container  h-16 w-full items-center justify-between mx-auto md:px-[1em] flex h-16 w-full max-w-7xl lg:max-w-8xl items-center justify-between">
                 {/* Left: Logo (Mobile & Desktop) */}
                 <div className="flex items-center">
-                    <Link href="/" className="mr-6 flex items-center space-x-2">
+                    <Link href="/" className=" mr-4 flex items-center space-x-2">
                         {/* Mobile Icon Logo */}
                         <div className="relative h-6 w-6 lg:hidden">
                             <Image src="/progressive.lk-icon.svg" alt="Progressive.lk" fill className="object-contain invert dark:invert-0" />
@@ -115,8 +123,14 @@ export function SiteHeader({ user: initialUser }: SiteHeaderProps) {
                                 key={route.href}
                                 href={route.href}
                                 className={cn(
-                                    "transition-colors hover:text-foreground/80 cursor-pointer",
-                                    route.active ? "text-foreground" : "text-foreground/60"
+                                    "transition-colors cursor-pointer",
+                                    isHeroPage
+                                        ? route.active
+                                            ? "text-white"
+                                            : "text-white/70 hover:text-white"
+                                        : route.active
+                                            ? "text-foreground"
+                                            : "text-foreground/60 hover:text-foreground/80"
                                 )}
                             >
                                 {route.label}
@@ -138,7 +152,7 @@ export function SiteHeader({ user: initialUser }: SiteHeaderProps) {
                         The InlineSearch component usually has an icon. Let's see if we can use it or a trigger.
                         I'll use a Button with Search icon for mobile if InlineSearch is hidden.
                     */}
-                    <Button variant="ghost" size="icon" className="md:hidden" asChild>
+                    <Button variant="ghost" size="icon" className={cn("md:hidden", isHeroPage && "text-white hover:text-white")} asChild>
                         <Link href="/search">
                             <Search className="h-5 w-5" />
                             <span className="sr-only">Search</span>
@@ -169,13 +183,6 @@ export function SiteHeader({ user: initialUser }: SiteHeaderProps) {
                                         <Link href="/profile" className="flex items-center gap-3">
                                             <User className="h-4 w-4 text-muted-foreground" />
                                             <span>Profile</span>
-                                        </Link>
-                                    </DropdownMenuItem>
-
-                                    <DropdownMenuItem asChild className="cursor-pointer focus:bg-white/5 focus:text-white rounded-md px-2 py-2">
-                                        <Link href="/library/likes" className="flex items-center gap-3">
-                                            <Heart className="h-4 w-4 text-muted-foreground" />
-                                            <span>Likes</span>
                                         </Link>
                                     </DropdownMenuItem>
 
@@ -223,14 +230,14 @@ export function SiteHeader({ user: initialUser }: SiteHeaderProps) {
                                 <Button
                                     variant="ghost"
                                     size="sm"
-                                    className="hidden md:flex gap-2 cursor-pointer"
+                                    className={cn("hidden md:flex gap-2 cursor-pointer", isHeroPage && "text-white hover:text-white")}
                                 >
                                     <User className="h-4 w-4" />
                                 </Button>
                                 <Button
                                     variant="ghost"
                                     size="icon"
-                                    className="flex md:hidden cursor-pointer"
+                                    className={cn("flex md:hidden cursor-pointer", isHeroPage && "text-white hover:text-white")}
                                 >
                                     <User className="h-5 w-5" />
                                 </Button>
@@ -242,7 +249,7 @@ export function SiteHeader({ user: initialUser }: SiteHeaderProps) {
                         <Button
                             variant="ghost"
                             size="icon"
-                            className="lg:hidden relative z-[60] cursor-pointer"
+                            className={cn("lg:hidden relative z-[60] cursor-pointer", isHeroPage && "text-white hover:text-white")}
                             onClick={() => setIsOpen(!isOpen)}
                         >
                             <AnimatePresence mode="wait">
@@ -392,6 +399,7 @@ export function SiteHeader({ user: initialUser }: SiteHeaderProps) {
                     </nav>
                 </div>
             </div>
+        </div>
         </motion.header>
     )
 }

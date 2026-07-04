@@ -114,7 +114,7 @@ export default async function TracksPage({
                                 src={heroTrack.imageUrl}
                                 alt={heroTrack.title}
                                 fill
-                                className="object-fill md:object-cover"
+                                className="object-cover object-center"
                                 priority
                             />
                         ) : (
@@ -144,7 +144,7 @@ export default async function TracksPage({
                         <div className="flex flex-col md:flex-row gap-8 items-start md:items-end">
                             <div className="flex-1 space-y-4 w-full">
                                 <div className="flex flex-wrap items-center gap-3 text-white/80">
-                                    <span className="px-3 py-1 rounded-md text-xs font-bold uppercase tracking-wider border text-white bg-primary border-primary">
+                                    <span className="px-3 py-1 rounded-md text-xs font-bold uppercase tracking-wider border text-white bg-cyan-600/90 border-cyan-400/70 shadow-[0_0_20px_rgba(34,211,238,0.25)]">
                                         Featured Release
                                     </span>
                                     {heroTrack.genreRel && (

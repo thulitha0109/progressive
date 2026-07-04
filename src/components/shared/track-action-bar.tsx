@@ -22,7 +22,8 @@ export function TrackActionBar({
 }: TrackActionBarProps) {
 
     const handleCopyLink = async () => {
-        const url = `${process.env.NEXT_PUBLIC_APP_URL || "https://progressive.lk"}/tracks/${trackId}`
+        const origin = typeof window !== "undefined" ? window.location.origin : (process.env.NEXT_PUBLIC_APP_URL || "https://progressive.lk")
+        const url = `${origin}/tracks/${trackId}`
         try {
             if (navigator.clipboard) {
                 await navigator.clipboard.writeText(url)

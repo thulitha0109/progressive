@@ -98,7 +98,10 @@ export async function getUpcomingTracks() {
 }
 
 export async function getTrack(id: string) {
-    return await prisma.track.findUnique({
+    const session = await auth()
+    const userId = session?.user?.id
+
+    const track = await prisma.track.findUnique({
         where: { id },
         include: {
             artist: true,
@@ -106,6 +109,26 @@ export async function getTrack(id: string) {
             _count: { select: { likedBy: true } },
         },
     })
+
+    if (!track) return null
+
+    let isLiked = false
+    if (userId) {
+        const userLikes = await prisma.user.findUnique({
+            where: { id: userId },
+            select: { likes: { select: { id: true } } },
+        })
+
+        if (userLikes) {
+            isLiked = userLikes.likes.some((likedTrack: { id: string }) => likedTrack.id === track.id)
+        }
+    }
+
+    return {
+        ...track,
+        likesCount: track._count.likedBy,
+        isLiked,
+    }
 }
 
 export async function getLikedTracks(userId: string) {

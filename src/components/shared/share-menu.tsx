@@ -18,18 +18,31 @@ interface ShareMenuProps {
 }
 
 export function ShareMenu({ url, text, children }: ShareMenuProps) {
+    const getShareUrl = React.useCallback((value: string) => {
+        if (!value) return ""
+        if (/^https?:\/\//i.test(value)) return value
+
+        const origin = typeof window !== "undefined"
+            ? window.location.origin
+            : (process.env.NEXT_PUBLIC_APP_URL || "https://progressive.lk")
+
+        return `${origin}${value.startsWith("/") ? "" : "/"}${value}`
+    }, [])
+
+    const shareUrl = getShareUrl(url)
+
     const handleCopyLink = async (e: React.MouseEvent) => {
         e.preventDefault()
         e.stopPropagation()
 
         try {
             if (navigator.clipboard) {
-                await navigator.clipboard.writeText(url)
+                await navigator.clipboard.writeText(shareUrl)
                 toast.success("Link copied to clipboard")
             } else {
                 // Fallback for non-secure contexts or incompatible browsers
                 const textArea = document.createElement("textarea")
-                textArea.value = url
+                textArea.value = shareUrl
                 document.body.appendChild(textArea)
                 textArea.select()
                 document.execCommand("copy")
@@ -48,12 +61,12 @@ export function ShareMenu({ url, text, children }: ShareMenuProps) {
 
         try {
             if (navigator.clipboard) {
-                await navigator.clipboard.writeText(url)
+                await navigator.clipboard.writeText(shareUrl)
                 toast.success("Link copied! Open Instagram to share.")
             } else {
                 // Fallback
                 const textArea = document.createElement("textarea")
-                textArea.value = url
+                textArea.value = shareUrl
                 document.body.appendChild(textArea)
                 textArea.select()
                 document.execCommand("copy")
@@ -69,7 +82,7 @@ export function ShareMenu({ url, text, children }: ShareMenuProps) {
     const handleShareWhatsApp = (e: React.MouseEvent) => {
         e.preventDefault()
         e.stopPropagation()
-        window.open(`https://wa.me/?text=${encodeURIComponent(text + ' ' + url)}`, '_blank')
+        window.open(`https://wa.me/?text=${encodeURIComponent(text + ' ' + shareUrl)}`, '_blank')
     }
 
     return (

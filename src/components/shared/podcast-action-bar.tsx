@@ -24,7 +24,8 @@ export function PodcastActionBar({
 }: PodcastActionBarProps) {
 
     const handleCopyLink = () => {
-        const url = `${process.env.NEXT_PUBLIC_APP_URL || "https://progressive.lk"}/podcasts/${podcastSlug}`
+        const origin = typeof window !== "undefined" ? window.location.origin : (process.env.NEXT_PUBLIC_APP_URL || "https://progressive.lk")
+        const url = `${origin}/podcasts/${podcastSlug}`
         navigator.clipboard.writeText(url)
         toast.success("Link copied to clipboard")
     }
