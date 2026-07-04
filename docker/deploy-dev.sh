@@ -54,7 +54,11 @@ echo "🔄 Running migrations and database seeding..."
 docker compose -p progressive-dev logs -f init-job
 
 # Check if init-job succeeded
-INIT_JOB_EXIT_CODE=$(docker inspect -f '{{.State.ExitCode}}' progressive-dev-init-job-1 2>/dev/null || echo "1")
+INIT_JOB_CONTAINER=$(docker compose -p progressive-dev ps -q init-job 2>/dev/null | head -n 1)
+if [ -z "$INIT_JOB_CONTAINER" ]; then
+  INIT_JOB_CONTAINER=$(docker ps --filter "name=init-job" --format "{{.ID}}" | head -n 1)
+fi
+INIT_JOB_EXIT_CODE=$(docker inspect -f '{{.State.ExitCode}}' "$INIT_JOB_CONTAINER" 2>/dev/null || echo "1")
 if [ "$INIT_JOB_EXIT_CODE" != "0" ]; then
   echo "❌ Database initialization job failed! Please run 'docker compose -p progressive-dev logs init-job' for details."
   exit 1
