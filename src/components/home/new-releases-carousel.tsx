@@ -70,7 +70,7 @@ function AnalogWheelIndicator({ total, current }: { total: number, current: numb
     if (!total) return null
 
     return (
-        <div className="relative h-8 w-full overflow-hidden bg-transparent rounded-full mb-8 select-none">
+        <div className="relative h-8 w-full overflow-hidden bg-transparent rounded-full mt-4 select-none">
             {/* Static Needle / Highlight - Always center */}
             <div className="absolute left-1/2 top-1/2 -translate-y-1/2 h-[3px] w-0.5 bg-red-500 z-20 -translate-x-1/2 shadow-[0_0_6px_1px_rgba(255,0,0,0.6)]" />
 
@@ -137,9 +137,7 @@ export function NewReleasesCarousel({ tracks }: { tracks: Track[] }) {
     const swiperRef = useRef<SwiperType | null>(null)
 
     return (
-        <div className="space-y-6 w-full">
-            <AnalogWheelIndicator key={tracks.length} total={tracks.length} current={currentIndex} />
-
+        <div className="space-y-4 w-full">
             <div className="relative group/carousel">
                 {/* Navigation Arrows */}
                 <div className="absolute top-1/2 -translate-y-1/2 -left-12 z-50 hidden md:block opacity-0 group-hover/carousel:opacity-100 transition-opacity duration-300">
@@ -208,6 +206,8 @@ export function NewReleasesCarousel({ tracks }: { tracks: Track[] }) {
                     </Swiper>
                 </div>
             </div>
+
+            <AnalogWheelIndicator key={tracks.length} total={tracks.length} current={currentIndex} />
         </div>
     )
 }

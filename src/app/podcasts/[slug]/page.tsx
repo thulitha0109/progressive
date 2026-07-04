@@ -58,7 +58,8 @@ export default async function PodcastPage({ params }: { params: Promise<{ slug: 
         },
         kind: "PODCAST" as const,
         likesCount: podcast._count.likedBy,
-        isLiked: false // TODO: Fetch actual user like status if available server-side
+        isLiked: false, // TODO: Fetch actual user like status if available server-side
+        waveformPeaks: (podcast.waveformPeaks as unknown as number[]) || []
     }
 
     const artistName = podcast.artist?.name || "Unknown Artist"

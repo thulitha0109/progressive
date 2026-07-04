@@ -64,7 +64,7 @@ function AnalogWheelIndicator({ total, current }: { total: number, current: numb
     if (!total) return null
 
     return (
-        <div className="relative h-8 w-full overflow-hidden bg-transparent rounded-full mb-8 select-none">
+        <div className="relative h-8 w-full overflow-hidden bg-transparent rounded-full mt-4 select-none">
             <div className="absolute left-1/2 top-1/2 -translate-y-1/2 h-[3px] w-0.5 bg-red-500 z-20 -translate-x-1/2 shadow-[0_0_6px_1px_rgba(255,0,0,0.6)]" />
             <div
                 className="absolute top-0 bottom-0 left-1/2 h-full will-change-transform transition-transform duration-500 ease-out"
@@ -110,9 +110,7 @@ export function NewPodcastsCarousel({ podcasts }: { podcasts: Podcast[] }) {
     const swiperRef = useRef<SwiperType | null>(null)
 
     return (
-        <div className="space-y-6 w-full">
-            <AnalogWheelIndicator key={podcasts.length} total={podcasts.length} current={currentIndex} />
-
+        <div className="space-y-4 w-full">
             <div className="relative group/carousel">
                 <div className="absolute top-1/2 -translate-y-1/2 -left-12 z-50 hidden md:block opacity-0 group-hover/carousel:opacity-100 transition-opacity duration-300">
                     <button
@@ -171,6 +169,8 @@ export function NewPodcastsCarousel({ podcasts }: { podcasts: Podcast[] }) {
                     </Swiper>
                 </div>
             </div>
+
+            <AnalogWheelIndicator key={podcasts.length} total={podcasts.length} current={currentIndex} />
         </div>
     )
 }

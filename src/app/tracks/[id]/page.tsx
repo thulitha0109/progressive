@@ -68,7 +68,8 @@ export default async function TrackPage({ params }: { params: Promise<{ id: stri
         },
         kind: "TRACK" as const,
         likesCount: track._count?.likedBy || 0,
-        isLiked: false // TODO: Fetch actual user like status if available server-side
+        isLiked: false, // TODO: Fetch actual user like status if available server-side
+        waveformPeaks: (track.waveformPeaks as unknown as number[]) || []
     }
 
     const artistName = track.artist?.name || "Unknown Artist"
