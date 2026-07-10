@@ -54,24 +54,23 @@ export default async function HomePage({
       )}
       </div>
       <div className="px-4 md:px-6 py-16 md:py-24 space-y-24 md:space-y-32">
-        {/* Upcoming Tracks */}
-        <div className="overflow-x-hidden">
-        <section>
-          <div className="flex items-center justify-between mb-8">
-            <h2 className="text-2xl font-bold tracking-tight">Upcoming Releases</h2>
-            <Link href="/tracks/upcoming" className="text-xl text-primary hover:scale-110 transition-transform px-2">
-              <ArrowRight className="w-6 h-6" />
-            </Link>
+        {/* Upcoming Tracks — only shown when there are upcoming items */}
+        {upcomingTracks.length > 0 && (
+          <div className="overflow-x-hidden">
+            <section>
+              <div className="flex items-center justify-between mb-8">
+                <h2 className="text-2xl font-bold tracking-tight">Upcoming Releases</h2>
+                <Link href="/tracks/upcoming" className="text-xl text-primary hover:scale-110 transition-transform px-2">
+                  <ArrowRight className="w-6 h-6" />
+                </Link>
+              </div>
+              <div className="block">
+                {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+                <UpcomingCarousel tracks={upcomingTracks as unknown as any[]} />
+              </div>
+            </section>
           </div>
-          <div className="block">
-            {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-            <UpcomingCarousel tracks={upcomingTracks as unknown as any[]} />
-            {upcomingTracks.length === 0 && (
-              <p className="text-muted-foreground col-span-full">No upcoming tracks scheduled.</p>
-            )}
-          </div>
-        </section>
-        </div>
+        )}
         {/* Published Tracks (New Releases) */}
         <section>
           <div className="flex items-center justify-between mb-8">

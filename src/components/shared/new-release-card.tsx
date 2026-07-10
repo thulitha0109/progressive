@@ -177,13 +177,13 @@ export function NewReleaseCard({ track, hideLikeButton = false }: { track: Relea
                                     trackId={track.id}
                                     initialLikes={track.likesCount}
                                     initialIsLiked={track.isLiked}
-                                    type="TRACK"
+                                    type={track.kind === "PODCAST" ? "PODCAST" : "TRACK"}
                                 />
                             </div>
                             <div className="transform transition-transform active:scale-95">
                                 <AddToPlaylistButton
                                     itemId={track.id}
-                                    type="TRACK"
+                                    type={track.kind === "PODCAST" ? "PODCAST" : "TRACK"}
                                     className="h-8 w-8 p-1.5"
                                 />
                             </div>

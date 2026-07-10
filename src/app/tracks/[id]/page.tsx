@@ -3,13 +3,14 @@ import { notFound } from "next/navigation"
 import Image from "next/image"
 import Link from "next/link"
 import { PlayButton } from "@/components/shared/play-button"
-import { Calendar, User, ArrowLeft, ArrowRight } from "lucide-react"
+import { Calendar, User, ArrowLeft, ArrowRight, Clock } from "lucide-react"
 import { format } from "date-fns"
 import { Metadata } from "next"
 import { NewReleaseCard } from "@/components/shared/new-release-card"
 import { cn } from "@/lib/utils"
 import { TrackActionBar } from "@/components/shared/track-action-bar"
 import { Prisma } from "@prisma/client"
+import { auth } from "@/auth"
 
 type TrackWithDetails = Prisma.TrackGetPayload<{
     include: {
@@ -49,6 +50,46 @@ export default async function TrackPage({ params }: { params: Promise<{ id: stri
 
     if (!track) {
         notFound()
+    }
+
+    // Gate: block access to upcoming tracks for non-admins
+    const session = await auth()
+    const isAdmin = session?.user?.role === "ADMIN"
+    const isUpcoming = new Date(track.scheduledFor) > new Date()
+
+    if (isUpcoming && !isAdmin) {
+        return (
+            <div className="min-h-screen bg-background flex items-center justify-center pb-24">
+                <div className="text-center space-y-6 px-4 max-w-md">
+                    {track.imageUrl && (
+                        <div className="relative h-48 w-48 mx-auto rounded-2xl overflow-hidden shadow-2xl">
+                            <Image src={track.imageUrl} alt={track.title} fill className="object-cover object-top blur-sm opacity-60" />
+                        </div>
+                    )}
+                    <div className="space-y-2">
+                        <div className="flex items-center justify-center gap-2 text-primary">
+                            <Clock className="h-5 w-5" />
+                            <span className="text-sm font-bold uppercase tracking-widest">Coming Soon</span>
+                        </div>
+                        <h1 className="text-3xl font-bold tracking-tight">{track.title}</h1>
+                        <p className="text-muted-foreground">{track.artist?.name || "Unknown Artist"}</p>
+                        <p className="text-sm text-muted-foreground">
+                            Available on{" "}
+                            <span className="text-foreground font-semibold">
+                                {format(new Date(track.scheduledFor), "MMMM d, yyyy 'at' h:mm a")}
+                            </span>
+                        </p>
+                    </div>
+                    <Link
+                        href="/tracks"
+                        className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                        <ArrowLeft className="h-4 w-4" />
+                        Back to Tracks
+                    </Link>
+                </div>
+            </div>
+        )
     }
 
     // Fetch related tracks (same genre, exclude current)
