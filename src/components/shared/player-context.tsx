@@ -1,10 +1,9 @@
 "use client"
 
-import React, { createContext, useContext, useState } from "react"
+import React, { createContext, useContext, useState, useRef } from "react"
 
 interface Track {
     id: string
-    // Standard properties
     title: string
     audioUrl: string
     imageUrl?: string | null
@@ -13,17 +12,14 @@ interface Track {
         name: string
         imageUrl?: string | null
     }
-    // Metadata for player
     likesCount?: number
     isLiked?: boolean
     kind?: "TRACK" | "PODCAST"
     genre?: string | null
     type?: string | null
     sequence?: number | null
-    // Waveform
     waveformPeaks?: number[] | null
     duration?: number
-    // Relations
     genreRel?: {
         name: string
         parent?: {
@@ -44,6 +40,8 @@ interface PlayerContextType {
     playNext: () => void
     playPrevious: () => void
     setIsFullScreen: (isFullScreen: boolean) => void
+    /** Shared ref — attach this to the single <audio> element that actually plays audio */
+    audioRef: React.RefObject<HTMLAudioElement | null>
 }
 
 const PlayerContext = createContext<PlayerContextType | undefined>(undefined)
@@ -54,6 +52,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     const [playlist, setPlaylist] = useState<Track[]>([])
     const [currentIndex, setCurrentIndex] = useState(0)
     const [isFullScreen, setIsFullScreen] = useState(false)
+    const audioRef = useRef<HTMLAudioElement | null>(null)
 
     const playTrack = (track: Track, newPlaylist?: Track[]) => {
         if (newPlaylist) {
@@ -61,7 +60,6 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
             const index = newPlaylist.findIndex(t => t.id === track.id)
             setCurrentIndex(index !== -1 ? index : 0)
         } else {
-            // If no playlist provided, add to existing or create new
             const existingIndex = playlist.findIndex(t => t.id === track.id)
             if (existingIndex !== -1) {
                 setCurrentIndex(existingIndex)
@@ -82,7 +80,6 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
 
     const playNext = () => {
         if (playlist.length === 0) return
-
         const nextIndex = (currentIndex + 1) % playlist.length
         setCurrentIndex(nextIndex)
         setCurrentTrack(playlist[nextIndex])
@@ -91,7 +88,6 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
 
     const playPrevious = () => {
         if (playlist.length === 0) return
-
         const prevIndex = currentIndex === 0 ? playlist.length - 1 : currentIndex - 1
         setCurrentIndex(prevIndex)
         setCurrentTrack(playlist[prevIndex])
@@ -111,7 +107,8 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
                 setIsPlaying,
                 playNext,
                 playPrevious,
-                setIsFullScreen
+                setIsFullScreen,
+                audioRef,
             }}
         >
             {children}

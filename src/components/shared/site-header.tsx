@@ -95,10 +95,10 @@ export function SiteHeader({ user: initialUser }: SiteHeaderProps) {
             animate={{ y: 0, opacity: 1 }}
             transition={{ duration: 0.8, ease: "easeOut" }}
             className={cn(
-                "fixed top-0 left-0 right-0 z-50 w-full mb-0 transition-all duration-300",
+                "fixed top-0 left-0 right-0 z-50 w-full mb-8 transition-all duration-300",
                 isHeroPage
-                    ? "bg-black/10 backdrop-blur-xl supports-[backdrop-filter]:bg-black/10 border-white/10 shadow-[0_8px_30px_rgba(0,0,0,0.25)]"
-                    : "bg-background/70 backdrop-blur-md supports-[backdrop-filter]:bg-background/60 border-border/40"
+                    ? "bg-black/5 backdrop-blur-sm supports-[backdrop-filter]:bg-black/10 border-white/10"
+                    : "bg-background/5 backdrop-blur-md supports-[backdrop-filter]:bg-background/60 border-border/40"
             )}
         >
         <div className="w-full max-w-[1400px] mx-auto px-4 md:px-6">

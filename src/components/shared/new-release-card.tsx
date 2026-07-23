@@ -132,11 +132,6 @@ export function NewReleaseCard({ track, hideLikeButton = false }: { track: Relea
                         </span>
                     </div>
                 )}
-
-                {/* Waveform - Bottom Center of Image */}
-                <div className="absolute bottom-3 inset-x-0 flex justify-center z-30 pointer-events-none opacity-90 scale-125">
-                    <StyledWaveform isPlaying={isCurrentTrack && isPlaying} />
-                </div>
             </div>
 
             {/* Info Section - Right */}
@@ -199,15 +194,19 @@ export function NewReleaseCard({ track, hideLikeButton = false }: { track: Relea
                     )}>
                         {track.title}
                     </h3>
-                    <p className="text-[11px] sm:text-sm text-muted-foreground font-medium truncate flex items-center gap-2">
+                    <p className="text-[11px] sm:text-sm text-muted-foreground font-medium truncate">
                         {track.artist?.name || "Unknown Artist"}
-                        {isCurrentTrack && isPlaying && (
-                            <span className="flex h-1.5 w-1.5 relative">
-                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                                <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-green-500"></span>
-                            </span>
-                        )}
                     </p>
+                    {/* Waveform — shown left-aligned below artist name when playing */}
+                    {isCurrentTrack && (
+                        <div className="mt-1">
+                            <StyledWaveform
+                                isPlaying={isPlaying}
+                                height={18}
+                                bars={20}
+                            />
+                        </div>
+                    )}
                 </div>
 
                 {/* Genres - Bottom */}

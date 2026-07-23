@@ -59,7 +59,7 @@ interface FeaturedItem {
 }
 
 export function FeaturedSection({ item }: { item: FeaturedItem }) {
-    const { currentTrack, isPlaying, togglePlay, playTrack } = usePlayer()
+    const { currentTrack, isPlaying, togglePlay, playTrack, audioRef } = usePlayer()
     const isCurrentTrack = currentTrack?.id === item.id
 
     // Remove complex glitch state, replace with simple mouse tracking for liquid effect
@@ -218,9 +218,11 @@ export function FeaturedSection({ item }: { item: FeaturedItem }) {
                                 </div>
                             )}
 
-                            {/* Waveform - Bottom Center */}
-                            <div className="absolute bottom-12 inset-x-0 flex justify-center z-30 pointer-events-none opacity-90 scale-150">
-                                <StyledWaveform isPlaying={isCurrentTrack && isPlaying} />
+                            {/* Waveform Equalizer - Bottom of Featured Image */}
+                            <div className="absolute bottom-4 inset-x-0 flex justify-center z-30 pointer-events-none px-6">
+                                <StyledWaveform
+                                    isPlaying={isCurrentTrack && isPlaying}
+                                />
                             </div>
 
                             {/* Play Overlay - Always Visible */}

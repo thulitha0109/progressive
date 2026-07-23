@@ -133,9 +133,9 @@ export function NewPodcastCard({ podcast, hideLikeButton = false }: { podcast: P
                     </div>
                 )}
 
-                {/* Waveform - Bottom Center of Image */}
-                <div className="absolute bottom-3 inset-x-0 flex justify-center z-30 pointer-events-none opacity-90 scale-125">
-                    <StyledWaveform isPlaying={isCurrentTrack && isPlaying} />
+                {/* Waveform Equalizer - Bottom of Image */}
+                <div className="absolute bottom-0 inset-x-0 flex justify-center z-30 pointer-events-none px-1">
+                    <StyledWaveform isPlaying={isCurrentTrack && isPlaying} height={28} bars={32} className="w-full" />
                 </div>
             </div>
 

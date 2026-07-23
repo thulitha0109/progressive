@@ -13,7 +13,7 @@ export default function AdminLayout({
     const pathname = usePathname()
 
     return (
-        <div className="flex min-h-screen w-full">
+        <div className="flex mt-12 min-h-screen w-full">
             <aside className="hidden w-64 flex-col border-r bg-background p-6 md:flex">
                 <div className="mb-8 flex items-center justify-start">
                     <Link href="/" className="flex items-center">

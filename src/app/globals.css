@@ -109,6 +109,12 @@
       opacity: 1;
     }
   }
+
+  /* Equalizer bar — GPU-smooth scaleY bounce between --eq-min and --eq-max */
+  @keyframes eq-bounce {
+    0%   { transform: scaleY(var(--eq-min)); }
+    100% { transform: scaleY(var(--eq-max)); }
+  }
 }
 
 @layer utilities {

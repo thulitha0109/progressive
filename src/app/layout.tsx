@@ -95,7 +95,7 @@ export default async function RootLayout({
                 <UserActionsProvider>
                   <div className="relative flex min-h-screen flex-col mx-auto max-w-[1400px] pb-24 md:pb-28">
                     <SiteHeader user={session?.user} />
-                    <main className="flex-1">{children}</main>
+                    <main className="flex-1 mt-8">{children}</main>
                     <SiteFooter />
                   </div>
                   <Player />

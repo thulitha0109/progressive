@@ -33,7 +33,7 @@ export default async function HomePage({
   const displayItem = featuredItem || (publishedTracks.length > 0 ? { ...publishedTracks[0], type: publishedTracks[0].type || "TRACK" } : null)
 
   return (
-    <div className="min-h-screen bg-background pb-24">
+    <div className="min-h-screen bg-background mt-12 pb-24">
       {/* Featured Section (Replaces Hero) */}
       <div className="overflow-x-hidden">
       {displayItem ? (
