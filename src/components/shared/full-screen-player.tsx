@@ -6,7 +6,7 @@ import { ChevronDown, Pause, Play, Volume2, VolumeX } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useState } from "react"
 import Image from "next/image"
-import { Waveform } from "@/components/shared/waveform"
+import { FullScreenWaveform } from "@/components/shared/waveform"
 import { LikeButton } from "@/components/shared/like-button"
 import { AddToPlaylistButton } from "@/components/shared/add-to-playlist-button"
 import { FollowButton } from "@/components/artist/follow-button"
@@ -291,13 +291,12 @@ export function FullScreenPlayer({
                             return null;
                         })()}
                         {track.audioUrl && audioElement && (
-                            <Waveform
-                                audioUrl={track.audioUrl}
+                            <FullScreenWaveform
+                                peaks={track.waveformPeaks as number[] | undefined}
                                 media={audioElement}
                                 height={64}
                                 waveColor="#52525b"
                                 progressColor="#fafafa"
-                                peaks={track.waveformPeaks as number[] | undefined}
                                 duration={duration}
                             />
                         )}

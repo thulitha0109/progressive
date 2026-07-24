@@ -7,9 +7,8 @@ import { LikeButton } from "@/components/shared/like-button"
 import { FollowButton } from "@/components/artist/follow-button"
 import { usePlayer } from "@/components/shared/player-context"
 import { cn } from "@/lib/utils"
-// import { WaveformBar } from "@/components/shared/waveform-bar" // Removed
 import { LiquidBackground } from "@/components/shared/liquid-background"
-import { StyledWaveform } from "@/components/shared/styled-waveform"
+import { CardWaveform } from "@/components/shared/styled-waveform"
 
 const GENRE_BORDERS: Record<string, string> = {
     "Progressive": "border-blue-500/50 text-blue-500",
@@ -62,12 +61,10 @@ export function FeaturedSection({ item }: { item: FeaturedItem }) {
     const { currentTrack, isPlaying, togglePlay, playTrack, audioRef } = usePlayer()
     const isCurrentTrack = currentTrack?.id === item.id
 
-    // Remove complex glitch state, replace with simple mouse tracking for liquid effect
     const handleImageClick = () => {
         if (isCurrentTrack) {
             togglePlay()
         } else {
-            // Cast to compatible Track type
             playTrack({
                 id: item.id,
                 title: item.title,
@@ -82,14 +79,10 @@ export function FeaturedSection({ item }: { item: FeaturedItem }) {
         }
     }
 
-    // We no longer need to hold back the content, as the LiquidBackground now has a static fallback
-    // that renders immediately. This fixes the "double load" / invisible content issue.
-
     const artistName = item.artist?.name || "Progressive.lk"
     const artistImage = item.artist?.imageUrl || null
     const sequence = item.assignedSequence ? String(item.assignedSequence).padStart(3, '0') : "001"
 
-    // Determine Genre Data
     const genreName = item.genreRel?.name || item.genre
     const parentGenreName = item.genreRel?.parent?.name
     const genreColorClass = getGenreBorderColor(parentGenreName || genreName || "")
@@ -98,26 +91,19 @@ export function FeaturedSection({ item }: { item: FeaturedItem }) {
         <section
             className="relative w-full overflow-hidden min-h-[700px] lg:min-h-screen flex items-end animate-enter-fade-in"
         >
-            {/* Background Image - LEFT sided liquid */}
             <div className="absolute inset-y-0 left-0 w-full lg:w-3/4 z-0 overflow-hidden">
                 <LiquidBackground
                     imageUrl="/images/PNG-06.png"
                     className="absolute inset-0 w-full h-full"
                 />
-
-                {/* Overlays for depth - Pointer events none to allow BG interaction */}
                 <div className="absolute inset-0 bg-linear-to-r from-background/0 to-background dark:from-background/0 dark:to-background pointer-events-none" />
                 <div className="absolute inset-0 bg-linear-to-t from-background via-background/50 to-background/0 dark:from-background dark:via-background/20 dark:to-background/0 pointer-events-none" />
             </div>
 
             <div className="container px-4 md:px-6 relative z-10 pt-12 pb-24 pointer-events-none">
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-6 items-end">
-                    {/* Left Side: Content - Text Data (Order 2 on Mobile, 1 on Desktop) */}
                     <div className="flex flex-col space-y-6 md:space-y-8 items-start text-left lg:items-end lg:text-right pointer-events-none lg:mb-12 order-2 lg:order-1">
-                        {/* Wrapper div for content to allow pointer events on text if needed, but mainly visual */}
                         <div className="pointer-events-auto w-full flex flex-col items-start lg:items-end space-y-8">
-
-                            {/* Artist Info (Vertical Layout: Image -> Name) */}
                             <div className="flex flex-col items-start lg:items-end space-y-6">
                                 <div className="relative h-24 w-24 md:h-32 md:w-32 overflow-hidden rounded-full border-2 border-white/20 shadow-lg">
                                     {artistImage ? (
@@ -151,7 +137,6 @@ export function FeaturedSection({ item }: { item: FeaturedItem }) {
                                 </div>
                             </div>
 
-                            {/* Track Info (NOW ON BOTTOM) */}
                             <div className="space-y-4 flex flex-col items-start lg:items-end w-full">
                                 <div className="relative inline-block text-left lg:text-right">
                                     <h1
@@ -197,7 +182,6 @@ export function FeaturedSection({ item }: { item: FeaturedItem }) {
                         </div>
                     </div>
 
-                    {/* Right Side: Player Card - (Order 1 on Mobile, 2 on Desktop) */}
                     <div className="relative w-full max-w-xl mx-auto lg:ml-auto lg:mb-12 cursor-pointer pointer-events-auto order-1 lg:order-2" onClick={handleImageClick}>
                         <div className="relative aspect-square rounded-md overflow-hidden shadow-2xl group border border-white/10 bg-black/50 backdrop-blur-md">
                             {item.imageUrl || (item.artist && item.artist.imageUrl) ? (
@@ -218,11 +202,9 @@ export function FeaturedSection({ item }: { item: FeaturedItem }) {
                                 </div>
                             )}
 
-                            {/* Waveform Equalizer - Bottom of Featured Image */}
+                            {/* Waveform - Bottom of Featured Image */}
                             <div className="absolute bottom-4 inset-x-0 flex justify-center z-30 pointer-events-none px-6">
-                                <StyledWaveform
-                                    isPlaying={isCurrentTrack && isPlaying}
-                                />
+                                <CardWaveform peaks={item.waveformPeaks ?? []} isPlaying={isCurrentTrack && isPlaying} barColor="linear-gradient(135deg, #2563eb 0%, #06b6d4 100%)" height={40} />
                             </div>
 
                             {/* Play Overlay - Always Visible */}
@@ -240,6 +222,6 @@ export function FeaturedSection({ item }: { item: FeaturedItem }) {
                     </div>
                 </div>
             </div>
-        </section >
+        </section>
     )
 }
