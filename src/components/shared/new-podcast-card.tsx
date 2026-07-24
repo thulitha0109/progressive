@@ -34,7 +34,7 @@ export interface PodcastItem {
     imageUrl?: string | null
   } | null
   sequence?: number | null
-  waveformPeaks?: number[] | null   // added
+  waveformPeaks?: any
 }
 
 const GENRE_BORDERS: Record<string, string> = {
@@ -220,7 +220,7 @@ export function NewPodcastCard({
           <div className="absolute bottom-8 right-3 sm:bottom-10 sm:right-4 z-30 pointer-events-none">
             <div className="flex justify-end w-24 sm:w-32 md:w-40">
               <CardWaveform
-                peaks={podcast.waveformPeaks ?? []}
+                peaks={Array.isArray(podcast.waveformPeaks) ? podcast.waveformPeaks : []}
                 isPlaying={isPlaying && currentTrack?.id === podcast.id}
                 height={24}
                 barColor="white"

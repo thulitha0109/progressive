@@ -30,7 +30,7 @@ export interface ReleaseItem {
   isLiked: boolean
   kind?: "TRACK" | "PODCAST"
   sequence?: number | null
-  waveformPeaks?: number[] | null
+  waveformPeaks?: any
   artist: {
     id: string
     name: string
@@ -231,7 +231,7 @@ export function NewReleaseCard({
           <div className="absolute bottom-3 right-3 sm:bottom-4 sm:right-3 z-30 pointer-events-none">
             <div className="flex justify-end w-24 sm:w-32 md:w-40">
               <CardWaveform
-                peaks={track.waveformPeaks ?? []}
+                peaks={Array.isArray(track.waveformPeaks) ? track.waveformPeaks : []}
                 isPlaying={isPlaying && currentTrack?.id === track.id}
                 height={24}
                 barColor="white"
