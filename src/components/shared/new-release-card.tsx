@@ -228,7 +228,7 @@ export function NewReleaseCard({
           </p>
 
           {/* Waveform — bottom‑right, 12 bars, responsive */}
-          <div className="absolute bottom-3 right-4 sm:bottom-4 sm:right-4 z-30 pointer-events-none">
+          <div className="absolute bottom-2 right-6 sm:bottom-2 sm:right-6 z-30 pointer-events-none">
             <div className="flex justify-end w-24 sm:w-32 md:w-40">
               <CardWaveform
                 peaks={Array.isArray(track.waveformPeaks) ? track.waveformPeaks : []}

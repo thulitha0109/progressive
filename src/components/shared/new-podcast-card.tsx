@@ -217,7 +217,7 @@ export function NewPodcastCard({
           </p>
 
           {/* Waveform — positioned above the sequence, at the bottom‑right */}
-          <div className="absolute bottom-8 right-3 sm:bottom-10 sm:right-4 z-30 pointer-events-none">
+          <div className="absolute bottom-8 right-6 sm:bottom-10 sm:right-6 z-30 pointer-events-none">
             <div className="flex justify-end w-24 sm:w-32 md:w-40">
               <CardWaveform
                 peaks={Array.isArray(podcast.waveformPeaks) ? podcast.waveformPeaks : []}
